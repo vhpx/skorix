@@ -8,13 +8,18 @@ BUILD_DIR = $(SRC_DIR)/build
 KERNEL_DIR = $(SRC_DIR)/os/kernel
 LIB_DIR = $(SRC_DIR)/lib
 
-# Source and object files
+# System and library files
 KERNEL_CFILES = $(wildcard $(KERNEL_DIR)/*.c)
 CORE_LIB_CFILES = $(wildcard $(LIB_DIR)/core/*.c)
 MBOX_LIB_CFILES = $(wildcard $(LIB_DIR)/mailbox/*.c)
 UTILS_LIB_CFILES = $(wildcard $(LIB_DIR)/utils/*.c)
 
-CFILES = $(KERNEL_CFILES) $(CORE_LIB_CFILES) $(MBOX_LIB_CFILES) $(UTILS_LIB_CFILES)
+# Game files
+GENGINE_LIB_CFILES = $(wildcard $(LIB_DIR)/games/engine/*.c)
+UNROB_GAME_LIB_CFILES = $(wildcard $(LIB_DIR)/games/unrob/*.c)
+
+# Source and object files
+CFILES = $(KERNEL_CFILES) $(CORE_LIB_CFILES) $(MBOX_LIB_CFILES) $(UTILS_LIB_CFILES) $(GENGINE_LIB_CFILES) $(UNROB_GAME_LIB_CFILES)
 OFILES = $(addprefix $(BUILD_DIR)/, $(notdir $(CFILES:%.c=%.o)))
 
 # print CFILES and OFILES
@@ -84,6 +89,12 @@ $(BUILD_DIR)/%.o: $(LIB_DIR)/mailbox/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@	
 
 $(BUILD_DIR)/%.o: $(LIB_DIR)/utils/%.c
+	$(CC) $(GCCFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o: $(LIB_DIR)/games/engine/%.c
+	$(CC) $(GCCFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o: $(LIB_DIR)/games/unrob/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@
 
 #----------------------------------------

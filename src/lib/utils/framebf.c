@@ -63,12 +63,12 @@ void framebf_init(int physicalWidth, int physicalHeight, int virtualWidth, int v
         mBuf[28] &= 0x3FFFFFFF;
         // Access frame buffer as 1 byte per each address
         fb = (unsigned char *)((unsigned long)mBuf[28]);
-        uart_puts("Got allocated Frame Buffer at RAM physical address: ");
-        uart_hex(mBuf[28]);
-        uart_puts("\n");
-        uart_puts("Frame Buffer Size (bytes): ");
-        uart_dec(mBuf[29]);
-        uart_puts("\n");
+        // uart_puts("Got allocated Frame Buffer at RAM physical address: ");
+        // uart_hex(mBuf[28]);
+        // uart_puts("\n");
+        // uart_puts("Frame Buffer Size (bytes): ");
+        // uart_dec(mBuf[29]);
+        // uart_puts("\n");
         width = mBuf[5]; // Actual physical width
         height = mBuf[6]; // Actual physical height
         pitch = mBuf[33]; // Number of bytes per line

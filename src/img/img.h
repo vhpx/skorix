@@ -1,3 +1,4 @@
+//this file is img.h
 #ifndef IMAGE_H
 #define IMAGE_H
 
@@ -7,7 +8,7 @@
 #define IMAGE_HEIGHT  1371 
 
 // Function prototype for displaying an image
-void displayImage();
-void scrollImage(char key);
+void displayImage(int screen_width, int screen_height, int image_width, int image_height, unsigned long* image_data);
+void scrollImage(char key, int screen_width, int screen_height, int image_width, int image_height, unsigned long* image_data);
 
 #endif

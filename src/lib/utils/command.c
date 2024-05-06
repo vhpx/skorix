@@ -8,6 +8,7 @@
 #include "../headers/string.h"
 #include "../headers/uart0.h"
 #include "../headers/unrob.h"
+#include "../headers/cli.h"
 
 Command commands[] = {
     {
@@ -230,8 +231,8 @@ int execute_command(char *input, CommandHistory *cmd_history) {
   }
 
   if (strcmp(command_name, "image") == 0) {
-    displayImage(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT,
-                 epd_bitmap_image);
+    displayImage(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);    
+    is_mode_image = 1;
     return 0;
   }
 

@@ -1,6 +1,8 @@
 #include "command.h"
 #include "config.h"
 
+extern int is_mode_image;
+
 int cli();
 int run_cli();
 void clear_screen();

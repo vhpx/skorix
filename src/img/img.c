@@ -37,7 +37,7 @@ void clearFramebuffer(int width, int height) {
     }
 }
 
-void displayImage(int screen_width, int screen_height, int image_width, int image_height, unsigned long* image_data) {
+void displayImage(int screen_width, int screen_height, int image_width, int image_height, const unsigned long* image_data) {
     // Initialize the framebuffer
     framebf_init(screen_width, screen_height, image_width, image_height);
     
@@ -64,7 +64,7 @@ void displayImage(int screen_width, int screen_height, int image_width, int imag
     }
 }
 
-void scrollImage(char key, int screen_width, int screen_height, int image_width, int image_height, unsigned long* image_data) {
+void scrollImage(char key, int screen_width, int screen_height, int image_width, int image_height, const unsigned long* image_data) {
     if (key == 'w') y_offset -= scroll_step;  // scroll up
     if (key == 's') y_offset += scroll_step;  // scroll down
     if (key == 'a') x_offset -= scroll_step;  // scroll left

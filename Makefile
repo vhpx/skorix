@@ -7,14 +7,16 @@ SRC_DIR = ./src
 BUILD_DIR = $(SRC_DIR)/build
 KERNEL_DIR = $(SRC_DIR)/os/kernel
 LIB_DIR = $(SRC_DIR)/lib
+IMAGE_DIR = $(SRC_DIR)/img
 
 # Source and object files
 KERNEL_CFILES = $(wildcard $(KERNEL_DIR)/*.c)
 CORE_LIB_CFILES = $(wildcard $(LIB_DIR)/core/*.c)
 MBOX_LIB_CFILES = $(wildcard $(LIB_DIR)/mailbox/*.c)
 UTILS_LIB_CFILES = $(wildcard $(LIB_DIR)/utils/*.c)
+IMAGE_CFILES = $(wildcard $(IMAGE_DIR)/*.c)
 
-CFILES = $(KERNEL_CFILES) $(CORE_LIB_CFILES) $(MBOX_LIB_CFILES) $(UTILS_LIB_CFILES)
+CFILES = $(KERNEL_CFILES) $(CORE_LIB_CFILES) $(MBOX_LIB_CFILES) $(UTILS_LIB_CFILES) $(IMAGE_CFILES)
 OFILES = $(addprefix $(BUILD_DIR)/, $(notdir $(CFILES:%.c=%.o)))
 
 # print CFILES and OFILES
@@ -84,6 +86,9 @@ $(BUILD_DIR)/%.o: $(LIB_DIR)/mailbox/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@	
 
 $(BUILD_DIR)/%.o: $(LIB_DIR)/utils/%.c
+	$(CC) $(GCCFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o: $(IMAGE_DIR)/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@
 
 #----------------------------------------

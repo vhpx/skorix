@@ -1,4 +1,7 @@
 #include "../headers/command.h"
+#include "../../img/img.h"
+#include "../../img/img_src.h"
+#include "../../video/video.h"
 #include "../headers/color.h"
 #include "../headers/config.h"
 #include "../headers/print.h"
@@ -73,6 +76,16 @@ Command commands[] = {
         {"conf", "cfg", "cf"},  // Aliases
         {"config -b <baudrate> -d <databits> -p <parity> -s <stopbits> -f "
          "<flow_control>"}, // Usage
+    },
+    {
+        "image",            // Name
+        "Display an image", // Description
+        displayImage,       // Func
+    },
+    {
+        "video",           // Name
+        "Display a video", // Description
+        displayVideo,      // Func
     },
     {
         "play",                                          // Name
@@ -213,6 +226,17 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     }
 
     set_config(tags);
+    return 0;
+  }
+
+  if (strcmp(command_name, "image") == 0) {
+    displayImage(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT,
+                 epd_bitmap_image);
+    return 0;
+  }
+
+  if (strcmp(command_name, "video") == 0) {
+    displayVideo(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT);
     return 0;
   }
 

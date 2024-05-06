@@ -4,6 +4,7 @@
 #include "../headers/print.h"
 #include "../headers/string.h"
 #include "../headers/uart0.h"
+#include "../headers/unrob.h"
 
 Command commands[] = {
     {
@@ -72,6 +73,13 @@ Command commands[] = {
         {"conf", "cfg", "cf"},  // Aliases
         {"config -b <baudrate> -d <databits> -p <parity> -s <stopbits> -f "
          "<flow_control>"}, // Usage
+    },
+    {
+        "play",                                          // Name
+        "Play a game",                                   // Description
+        play_game,                                       // Func
+        {"p"},                                           // Aliases
+        {"play -g <game> | Available games: unrob (ur)"} // Usage
     },
 };
 
@@ -205,6 +213,19 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     }
 
     set_config(tags);
+    return 0;
+  }
+
+  if (strcmp(command_name, "play") == 0 || strcmp(command_name, "p") == 0) {
+    // if there is no tag, print error
+    if (tags[0].tag[0] == '\0' || tags[0].value[0] == '\0') {
+      uart_puts("\n\n");
+      uart_puts("Invalid params for play.\n");
+      uart_puts("Usage: play -g <game> | Available games: unrob (ur)\n\n");
+      return 0;
+    }
+
+    play_game(tags);
     return 0;
   }
 
@@ -447,6 +468,38 @@ void set_config(Tag *tags) {
 
     // Restart the uart
     restart_uart();
+  }
+}
+
+void play_game(Tag tags[MAX_CMD_ARGS]) {
+  // tag can be -g for game
+  for (int i = 0; i < MAX_CMD_ARGS; i++) {
+    // If the tag is empty or nullish, skip it
+    if (tags[i].tag[0] == '\0' || tags[i].value[0] == '\0' ||
+        tags[i].tag == (char *)0 || tags[i].value == (char *)0) {
+      break;
+    }
+
+    if (tags[i].tag == (char *)0 || tags[i].value == (char *)0) {
+      uart_puts("\nNo tag supplied.\n");
+      uart_puts("Available tags: -g for game.\n\n");
+      return;
+    }
+
+    if (strcmp(tags[i].tag, "g") == 0) {
+      if (strcmp(tags[i].value, "unrob") == 0 ||
+          strcmp(tags[i].value, "ur") == 0) {
+        start_unrob_game();
+      } else {
+        uart_puts("\nInvalid game.\n");
+        uart_puts("Available games: unrob (ur).\n\n");
+        return;
+      }
+    } else {
+      uart_puts("\nInvalid params for play.\n");
+      uart_puts("Available tags: -g for game.\n\n");
+      return;
+    }
   }
 }
 

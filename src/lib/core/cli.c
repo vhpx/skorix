@@ -59,7 +59,16 @@ int run_cli() {
 int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index, CommandHistory *cmd_history, char *pre_autofilled_cmd, char *post_autofilled_cmd) {
   int reset_past_cmd_index = 1;
 
-  if (c == '\b') {
+  // TODO: Add improved support for image scrolling
+  if (is_mode_image) { 
+    if(c == 'w' || c == 's' || c == 'a' || c == 'd'){
+      scrollImage(c, SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);
+    }else if(c == 27){ //escape key
+    //exit all the modes
+    clearFramebuffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+    is_mode_image = 0; 
+    }
+  } else if (c == '\b') {
     handle_backspace(cli_buffer, index, pre_autofilled_cmd, post_autofilled_cmd);
   } else if (c == '\t') {
     handle_autocomplete(cli_buffer, index, pre_autofilled_cmd, post_autofilled_cmd);
@@ -70,16 +79,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index, Comm
     strcpy(pre_autofilled_cmd, cli_buffer);
     strcpy(post_autofilled_cmd, cli_buffer);
 
-  // TODO: Add improved support for image scrolling
-  } else if ((c == 'w' || c == 's' || c == 'a' || c == 'd' ) && is_mode_image) { // handle keys for image scrolling
-      scrollImage(c, SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);
-
-  } else if(c == 27){ //escape key
-    //exit all the modes
-    clearFramebuffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-    is_mode_image = 0; 
-
-  }else if (c != '\n') {
+  } else if (c != '\n') {
     handle_regular_input(c, cli_buffer, index, pre_autofilled_cmd, post_autofilled_cmd);
   } else if (c == '\n') {
     int shutdown = handle_newline(cli_buffer, index, past_cmd_index, cmd_history);

@@ -231,6 +231,16 @@ int execute_command(char *input, CommandHistory *cmd_history) {
   }
 
   if (strcmp(command_name, "image") == 0) {
+    clearFramebuffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+    uart_puts("\n---Entering Image Mode---\n\n");
+    uart_puts("Key to move the camera:\n");
+    uart_puts("w: up\n");
+    uart_puts("s: down\n");
+    uart_puts("a: left\n");
+    uart_puts("d: right\n\n");
+    uart_puts("Press Escape to exit Image Mode\n");
+
+
     displayImage(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);    
     is_mode_image = 1;
     return 0;

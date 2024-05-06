@@ -1,3 +1,4 @@
+// this file is cli.c
 #include "../headers/cli.h"
 
 #include "../headers/color.h"
@@ -6,6 +7,9 @@
 #include "../headers/print.h"
 #include "../headers/string.h"
 #include "../headers/uart0.h"
+#include "../../img/img.h"
+#include "../../img/img_src.h"
+
 
 int cli() {
   static char cli_buffer[MAX_CMD_SIZE];
@@ -22,6 +26,7 @@ int cli() {
 
   // read and send back each char
   char c = uart_getc();
+  // int is_moving_image = 0;
   int shutdown =
       handle_input(c, cli_buffer, &index, &past_cmd_index, &cmd_history,
                    pre_autofilled_cmd, post_autofilled_cmd);
@@ -71,6 +76,9 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
 
     strcpy(pre_autofilled_cmd, cli_buffer);
     strcpy(post_autofilled_cmd, cli_buffer);
+  } else if (c == 'w' || c == 's' || c == 'a' || c == 'd') {  // handle keys for image scrolling
+    scrollImage(c, SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);
+    
   } else if (c != '\n') {
     handle_regular_input(c, cli_buffer, index, pre_autofilled_cmd,
                          post_autofilled_cmd);

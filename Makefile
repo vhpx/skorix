@@ -24,13 +24,9 @@ VIDEO_CFILES = $(wildcard $(VIDEO_DIR)/*.c)
 GENGINE_LIB_CFILES = $(wildcard $(LIB_DIR)/games/engine/*.c)
 UNROB_GAME_LIB_CFILES = $(wildcard $(LIB_DIR)/games/unrob/*.c)
 
-# System files
+# Compilation files
 CFILES = $(KERNEL_CFILES) $(CORE_LIB_CFILES) $(MBOX_LIB_CFILES) $(UTILS_LIB_CFILES) $(IMAGE_CFILES) $(VIDEO_CFILES) $(GENGINE_LIB_CFILES) $(UNROB_GAME_LIB_CFILES)
 OFILES = $(addprefix $(BUILD_DIR)/, $(notdir $(CFILES:%.c=%.o)))
-
-# print CFILES and OFILES
-$(info CFILES = $(CFILES))
-$(info OFILES = $(OFILES))
 
 # Targets
 UART = uart0

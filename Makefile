@@ -10,7 +10,6 @@ LIB_DIR = $(SRC_DIR)/lib
 IMAGE_DIR = $(SRC_DIR)/img
 VIDEO_DIR = $(SRC_DIR)/video
 
-
 # System and library files
 KERNEL_CFILES = $(wildcard $(KERNEL_DIR)/*.c)
 CORE_LIB_CFILES = $(wildcard $(LIB_DIR)/core/*.c)
@@ -37,6 +36,11 @@ $(info OFILES = $(OFILES))
 UART = uart0
 TARGET = kernel8.img
 QEMU = qemu-system-aarch64
+
+# Force cmd on Windows
+ifeq ($(OS), Windows_NT)
+	SHELL = cmd
+endif
 
 #----------------------------------------
 # Main Rules
@@ -70,9 +74,9 @@ clean:
 	if exist .\src\build\images\*.img del .\src\build\images\*.img
 
 clean_mac:
-	rm -f .\src\build\*.o
-	rm -f .\src\build\kernel\*.elf
-	rm -f .\src\build\images\*.img
+	rm -f ./src/build/*.o
+	rm -f ./src/build/kernel/*.elf
+	rm -f ./src/build/images/*.img
 
 #----------------------------------------
 # Compilation & Linking

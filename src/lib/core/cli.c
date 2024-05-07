@@ -12,6 +12,7 @@
 
 int is_mode_image = 0;
 int is_mode_video = 0;
+int is_mode_font = 0;
 
 int cli() {
   static char cli_buffer[MAX_CMD_SIZE];
@@ -65,19 +66,25 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index, Comm
     if(c == 'w' || c == 's' || c == 'a' || c == 'd'){
       scrollImage(c, SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);
     }else if(c == 27){ //escape key
-    //exit all the modes
-    clearFramebuffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-    is_mode_image = 0; 
+      //exit all the modes
+      clearFramebuffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+      is_mode_image = 0; 
     }
   } else if(is_mode_video){
-    if(c == 27){ //escape key
+    if(c == 'r'){
+        displayVideo(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT);
+    }else if(c == 27){ //escape key
         clearFramebuffer(SCREEN_WIDTH, SCREEN_HEIGHT);
         is_mode_video = 0; 
-    } else if(c == 'r'){
-        displayVideo(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT);
     }
   
-  } else if (c == '\b') {
+  } else if(is_mode_font) {
+    if(c == 27){ //escape key
+        clearFramebuffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+        is_mode_font = 0; 
+    } 
+  
+  }else if (c == '\b') {
     handle_backspace(cli_buffer, index, pre_autofilled_cmd, post_autofilled_cmd);
   } else if (c == '\t') {
     handle_autocomplete(cli_buffer, index, pre_autofilled_cmd, post_autofilled_cmd);

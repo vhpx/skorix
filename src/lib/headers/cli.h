@@ -3,6 +3,7 @@
 
 extern int is_mode_image;
 extern int is_mode_video;
+extern int is_mode_font;
 
 int cli();
 int run_cli();

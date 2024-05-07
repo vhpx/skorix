@@ -247,7 +247,12 @@ int execute_command(char *input, CommandHistory *cmd_history) {
   }
 
   if (strcmp(command_name, "video") == 0) {
+    clearFramebuffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+    uart_puts("\n---Entering Video Mode---\n\n");
+    uart_puts("r: replay video\n\n");
+    uart_puts("Press Escape to exit Image Mode\n");
     displayVideo(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT);
+    is_mode_video = 1;
     return 0;
   }
 

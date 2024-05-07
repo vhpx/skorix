@@ -2,6 +2,7 @@
 #include "config.h"
 
 extern int is_mode_image;
+extern int is_mode_video;
 
 int cli();
 int run_cli();

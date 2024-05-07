@@ -4,7 +4,7 @@ GCCFLAGS = -Wall -O2 -ffreestanding -nostdinc -nostdlib
 
 # Directories
 SRC_DIR = ./src
-BUILD_DIR = $(SRC_DIR)/build
+BUILD_DIR = ./build
 KERNEL_DIR = $(SRC_DIR)/os/kernel
 LIB_DIR = $(SRC_DIR)/lib
 IMAGE_DIR = $(SRC_DIR)/img
@@ -55,24 +55,46 @@ $(TARGET): $(BUILD_DIR)/boot.o $(BUILD_DIR)/uart.o $(OFILES)
 #----------------------------------------
 
 mk_dirs:
-	if not exist .\src\build mkdir .\src\build
-	if not exist .\src\build\kernel mkdir .\src\build\kernel
-	if not exist .\src\build\images mkdir .\src\build\images
+	if not exist .\build mkdir .\build
+	if not exist .\build\kernel mkdir .\build\kernel
+	if not exist .\build\images mkdir .\build\images
 
 mk_dirs_mac:
-	if [ ! -d ./src/build ]; then mkdir ./src/build; fi
-	if [ ! -d ./src/build/kernel ]; then mkdir ./src/build/kernel; fi
-	if [ ! -d ./src/build/images ]; then mkdir ./src/build/images; fi
+	if [ ! -d ./build ]; then mkdir ./build; fi
+	if [ ! -d ./build/kernel ]; then mkdir ./build/kernel; fi
+	if [ ! -d ./build/images ]; then mkdir ./build/images; fi
 
 clean:
+#   Remove old build files (./src/build)
 	if exist .\src\build\*.o del .\src\build\*.o
 	if exist .\src\build\kernel\*.elf del .\src\build\kernel\*.elf
 	if exist .\src\build\images\*.img del .\src\build\images\*.img
 
+#   Remove old build directories (./src/build)
+	if exist .\src\build\kernel rmdir .\src\build\kernel /s /q
+	if exist .\src\build\images rmdir .\src\build\images /s /q
+	if exist .\src\build rmdir .\src\build /s /q
+
+#   Remove new build files (./build)
+	if exist .\build\*.o del .\build\*.o
+	if exist .\build\kernel\*.elf del .\build\kernel\*.elf
+	if exist .\build\images\*.img del .\build\images\*.img
+
 clean_mac:
+#   Remove old build files (./src/build)
 	rm -f ./src/build/*.o
 	rm -f ./src/build/kernel/*.elf
 	rm -f ./src/build/images/*.img
+
+#   Remove old build directories (./src/build)
+	rm -rf ./src/build/kernel
+	rm -rf ./src/build/images
+	rm -rf ./src/build
+	
+#   Remove new build files (./build)
+	rm -f ./build/*.o
+	rm -f ./build/kernel/*.elf
+	rm -f ./build/images/*.img
 
 #----------------------------------------
 # Compilation & Linking

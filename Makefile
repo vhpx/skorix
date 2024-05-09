@@ -36,7 +36,7 @@ UART = uart0
 TARGET = kernel8.img
 QEMU = qemu-system-aarch64
 
-Force cmd on Windows
+# Force cmd on Windows
 ifeq ($(OS), Windows_NT)
 	SHELL = cmd
 endif

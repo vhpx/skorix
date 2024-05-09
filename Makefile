@@ -37,9 +37,9 @@ TARGET = kernel8.img
 QEMU = qemu-system-aarch64
 
 # Force cmd on Windows
-ifeq ($(OS), Windows_NT)
-	SHELL = cmd
-endif
+# ifeq ($(OS), Windows_NT)
+# 	SHELL = cmd
+# endif
 
 #----------------------------------------
 # Main Rules
@@ -47,7 +47,11 @@ endif
 
 all: mk_dirs clean build $(TARGET) run0
 
+fast: mk_dirs clean_fast build $(TARGET) run0
+
 mac: mk_dirs_mac clean_mac build $(TARGET) run0_mac
+
+mac_fast: mk_dirs_mac clean_mac_fast build $(TARGET) run0_mac
 
 $(TARGET): $(BUILD_DIR)/boot.o $(BUILD_DIR)/uart.o $(OFILES)
 	aarch64-none-elf-ld -nostdlib $^ -T $(KERNEL_DIR)/link.ld -o $(BUILD_DIR)/kernel/kernel8.elf
@@ -96,6 +100,16 @@ clean_mac:
 	
 #   Remove new build files (./build)
 	rm -f ./build/*.o
+	rm -f ./build/kernel/*.elf
+	rm -f ./build/images/*.img
+
+clean_fast:
+	for %%f in (.\build\*.o) do if not %%~nxf == video_src.o (if not %%~nxf == img_src.o del %%~f)
+	if exist .\build\kernel\*.elf del .\build\kernel\*.elf
+	if exist .\build\images\*.img del .\build\images\*.img
+
+clean_mac_fast:
+	find -iname '*.o' -not -iname 'video_src.o' -not -iname 'img_src.o' -execdir rm {} \;
 	rm -f ./build/kernel/*.elf
 	rm -f ./build/images/*.img
 

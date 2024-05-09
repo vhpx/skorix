@@ -23,7 +23,7 @@ void displayImage(int screen_width, int screen_height, int image_width,
   framebf_init(screen_width, screen_height, image_width, image_height);
 
   // Clear the screen or framebuffer here
-  clearFramebuffer(screen_width, screen_height); // You might need to implement this function based on your system.
+  // clearFramebuffer(screen_width, screen_height); // You might need to implement this function based on your system.
 
   // Ensure offsets are within bounds
   if (x_offset < 0)

@@ -36,10 +36,10 @@ UART = uart0
 TARGET = kernel8.img
 QEMU = qemu-system-aarch64
 
-# Force cmd on Windows
-# ifeq ($(OS), Windows_NT)
-# 	SHELL = cmd
-# endif
+Force cmd on Windows
+ifeq ($(OS), Windows_NT)
+	SHELL = cmd
+endif
 
 #----------------------------------------
 # Main Rules
@@ -49,7 +49,11 @@ all: mk_dirs clean build $(TARGET) run0
 
 fast: mk_dirs clean_fast build $(TARGET) run0
 
+fast: mk_dirs clean_fast build $(TARGET) run0
+
 mac: mk_dirs_mac clean_mac build $(TARGET) run0_mac
+
+mac_fast: mk_dirs_mac clean_mac_fast build $(TARGET) run0_mac
 
 mac_fast: mk_dirs_mac clean_mac_fast build $(TARGET) run0_mac
 

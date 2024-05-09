@@ -41,11 +41,9 @@ ifeq ($(OS), Windows_NT)
 	SHELL = cmd
 	RMIMG = if exist .\build\img_src.o del .\build\img_src.o
 	RMVIDEO = if exist .\build\video_src.o del .\build\video_src.o
-	RMFULL = if exist .\build rmdir .\build /s /q
 else
 	RMIMG = rm -f ./build/img_src.o
 	RMVIDEO = rm -f ./build/video_src.o
-	RMFULL = rm -rf ./build/
 endif
 
 #----------------------------------------
@@ -54,11 +52,19 @@ endif
 
 all: mk_dirs clean build $(TARGET) run0
 
-full: mk_dirs clean clean_full build $(TARGET) run0
+full: mk_dirs clean clean_img clean_video build $(TARGET) run0
+
+image: mk_dirs clean clean_img build $(TARGET) run0
+
+video: mk_dirs clean clean_video build $(TARGET) run0
 
 mac: mk_dirs_mac clean_mac build $(TARGET) run0_mac
 
-macfull: mk_dirs_mac clean_mac clean_full build $(TARGET) run0_mac
+macfull: mk_dirs_mac clean_mac clean_img clean_video build $(TARGET) run0_mac
+
+macimage: mk_dirs_mac clean_mac clean_img build $(TARGET) run0_mac
+
+macvideo: mk_dirs_mac clean_mac clean_video build $(TARGET) run0_mac
 
 $(TARGET): $(BUILD_DIR)/boot.o $(BUILD_DIR)/uart.o $(OFILES)
 	aarch64-none-elf-ld -nostdlib $^ -T $(KERNEL_DIR)/link.ld -o $(BUILD_DIR)/kernel/kernel8.elf
@@ -101,9 +107,6 @@ clean_img:
 
 clean_video:
 	$(RMVIDEO)
-
-clean_full:
-	$(RMFULL)
 
 #----------------------------------------
 # Compilation & Linking

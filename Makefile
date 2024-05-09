@@ -39,6 +39,10 @@ QEMU = qemu-system-aarch64
 # Force cmd on Windows
 ifeq ($(OS), Windows_NT)
 	SHELL = cmd
+	RMFULL = if exist .\build\*.o del .\build\*.o
+else
+	SHELL = /bin/bash
+	RMFULL = rm -f ./build/*.o
 endif
 
 #----------------------------------------
@@ -47,11 +51,11 @@ endif
 
 all: mk_dirs clean build $(TARGET) run0
 
-fast: mk_dirs clean_fast build $(TARGET) run0
+full: mk_dirs clean clean_full build $(TARGET) run0
 
 mac: mk_dirs_mac clean_mac build $(TARGET) run0_mac
 
-mac_fast: mk_dirs_mac clean_mac_fast build $(TARGET) run0_mac
+macfull: mk_dirs_mac clean_mac clean_full build $(TARGET) run0_mac
 
 $(TARGET): $(BUILD_DIR)/boot.o $(BUILD_DIR)/uart.o $(OFILES)
 	aarch64-none-elf-ld -nostdlib $^ -T $(KERNEL_DIR)/link.ld -o $(BUILD_DIR)/kernel/kernel8.elf
@@ -72,46 +76,25 @@ mk_dirs_mac:
 	if [ ! -d ./build/images ]; then mkdir ./build/images; fi
 
 clean:
-#   Remove old build files (./src/build)
-	if exist .\src\build\*.o del .\src\build\*.o
-	if exist .\src\build\kernel\*.elf del .\src\build\kernel\*.elf
-	if exist .\src\build\images\*.img del .\src\build\images\*.img
-
-#   Remove old build directories (./src/build)
-	if exist .\src\build\kernel rmdir .\src\build\kernel /s /q
-	if exist .\src\build\images rmdir .\src\build\images /s /q
+#   Remove old build files (.\src\build)
 	if exist .\src\build rmdir .\src\build /s /q
 
-#   Remove new build files (./build)
-	if exist .\build\*.o del .\build\*.o
+#   Remove new build files (.\build)
+	for %%f in (.\build\*.o) do if not %%~nxf == video_src.o (if not %%~nxf == img_src.o del %%~f)
 	if exist .\build\kernel\*.elf del .\build\kernel\*.elf
 	if exist .\build\images\*.img del .\build\images\*.img
 
 clean_mac:
 #   Remove old build files (./src/build)
-	rm -f ./src/build/*.o
-	rm -f ./src/build/kernel/*.elf
-	rm -f ./src/build/images/*.img
-
-#   Remove old build directories (./src/build)
-	rm -rf ./src/build/kernel
-	rm -rf ./src/build/images
 	rm -rf ./src/build
 	
 #   Remove new build files (./build)
-	rm -f ./build/*.o
+	find -iwholename './build/*.o' -not -iname 'video_src.o' -not -iname 'img_src.o' -execdir rm {} \;
 	rm -f ./build/kernel/*.elf
 	rm -f ./build/images/*.img
 
-clean_fast:
-	for %%f in (.\build\*.o) do if not %%~nxf == video_src.o (if not %%~nxf == img_src.o del %%~f)
-	if exist .\build\kernel\*.elf del .\build\kernel\*.elf
-	if exist .\build\images\*.img del .\build\images\*.img
-
-clean_mac_fast:
-	find -iname '*.o' -not -iname 'video_src.o' -not -iname 'img_src.o' -execdir rm {} \;
-	rm -f ./build/kernel/*.elf
-	rm -f ./build/images/*.img
+clean_full:
+	$(RMFULL)
 
 #----------------------------------------
 # Compilation & Linking

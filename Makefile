@@ -39,10 +39,13 @@ QEMU = qemu-system-aarch64
 # Force cmd on Windows
 ifeq ($(OS), Windows_NT)
 	SHELL = cmd
-	RMFULL = if exist .\build\*.o del .\build\*.o
+	RMIMG = if exist .\build\img_src.o del .\build\img_src.o
+	RMVIDEO = if exist .\build\video_src.o del .\build\video_src.o
+	RMFULL = if exist .\build rmdir .\build /s /q
 else
-	SHELL = /bin/bash
-	RMFULL = rm -f ./build/*.o
+	RMIMG = rm -f ./build/img_src.o
+	RMVIDEO = rm -f ./build/video_src.o
+	RMFULL = rm -rf ./build/
 endif
 
 #----------------------------------------
@@ -92,6 +95,12 @@ clean_mac:
 	find -iwholename './build/*.o' -not -iname 'video_src.o' -not -iname 'img_src.o' -execdir rm {} \;
 	rm -f ./build/kernel/*.elf
 	rm -f ./build/images/*.img
+
+clean_img:
+	$(RMIMG)
+
+clean_video:
+	$(RMVIDEO)
 
 clean_full:
 	$(RMFULL)

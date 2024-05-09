@@ -1,16 +1,16 @@
-//This is command.c
+// This is command.c
 #include "../headers/command.h"
+#include "../../font/font.h"
 #include "../../img/img.h"
 #include "../../img/img_src.h"
 #include "../../video/video.h"
-#include "../../font/font.h"
+#include "../headers/cli.h"
 #include "../headers/color.h"
 #include "../headers/config.h"
 #include "../headers/print.h"
 #include "../headers/string.h"
 #include "../headers/uart0.h"
 #include "../headers/unrob.h"
-#include "../headers/cli.h"
 
 Command commands[] = {
     {
@@ -89,6 +89,11 @@ Command commands[] = {
         "video",           // Name
         "Display a video", // Description
         displayVideo,      // Func
+    },
+    {
+        "font",           // Name
+        "Display a font", // Description
+        displayFont,      // Func
     },
     {
         "play",                                          // Name
@@ -242,8 +247,8 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     uart_puts("d: right\n\n");
     uart_puts("Press Escape to exit Image Mode\n");
 
-
-    displayImage(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);    
+    displayImage(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT,
+                 epd_bitmap_image);
     is_mode_image = 1;
     return 0;
   }
@@ -258,7 +263,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     return 0;
   }
 
-    if (strcmp(command_name, "font") == 0) {
+  if (strcmp(command_name, "font") == 0) {
     clearFramebuffer(SCREEN_WIDTH, SCREEN_HEIGHT);
     uart_puts("\n---Entering Font Mode---\n\n");
     uart_puts("Press Escape to exit Font Mode\n");
@@ -634,7 +639,8 @@ void autofill_command(char *buffer, char *completed_command,
     }
   }
 
-  completed_command = (char *)0;
+  // if no command or alias is found, return the buffer
+  strcpy(completed_command, buffer);
 }
 
 void restart_uart() {

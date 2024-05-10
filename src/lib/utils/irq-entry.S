@@ -78,19 +78,19 @@ vectors:
     vector error_el0_32
 
 sync_el1t:
-    handle_invalid SYNC_EL1T
+    handle_invalid SYNC_EL1t
 
 irq_el1t:
-    handle_invalid IRQ_EL1T
+    handle_invalid IRQ_EL1t
 
 fiq_el1t:
-    handle_invalid FIQ_EL1T
+    handle_invalid FIQ_EL1t
 
 error_el1t:
-    handle_invalid ERROR_EL1T
+    handle_invalid ERROR_EL1t
 
 sync_el1h:
-    handle_invalid SYNC_EL1H
+    handle_invalid SYNC_EL1h
 
 irq_el1h:
     entry
@@ -98,10 +98,10 @@ irq_el1h:
     exit
 
 fiq_el1h:
-    handle_invalid FIQ_EL1H
+    handle_invalid FIQ_EL1h
 
 error_el1h:
-    handle_invalid ERROR_EL1H
+    handle_invalid ERROR_EL1h
 
 sync_el0_64:
     handle_invalid SYNC_EL0_64
@@ -127,5 +127,5 @@ fiq_el0_32:
 error_el0_32:
     handle_invalid ERROR_EL0_32
 
-.globl hang:
+.globl hang
 hang: b hang

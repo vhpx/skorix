@@ -10,6 +10,8 @@
 #include "../headers/print.h"
 #include "../headers/string.h"
 #include "../headers/uart0.h"
+#include "../headers/irq.h"
+#include "../headers/timer.h"
 
 int is_mode_image = 0;
 int is_mode_video = 0;
@@ -46,6 +48,13 @@ int run_cli() {
   clear_screen();
   print_welcome_message();
   reset_console();
+
+  // Timer interrupt
+  irq_init();
+  timer_irq_enable();
+  irq_wait();
+  irq_enable();
+  timer_init();
 
   // Start the CLI
   int status = 0;

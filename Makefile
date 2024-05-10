@@ -31,6 +31,9 @@ UNROB_GAME_LIB_CFILES = $(wildcard $(LIB_DIR)/games/unrob/*.c)
 CFILES = $(KERNEL_CFILES) $(CORE_LIB_CFILES) $(MBOX_LIB_CFILES) $(UTILS_LIB_CFILES) $(IMAGE_CFILES) $(VIDEO_CFILES) $(FONT_CFILES) $(GENGINE_LIB_CFILES) $(UNROB_GAME_LIB_CFILES)
 OFILES = $(addprefix $(BUILD_DIR)/, $(notdir $(CFILES:%.c=%.o)))
 
+SFILES = $(wildcard $(LIB_DIR)/utils/*.S)
+OFILES += $(addprefix $(BUILD_DIR)/, $(notdir $(SFILES:%.S=%_asm.o)))
+
 # Targets
 UART = uart0
 TARGET = kernel8.img
@@ -130,6 +133,9 @@ $(BUILD_DIR)/%.o: $(LIB_DIR)/mailbox/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@	
 
 $(BUILD_DIR)/%.o: $(LIB_DIR)/utils/%.c
+	$(CC) $(GCCFLAGS) -c $< -o $@
+	
+$(BUILD_DIR)/%_asm.o: $(LIB_DIR)/utils/%.S
 	$(CC) $(GCCFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.o: $(IMAGE_DIR)/%.c

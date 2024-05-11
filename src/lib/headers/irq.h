@@ -109,4 +109,6 @@ void irq_wait(void);
 void timer_irq_enable(void);
 void handle_irq(void);
 
+void please_show_something(void);
+
 #endif

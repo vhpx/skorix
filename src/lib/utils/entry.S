@@ -1,4 +1,4 @@
-#include "../headers/irq-entry.h"
+#include "../headers/entry.h"
 
 .macro entry
     sub sp,  sp,  #STACK_FRAME_SIZE
@@ -46,6 +46,7 @@
     mov x0, #\type
     mrs x1, esr_el1
     mrs x2, elr_el1
+    bl  please_show_something
     b   hang
 .endm
 

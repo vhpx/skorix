@@ -22,7 +22,6 @@ void timer_irq_disable(void) {
 void handle_irq(void) {
     unsigned int irq;
 
-
 #ifdef RPI3
     irq = IRQ_PENDING_1;
 #else
@@ -35,4 +34,8 @@ void handle_irq(void) {
             irq &= ~SYS_TIMER_1_IRQ;
         }
     }
+}
+
+void please_show_something(void) {
+	legacy_uart_puts("Please show something\n");
 }

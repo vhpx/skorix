@@ -4,8 +4,7 @@
 unsigned int timer1 = 0;
 
 void timer_init(void) {
-    timer1 = TIMER_CLO;
-    timer1 += TIMER_CLOCK;
+    timer1 = TIMER_CLO + TIMER_CLOCK;
     TIMER_C1 = timer1;
 }
 

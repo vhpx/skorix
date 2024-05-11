@@ -1,4 +1,4 @@
-#include "../headers/irq-entry.h"
+#include "../headers/entry.h"
 #include "../headers/irq.h"
 #include "../headers/timer.h"
 #include "../headers/uart0.h"

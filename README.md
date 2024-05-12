@@ -9,16 +9,7 @@ The project is organized into the following directories:
 ```
 . <--- (root directory)
 |
-|   .gitignore
-|   Makefile
-|   README.md
-|   tree.txt
-|   
-+---.vscode
-|       settings.json
-|       
-+---docs
-|       specifications.pdf
++---Makefile
 |       
 +---src
     +---build
@@ -32,31 +23,24 @@ The project is organized into the following directories:
     |           
     +---lib
     |   +---core
-    |   |       cli.c
+    |   |       
+    |   +---games
+    |   |   |
+    |   |   +---unrob
+    |   |   |
+    |   |   +---engine
     |   |       
     |   +---headers
     |   |       *.h files
     |   |       
-    |   +---mailbox
-    |   |       mbox.c
-    |   |       
     |   +---utils
-    |           color.c
-    |           command.c
-    |           config.c
-    |           constants.c
-    |           number.c
-    |           print.c
-    |           string.c
     |           
     +---os
         +---kernel
-        |       boot.S
-        |       kernel.c
-        |       link.ld
         |       
+        +---mailbox
+        |
         +---uarts
-                uart0.c
 ```
 
 ## **Features**
@@ -95,9 +79,18 @@ Use the `setcolor` command to personalize text and background colors within the 
 * More sophisticated shutdown implementation
 * Exploration of GUI elements
 
-# **About the Author**
+# **About the Authors**
 
-Skorix OS was developed by Vo Hoang Phuc (S3926761) as part of the Embedded Systems: OS and Interfacing (EEET2490) course at RMIT University. The project aims to provide a foundational understanding of operating system development and low-level programming.
+Skorix OS was initially developed by [**Vo Hoang Phuc**](https://github.com/vhpx) (S3926761) as part of the Embedded Systems: OS and Interfacing (EEET2490) course at RMIT University. The project aims to provide a foundational understanding of operating system development and low-level programming.
+
+The project is then further developed in collaboration with [**Do Phuong Linh**](https://github.com/dophuonglinhh), [**Le Duy Quang**](https://github.com/leQwang), and [**Tran Thanh Tung**](https://github.com/s3927562) to enhance the OS's functionality and user experience. We've worked together to implement image, video, and custom font display capabilities, as well as implementing the "Unrob" game (a clone of the ["Unthief" game by Dan or Daniel](https://dan-or-daniel.itch.io/unthief)). The game utilized the UART driver to receive user input and display the game state on the screen, while having custom timer and interrupt handling to ensure smooth gameplay.
+
+## **Authors**
+
+* [**Vo Hoang Phuc**](https://github.com/vhpx)
+* [**Do Phuong Linh**](https://github.com/dophuonglinhh)
+* [**Le Duy Quang**](https://github.com/leQwang)
+* [**Tran Thanh Tung**](https://github.com/s3927562)
 
 ## **Contact**
 

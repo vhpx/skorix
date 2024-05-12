@@ -5,7 +5,8 @@ GCCFLAGS = -Wall -O2 -ffreestanding -nostdinc -nostdlib
 # Directories
 SRC_DIR = ./src
 BUILD_DIR = ./build
-KERNEL_DIR = $(SRC_DIR)/os/kernel
+OS_DIR = $(SRC_DIR)/os
+KERNEL_DIR = $(OS_DIR)/kernel
 LIB_DIR = $(SRC_DIR)/lib
 IMAGE_DIR = $(SRC_DIR)/img
 VIDEO_DIR = $(SRC_DIR)/video
@@ -14,8 +15,9 @@ FONT_DIR = $(SRC_DIR)/font
 
 # System and library files
 KERNEL_CFILES = $(wildcard $(KERNEL_DIR)/*.c)
+MBOX_LIB_CFILES = $(wildcard $(OS_DIR)/mailbox/*.c)
+
 CORE_LIB_CFILES = $(wildcard $(LIB_DIR)/core/*.c)
-MBOX_LIB_CFILES = $(wildcard $(LIB_DIR)/mailbox/*.c)
 UTILS_LIB_CFILES = $(wildcard $(LIB_DIR)/utils/*.c)
 
 # Media Processing files
@@ -124,11 +126,11 @@ $(BUILD_DIR)/uart.o: ./src/os/uarts/$(UART).c
 $(BUILD_DIR)/%.o: $(KERNEL_DIR)/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/%.o: $(LIB_DIR)/core/%.c
+$(BUILD_DIR)/%.o: $(OS_DIR)/mailbox/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/%.o: $(LIB_DIR)/mailbox/%.c
-	$(CC) $(GCCFLAGS) -c $< -o $@	
+$(BUILD_DIR)/%.o: $(LIB_DIR)/core/%.c
+	$(CC) $(GCCFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.o: $(LIB_DIR)/utils/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@

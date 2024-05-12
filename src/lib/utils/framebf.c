@@ -175,7 +175,7 @@ void drawChar(unsigned char ch, int x, int y, unsigned int attr, int zoom) {
     for (int j = 0; j < (FONT_WIDTH * zoom); j++) {
       unsigned char mask = 1 << (j / zoom);
       if (*glyph & mask) { // only draw pixels belong to the character glyph
-        drawPixelARGB32(x + j, y + i, attr);
+        drawPixel(x + j, y + i, attr);
       }
     }
     glyph += (i % zoom) ? 0 : FONT_BPL;

@@ -26,9 +26,10 @@ FONT_CFILES = $(wildcard $(FONT_DIR)/*.c)
 # Game Engine files
 GENGINE_LIB_CFILES = $(wildcard $(LIB_DIR)/games/engine/*.c)
 UNROB_GAME_LIB_CFILES = $(wildcard $(LIB_DIR)/games/unrob/*.c)
+BREAKOUT_GAME_LIB_CFILES = $(wildcard $(LIB_DIR)/games/breakout/*.c)
 
 # System files
-CFILES = $(KERNEL_CFILES) $(CORE_LIB_CFILES) $(MBOX_LIB_CFILES) $(UTILS_LIB_CFILES) $(IMAGE_CFILES) $(VIDEO_CFILES) $(FONT_CFILES) $(GENGINE_LIB_CFILES) $(UNROB_GAME_LIB_CFILES)
+CFILES = $(KERNEL_CFILES) $(CORE_LIB_CFILES) $(MBOX_LIB_CFILES) $(UTILS_LIB_CFILES) $(IMAGE_CFILES) $(VIDEO_CFILES) $(FONT_CFILES) $(GENGINE_LIB_CFILES) $(UNROB_GAME_LIB_CFILES) $(BREAKOUT_GAME_LIB_CFILES)
 OFILES = $(addprefix $(BUILD_DIR)/, $(notdir $(CFILES:%.c=%.o)))
 
 # Targets
@@ -145,6 +146,9 @@ $(BUILD_DIR)/%.o: $(LIB_DIR)/games/engine/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.o: $(LIB_DIR)/games/unrob/%.c
+	$(CC) $(GCCFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o: $(LIB_DIR)/games/breakout/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@
 
 #----------------------------------------

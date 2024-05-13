@@ -11,4 +11,3 @@
 void displayVideo(int screen_width, int screen_height, int image_width, int image_height);
 
 #endif
-

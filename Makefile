@@ -5,7 +5,8 @@ GCCFLAGS = -Wall -O2 -ffreestanding -nostdinc -nostdlib
 # Directories
 SRC_DIR = ./src
 BUILD_DIR = ./build
-KERNEL_DIR = $(SRC_DIR)/os/kernel
+OS_DIR = $(SRC_DIR)/os
+KERNEL_DIR = $(OS_DIR)/kernel
 LIB_DIR = $(SRC_DIR)/lib
 IMAGE_DIR = $(SRC_DIR)/img
 VIDEO_DIR = $(SRC_DIR)/video
@@ -14,8 +15,9 @@ FONT_DIR = $(SRC_DIR)/font
 
 # System and library files
 KERNEL_CFILES = $(wildcard $(KERNEL_DIR)/*.c)
+MBOX_LIB_CFILES = $(wildcard $(OS_DIR)/mailbox/*.c)
+
 CORE_LIB_CFILES = $(wildcard $(LIB_DIR)/core/*.c)
-MBOX_LIB_CFILES = $(wildcard $(LIB_DIR)/mailbox/*.c)
 UTILS_LIB_CFILES = $(wildcard $(LIB_DIR)/utils/*.c)
 
 # Media Processing files
@@ -26,9 +28,10 @@ FONT_CFILES = $(wildcard $(FONT_DIR)/*.c)
 # Game Engine files
 GENGINE_LIB_CFILES = $(wildcard $(LIB_DIR)/games/engine/*.c)
 UNROB_GAME_LIB_CFILES = $(wildcard $(LIB_DIR)/games/unrob/*.c)
+BREAKOUT_GAME_LIB_CFILES = $(wildcard $(LIB_DIR)/games/breakout/*.c)
 
 # C System files
-CFILES = $(KERNEL_CFILES) $(CORE_LIB_CFILES) $(MBOX_LIB_CFILES) $(UTILS_LIB_CFILES) $(IMAGE_CFILES) $(VIDEO_CFILES) $(FONT_CFILES) $(GENGINE_LIB_CFILES) $(UNROB_GAME_LIB_CFILES)
+CFILES = $(KERNEL_CFILES) $(CORE_LIB_CFILES) $(MBOX_LIB_CFILES) $(UTILS_LIB_CFILES) $(IMAGE_CFILES) $(VIDEO_CFILES) $(FONT_CFILES) $(GENGINE_LIB_CFILES) $(UNROB_GAME_LIB_CFILES) $(BREAKOUT_GAME_LIB_CFILES)
 OFILES = $(addprefix $(BUILD_DIR)/, $(notdir $(CFILES:%.c=%.o)))
 
 # Assembly System files
@@ -127,11 +130,11 @@ $(BUILD_DIR)/uart.o: ./src/os/uarts/$(UART).c
 $(BUILD_DIR)/%.o: $(KERNEL_DIR)/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/%.o: $(LIB_DIR)/core/%.c
+$(BUILD_DIR)/%.o: $(OS_DIR)/mailbox/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/%.o: $(LIB_DIR)/mailbox/%.c
-	$(CC) $(GCCFLAGS) -c $< -o $@	
+$(BUILD_DIR)/%.o: $(LIB_DIR)/core/%.c
+	$(CC) $(GCCFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.o: $(LIB_DIR)/utils/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@
@@ -152,6 +155,9 @@ $(BUILD_DIR)/%.o: $(LIB_DIR)/games/engine/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.o: $(LIB_DIR)/games/unrob/%.c
+	$(CC) $(GCCFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o: $(LIB_DIR)/games/breakout/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@
 
 #----------------------------------------

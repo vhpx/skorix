@@ -1,7 +1,32 @@
 #include "../../lib/headers/uart0.h"
 #include "../../lib/headers/color.h"
 #include "../../lib/headers/config.h"
+#include "../../lib/headers/constants.h"
 #include "../../lib/headers/string.h"
+#include "../../lib/headers/utils.h"
+
+enum {
+  AUX_BASE = MMIO_BASE + 0x215000,
+  AUX_IRQ = AUX_BASE,
+  AUX_ENABLES = AUX_BASE + 4,
+  AUX_MU_IO_REG = AUX_BASE + 64,
+  AUX_MU_IER_REG = AUX_BASE + 68,
+  AUX_MU_IIR_REG = AUX_BASE + 72,
+  AUX_MU_LCR_REG = AUX_BASE + 76,
+  AUX_MU_MCR_REG = AUX_BASE + 80,
+  AUX_MU_LSR_REG = AUX_BASE + 84,
+  AUX_MU_MSR_REG = AUX_BASE + 88,
+  AUX_MU_SCRATCH = AUX_BASE + 92,
+  AUX_MU_CNTL_REG = AUX_BASE + 96,
+  AUX_MU_STAT_REG = AUX_BASE + 100,
+  AUX_MU_BAUD_REG = AUX_BASE + 104,
+  AUX_UART_CLOCK = 500000000,
+  UART_MAX_QUEUE = 16 * 1024
+};
+
+unsigned char uart_output_queue[UART_MAX_QUEUE];
+unsigned int uart_output_queue_write = 0;
+unsigned int uart_output_queue_read = 0;
 
 void delay(int cycles) {
   while (cycles--) {
@@ -173,40 +198,75 @@ void legacy_uart_puts(char *s) {
 }
 
 /**
-* Display a value in hexadecimal format
-*/
+ * Display a value in hexadecimal format
+ */
 void uart_hex(unsigned int num) {
-    uart_puts("0x");
-    for (int pos = 28; pos >= 0; pos = pos - 4) {
-        // Get highest 4-bit nibble
-        char digit = (num >> pos) & 0xF;
-        /* Convert to ASCII code */
-        // 0-9 => '0'-'9', 10-15 => 'A'-'F'
-        digit += (digit > 9) ? (-10 + 'A') : '0';
-        uart_sendc(digit);
-    }
+  uart_puts("0x");
+  for (int pos = 28; pos >= 0; pos = pos - 4) {
+    // Get highest 4-bit nibble
+    char digit = (num >> pos) & 0xF;
+    /* Convert to ASCII code */
+    // 0-9 => '0'-'9', 10-15 => 'A'-'F'
+    digit += (digit > 9) ? (-10 + 'A') : '0';
+    uart_sendc(digit);
+  }
 }
 
 /**
-* Display a value in decimal format
-*/
+ * Display a value in decimal format
+ */
 void uart_dec(int num) {
-    //A string to store the digit characters
-    char str[33] = "";
-    //Calculate the number of digits
-    int len = 1;
-    int temp = num;
-    while (temp >= 10){
-        len++;
-        temp = temp / 10;
-    }
-    
-    //Store into the string and print out
-    for (int i = 0; i < len; i++){
-        int digit = num % 10; //get last digit
-        num = num / 10; //remove last digit from the number
-        str[len - (i + 1)] = digit + '0';
-    }
-    str[len] = '\0';
-    uart_puts(str);
+  // A string to store the digit characters
+  char str[33] = "";
+  // Calculate the number of digits
+  int len = 1;
+  int temp = num;
+  while (temp >= 10) {
+    len++;
+    temp = temp / 10;
+  }
+
+  // Store into the string and print out
+  for (int i = 0; i < len; i++) {
+    int digit = num % 10; // get last digit
+    num = num / 10;       // remove last digit from the number
+    str[len - (i + 1)] = digit + '0';
+  }
+  str[len] = '\0';
+  uart_puts(str);
+}
+
+void mmio_write(long reg, unsigned int val) {
+  *(volatile unsigned int *)reg = val;
+}
+
+unsigned int mmio_read(long reg) { return *(volatile unsigned int *)reg; }
+
+unsigned int uart_isOutputQueueEmpty() {
+  return uart_output_queue_read == uart_output_queue_write;
+}
+
+unsigned int uart_isWriteByteReady() {
+  return mmio_read(AUX_MU_LSR_REG) & 0x20;
+}
+
+void uart_writeByteBlockingActual(unsigned char ch) {
+  while (!uart_isWriteByteReady())
+    continue;
+
+  mmio_write(AUX_MU_IO_REG, (unsigned int)ch);
+}
+
+unsigned char uart_readByte() {
+  while (!uart_isReadByteReady())
+    ;
+  return (unsigned char)mmio_read(AUX_MU_IO_REG);
+}
+
+void uart_loadOutputFifo() {
+  while (!uart_isOutputQueueEmpty() && uart_isWriteByteReady()) {
+    uart_writeByteBlockingActual(uart_output_queue[uart_output_queue_read]);
+    uart_output_queue_read =
+        (uart_output_queue_read + 1) & (UART_MAX_QUEUE - 1); // Don't overrun
+  }
 }

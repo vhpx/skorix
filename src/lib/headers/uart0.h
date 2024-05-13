@@ -3,6 +3,7 @@
 
 /* PL011 UART (UART0) registers */
 #define UART0_BASE (MMIO_BASE + 0x201000)
+#define SAFE_ADDRESS 0x00210000 // Somewhere safe to store a lot of data
 
 /* DR = Data register */
 #define UART0_DR (*(volatile unsigned int *)(UART0_BASE + 0x00))
@@ -161,3 +162,5 @@ void uart_puts(char *s);
 void legacy_uart_puts(char *s);
 void uart_hex(unsigned int num);
 void uart_dec(int num);
+unsigned char uart_readByte();
+void uart_loadOutputFifo();

@@ -163,3 +163,10 @@ get_el:
     mrs x0, CurrentEL
     lsr x0, x0, #2
     ret
+
+// Write exception table to EL2 Vector Base Address Register
+.globl exception_init
+exception_init:
+    adr x0, exception_table
+    msr vbar_el2, x0
+    ret

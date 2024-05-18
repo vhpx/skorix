@@ -23,6 +23,11 @@ static const char exceptions[16][16] = {
     "ERROR_EL_32"
 };
 
+// Assembly functions
+void exception_init(void);
+int get_el(void);
+
+// C functions
 void show_exception(unsigned int type, unsigned long esr, unsigned long far, unsigned long elr);
 
 #endif

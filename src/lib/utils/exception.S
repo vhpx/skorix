@@ -71,8 +71,7 @@
     save_state
     mov x0, #\type
     mrs x1, esr_el2
-    mrs x2, far_el2
-    mrs x3, elr_el2
+    mrs x2, elr_el2
     bl  show_exception
     b   hang
 .endm

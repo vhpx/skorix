@@ -1,7 +1,27 @@
 // https://github.com/rockytriton/LLD/tree/main/rpi_bm/part9
 // https://github.com/babbleberry/rpi4-osdev/tree/master/part13-interrupts
 
-#include "../headers/exception.h"
+#define SYNC_EL0            0
+#define IRQ_EL0             1
+#define FIQ_EL0             2
+#define ERROR_EL0           3
+
+#define SYNC_ELx            4
+#define IRQ_ELx             5
+#define FIQ_ELx             6
+#define ERROR_ELx           7
+
+#define SYNC_EL_64          8
+#define IRQ_EL_64           9
+#define FIQ_EL_64           10
+#define ERROR_EL_64         11
+
+#define SYNC_EL_32          12
+#define IRQ_EL_32           13
+#define FIQ_EL_32           14
+#define ERROR_EL_32         15
+
+#define STACK_FRAME_SIZE    256
 
 // Save processor state
 .macro save_state
@@ -51,7 +71,8 @@
     save_state
     mov x0, #\type
     mrs x1, esr_el2
-    mrs x2, elr_el2
+    mrs x2, far_el2
+    mrs x3, elr_el2
     bl  show_exception
     b   hang
 .endm

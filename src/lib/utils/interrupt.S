@@ -5,9 +5,7 @@
 .globl interrupt_init
 interrupt_init:
     mrs x0, hcr_el2             // Read EL2 Hypervisor Configuration Register
-    orr x0, x0, #(1 << 3)       // Enable EL2 FIQ Routing
     orr x0, x0, #(1 << 4)       // Enable EL2 IRQ Routing
-    orr x0, x0, #(1 << 5)       // Enable EL2 SError and Abort Routing
     msr hcr_el2, x0             // Write back to register
     
     // Write exception table to EL2 Vector Base Address Register

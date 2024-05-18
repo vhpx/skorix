@@ -26,10 +26,8 @@ void handle_irq_elx(void) {
     irq_pending = IRQ0_PENDING0;
 #endif
 
-    while (irq_pending) {
-        if (irq_pending & SYS_TIMER_1_IRQ) {
-            handle_sys_timer1();
-            irq_pending &= ~SYS_TIMER_1_IRQ;
-        }
+    if (irq_pending & SYS_TIMER_1_IRQ) {
+        handle_sys_timer1();
+        irq_pending &= ~SYS_TIMER_1_IRQ;
     }
 }

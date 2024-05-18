@@ -10,6 +10,8 @@
 #define MAP_WIDTH 1000
 #define MAP_HEIGHT 1000
 #define MOVE_STEP 20
+#define MAP_SCALE_DIVIDER_WIDTH (MAP_WIDTH/MOVE_STEP)
+#define MAP_SCALE_DIVIDER_HEIGHT (MAP_HEIGHT/MOVE_STEP)
 
 void start_unrob_game();
 void movePlayer(char key);

@@ -8,7 +8,7 @@
 #include "game.h"
 #include "../../headers/uart0.h"
 
-int logical_map[50][50] = {
+int logical_map[MAP_SCALE_DIVIDER_WIDTH][MAP_SCALE_DIVIDER_HEIGHT] = {
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -109,65 +109,65 @@ void movePlayer(char key) {
         case 'w':  // Move up
             uart_puts("\nMoving up to: \n");
             uart_puts("logical_map[");
-            uart_dec((player->y - MOVE_STEP)/20);
+            uart_dec((player->y - MOVE_STEP)/MOVE_STEP);
             uart_puts("][");
-            uart_dec(player->x/20);
+            uart_dec(player->x/MOVE_STEP);
             uart_puts("] = ");
-            uart_dec(logical_map[(player->y - MOVE_STEP)/20][player->x/20]);
+            uart_dec(logical_map[(player->y - MOVE_STEP)/MOVE_STEP][player->x/MOVE_STEP]);
             
 
             //since the player is equal to 2 STEP_MOVE, we handle the all case for collision
             if (player->y - MOVE_STEP >= 0 && player->y != 0 
-            && logical_map[(player->y - MOVE_STEP)/20][player->x/20]
-            && logical_map[(player->y - MOVE_STEP)/20][(player->x + MOVE_STEP)/20])
+            && logical_map[(player->y - MOVE_STEP)/MOVE_STEP][player->x/MOVE_STEP]
+            && logical_map[(player->y - MOVE_STEP)/MOVE_STEP][(player->x + MOVE_STEP)/MOVE_STEP])
                 player->y -= MOVE_STEP;
             break;
 
         case 's':  // Move down
             uart_puts("\nMoving down to: \n");
             uart_puts("logical_map[");
-            uart_dec((player->y + player->height + MOVE_STEP)/20);
+            uart_dec((player->y + player->height + MOVE_STEP)/MOVE_STEP);
             uart_puts("][");
-            uart_dec(player->x/20);
+            uart_dec(player->x/MOVE_STEP);
             uart_puts("] = ");
-            uart_dec(logical_map[(player->y + player->height + MOVE_STEP)/20][player->x/20]);
+            uart_dec(logical_map[(player->y + player->height + MOVE_STEP)/MOVE_STEP][player->x/MOVE_STEP]);
             
 
             if (player->y + player->height + MOVE_STEP <= SCREEN_GAME_HEIGHT 
-            && logical_map[(player->y + player->height)/20][player->x/20] 
-            && logical_map[(player->y + player->height)/20][(player->x + MOVE_STEP)/20])
+            && logical_map[(player->y + player->height)/MOVE_STEP][player->x/MOVE_STEP] 
+            && logical_map[(player->y + player->height)/MOVE_STEP][(player->x + MOVE_STEP)/MOVE_STEP])
                 player->y += MOVE_STEP;
             break;
 
         case 'a':  // Move left
             uart_puts("\nMoving left to: \n");
             uart_puts("logical_map[");
-            uart_dec(player->y/20);
+            uart_dec(player->y/MOVE_STEP);
             uart_puts("][");
-            uart_dec((player->x - MOVE_STEP)/20);
+            uart_dec((player->x - MOVE_STEP)/MOVE_STEP);
             uart_puts("] = ");
-            uart_dec(logical_map[player->y/20][(player->x - MOVE_STEP)/20]);
+            uart_dec(logical_map[player->y/MOVE_STEP][(player->x - MOVE_STEP)/MOVE_STEP]);
             
             
             if (player->x - MOVE_STEP >= 0 && player->x != 0 
-            && logical_map[player->y/20][(player->x - MOVE_STEP)/20]
-            && logical_map[(player->y + MOVE_STEP)/20][(player->x - MOVE_STEP)/20])
+            && logical_map[player->y/MOVE_STEP][(player->x - MOVE_STEP)/MOVE_STEP]
+            && logical_map[(player->y + MOVE_STEP)/MOVE_STEP][(player->x - MOVE_STEP)/MOVE_STEP])
                 player->x -= MOVE_STEP;
             break;
 
         case 'd':  // Move right
             uart_puts("\nMoving right to: \n");
             uart_puts("logical_map[");
-            uart_dec((player->y)/20);
+            uart_dec((player->y)/MOVE_STEP);
             uart_puts("][");
-            uart_dec((player->x + player->width)/20);
+            uart_dec((player->x + player->width)/MOVE_STEP);
             uart_puts("] = ");
-            uart_dec(logical_map[player->y/20][(player->x + player->width)/20]);
+            uart_dec(logical_map[player->y/MOVE_STEP][(player->x + player->width)/MOVE_STEP]);
             
 
             if (player->x + player->width <= SCREEN_GAME_WIDTH 
-            && logical_map[player->y/20][(player->x + player->width)/20]
-            && logical_map[(player->y + MOVE_STEP)/20][(player->x + player->width)/20])
+            && logical_map[player->y/MOVE_STEP][(player->x + player->width)/MOVE_STEP]
+            && logical_map[(player->y + MOVE_STEP)/MOVE_STEP][(player->x + player->width)/MOVE_STEP])
                 player->x += MOVE_STEP;
             break;
 
@@ -181,11 +181,11 @@ void movePlayer(char key) {
     uart_dec(player->y);
     uart_puts("\nLogocal Map position: \n");
     uart_puts("logical_map[");
-    uart_dec(player->y/20);
+    uart_dec(player->y/MOVE_STEP);
     uart_puts("][");
-    uart_dec(player->x/20);
+    uart_dec(player->x/MOVE_STEP);
     uart_puts("] = ");
-    uart_dec(logical_map[player->y/20][player->x/20]);
+    uart_dec(logical_map[player->y/MOVE_STEP][player->x/MOVE_STEP]);
     uart_puts("\n");
     
     // Clear the entire framebuffer and redraw the map

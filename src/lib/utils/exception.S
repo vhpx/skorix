@@ -156,3 +156,10 @@ error_el_32:
     handle_exception_default ERROR_EL_32
 
 hang: b hang
+
+// Get current exception level (EL2 by default)
+.globl get_el
+get_el:
+    mrs x0, CurrentEL
+    lsr x0, x0, #2
+    ret

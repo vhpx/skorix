@@ -22,10 +22,3 @@ interrupt_enable:
 interrupt_disable:
     msr daifset, #2             // Masks interrupts
     ret
-
-// Get current exception level (EL2 by default)
-.globl get_el
-get_el:
-    mrs x0, CurrentEL
-    lsr x0, x0, #2
-    ret

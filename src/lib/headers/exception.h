@@ -1,7 +1,7 @@
 #ifndef EXCEPTION_H
 #define EXCEPTION_H
 
-static const char exceptions[16][16] = {
+static char exceptions[16][16] = {
     "SYNC_EL0",
     "IRQ_EL0",
     "FIQ_EL0",

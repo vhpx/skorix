@@ -4,6 +4,7 @@
 extern int is_mode_image;
 extern int is_mode_video;
 extern int is_mode_font;
+extern int is_mode_game;
 
 int cli();
 int run_cli();

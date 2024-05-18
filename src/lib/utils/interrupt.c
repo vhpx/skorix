@@ -1,4 +1,3 @@
-#include "../headers/exception.h"
 #include "../headers/interrupt.h"
 #include "../headers/timer.h"
 

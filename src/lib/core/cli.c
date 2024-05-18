@@ -10,6 +10,7 @@
 #include "../headers/print.h"
 #include "../headers/string.h"
 #include "../headers/uart0.h"
+#include "../headers/exception.h"
 #include "../headers/interrupt.h"
 #include "../headers/timer.h"
 
@@ -50,9 +51,10 @@ int run_cli() {
   reset_console();
 
   // Enable interrupts
+  exception_init();
   interrupt_init();
-  sys_timer1_irq_enable();
   sys_timer1_init();
+  sys_timer1_irq_enable();
   interrupt_enable();
 
   // Start the CLI

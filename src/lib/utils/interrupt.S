@@ -1,6 +1,8 @@
 // https://grasslab.github.io/osdi/en/labs/lab3.html
-// https://developer.arm.com/documentation/ddi0500/j/System-Control/AArch64-register-descriptions/Hypervisor-Configuration-Register
 // https://github.com/tianocore/edk2/blob/master/ArmPlatformPkg/PrePeiCore/AArch64/Helper.S
+// https://developer.arm.com/documentation/ddi0500/j/System-Control/AArch64-register-descriptions/Hypervisor-Configuration-Register
+// https://github.com/rockytriton/LLD/tree/main/rpi_bm/part9
+// https://github.com/babbleberry/rpi4-osdev/tree/master/part13-interrupts
 
 .globl interrupt_init
 interrupt_init:

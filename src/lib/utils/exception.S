@@ -83,8 +83,7 @@
 .endm
 
 .align 11
-.globl exception_table
-exception_table:
+exceptions:
     exception sync_el0
     exception irq_el0
     exception fiq_el0
@@ -167,6 +166,6 @@ get_el:
 // Write exception table to EL2 Vector Base Address Register
 .globl exception_init
 exception_init:
-    adr x0, exception_table
+    adr x0, exceptions
     msr vbar_el2, x0
     ret

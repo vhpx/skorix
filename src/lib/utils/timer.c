@@ -1,5 +1,4 @@
 #include "../headers/timer.h"
-#include "../headers/uart0.h"
 #include "../headers/gpio.h"
 
 unsigned int timer1_cmp = 0;

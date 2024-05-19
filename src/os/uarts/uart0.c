@@ -52,12 +52,18 @@ void setup_gpio() {
     GPFSEL1 = r;
   }
 
-  // Enable pull-up on GPIO 14, 15
+  // Disable pull-up/down resistors on GPIO 14, 15
+#ifdef RPI3
   GPPUD = 0; // No pull up/down control
   delay(150);
   GPPUDCLK0 = (1 << 14) | (1 << 15); // enable clock for GPIO 14, 15
   delay(150);
   GPPUDCLK0 = 0; // flush GPIO setup
+#else
+  r = GPIO_PUP_PDN_CNTRL_REG0;
+  r &= ~((3 << 28) | (3 << 30)); // No resistor is selected for GPIO 14, 15
+  GPIO_PUP_PDN_CNTRL_REG0 = r;
+#endif
 }
 
 void setup_uart() {

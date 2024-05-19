@@ -1,7 +1,30 @@
+// https://grasslab.github.io/osdi/en/labs/lab3.html
+// https://github.com/tianocore/edk2/blob/master/ArmPlatformPkg/PrePeiCore/AArch64/Helper.S
+// https://developer.arm.com/documentation/ddi0500/j/System-Control/AArch64-register-descriptions/Hypervisor-Configuration-Register
 // https://github.com/rockytriton/LLD/tree/main/rpi_bm/part9
 // https://github.com/babbleberry/rpi4-osdev/tree/master/part13-interrupts
 
-#include "../headers/exception.h"
+#define SYNC_EL0            0
+#define IRQ_EL0             1
+#define FIQ_EL0             2
+#define ERROR_EL0           3
+
+#define SYNC_ELx            4
+#define IRQ_ELx             5
+#define FIQ_ELx             6
+#define ERROR_ELx           7
+
+#define SYNC_EL_64          8
+#define IRQ_EL_64           9
+#define FIQ_EL_64           10
+#define ERROR_EL_64         11
+
+#define SYNC_EL_32          12
+#define IRQ_EL_32           13
+#define FIQ_EL_32           14
+#define ERROR_EL_32         15
+
+#define STACK_FRAME_SIZE    256
 
 // Save processor state
 .macro save_state
@@ -62,8 +85,7 @@
 .endm
 
 .align 11
-.globl exception_table
-exception_table:
+exceptions:
     exception sync_el0
     exception irq_el0
     exception fiq_el0
@@ -135,3 +157,17 @@ error_el_32:
     handle_exception_default ERROR_EL_32
 
 hang: b hang
+
+// Get current exception level (EL2 by default)
+.globl get_el
+get_el:
+    mrs x0, CurrentEL
+    lsr x0, x0, #2
+    ret
+
+// Write exception table to EL2 Vector Base Address Register
+.globl exception_init
+exception_init:
+    adr x0, exceptions
+    msr vbar_el2, x0
+    ret

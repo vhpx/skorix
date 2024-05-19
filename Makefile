@@ -43,6 +43,11 @@ UART = uart0
 TARGET = kernel8.img
 QEMU = qemu-system-aarch64
 
+# RPI Version
+ifneq ($(pi), 4)
+	GCCFLAGS += -DRPI3
+endif
+
 # Force cmd on Windows
 ifeq ($(OS), Windows_NT)
 	SHELL = cmd

@@ -1,26 +1,33 @@
 #ifndef EXCEPTION_H
 #define EXCEPTION_H
 
-#define SYNC_EL0            0
-#define IRQ_EL0             1
-#define FIQ_EL0             2
-#define ERROR_EL0           3
+static char exceptions[16][16] = {
+    "SYNC_EL0",
+    "IRQ_EL0",
+    "FIQ_EL0",
+    "ERROR_EL0",
 
-#define SYNC_ELx            4
-#define IRQ_ELx             5
-#define FIQ_ELx             6
-#define ERROR_ELx           7
+    "SYNC_ELx",
+    "IRQ_ELx",
+    "FIQ_ELx",
+    "ERROR_ELx",
 
-#define SYNC_EL_64          8
-#define IRQ_EL_64           9
-#define FIQ_EL_64           10
-#define ERROR_EL_64         11
+    "SYNC_EL_64",
+    "IRQ_EL_64",
+    "FIQ_EL_64",
+    "ERROR_EL_64",
 
-#define SYNC_EL_32          12
-#define IRQ_EL_32           13
-#define FIQ_EL_32           14
-#define ERROR_EL_32         15
+    "SYNC_EL_32",
+    "IRQ_EL_32",
+    "FIQ_EL_32",
+    "ERROR_EL_32"
+};
 
-#define STACK_FRAME_SIZE    256
+// Assembly functions
+void exception_init(void);
+int get_el(void);
+
+// C functions
+void show_exception(unsigned int type, unsigned long esr, unsigned long address);
 
 #endif

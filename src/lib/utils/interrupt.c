@@ -1,4 +1,3 @@
-#include "../headers/exception.h"
 #include "../headers/interrupt.h"
 #include "../headers/timer.h"
 
@@ -27,23 +26,8 @@ void handle_irq_elx(void) {
     irq_pending = IRQ0_PENDING0;
 #endif
 
-    while (irq_pending) {
-        if (irq_pending & SYS_TIMER_1_IRQ) {
-            handle_sys_timer1();
-            irq_pending &= ~SYS_TIMER_1_IRQ;
-        }
+    if (irq_pending & SYS_TIMER_1_IRQ) {
+        handle_sys_timer1();
+        irq_pending &= ~SYS_TIMER_1_IRQ;
     }
-}
-
-void show_exception(unsigned int type, unsigned long esr, unsigned long address) {
-    uart_puts("\n\nSomething went wrong...\n");
-    uart_puts("Exception type: ");
-    uart_puts(exceptions[type]);
-    uart_puts("\n");
-    uart_puts("ESR: ");
-    uart_hex(esr);
-    uart_puts("\n");
-    uart_puts("Address: ");
-    uart_hex(address);
-    uart_puts("\n");
 }

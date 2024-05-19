@@ -282,8 +282,8 @@ int execute_command(char *input, CommandHistory *cmd_history) {
       uart_puts("Usage: play -g <game> | Available games: unrob (ur)\n\n");
       return 0;
     }
-
-    play_game(tags);
+    play_game(tags); //used this later on
+    is_mode_game = 1;
     return 0;
   }
 

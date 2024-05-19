@@ -11,6 +11,8 @@
     "constants.h": "c",
     "framebf.h": "c",
     "img.h": "c",
-    "img_src.h": "c"
+    "img_src.h": "c",
+    "video.h": "c",
+    "print.h": "c"
   }
 }

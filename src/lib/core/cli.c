@@ -12,10 +12,14 @@
 #include "../headers/uart0.h"
 #include "../headers/interrupt.h"
 #include "../headers/timer.h"
+#include "../headers/unrob.h"
+#include "../games/unrob/game.h"
+
 
 int is_mode_image = 0;
 int is_mode_video = 0;
 int is_mode_font = 0;
+int is_mode_game = 0;
 
 int cli() {
   static char cli_buffer[MAX_CMD_SIZE];
@@ -95,6 +99,14 @@ int handle_input(char c, char* cli_buffer, int* index, int* past_cmd_index,
     if (c == 27) { // escape key
       clearFramebuffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       is_mode_font = 0;
+    }
+
+  } else if (is_mode_game) {
+    if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
+      movePlayer(c);
+    }else if (c == 27) { // escape key
+      clearFramebuffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+      is_mode_game = 0;
     }
 
   } else if (c == '\b') {

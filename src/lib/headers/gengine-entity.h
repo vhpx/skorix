@@ -1,3 +1,4 @@
+//gengine-entity.h
 #include "gengine-core.h"
 
 typedef struct {

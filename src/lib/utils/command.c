@@ -3,6 +3,7 @@
 #include "../../img/img.h"
 #include "../../img/img_src.h"
 #include "../../video/video.h"
+#include "../games/unrob/game.h"
 #include "../headers/breakout.h"
 #include "../headers/cli.h"
 #include "../headers/color.h"
@@ -282,7 +283,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
       uart_puts("Usage: play -g <game> | Available games: unrob (ur)\n\n");
       return 0;
     }
-    play_game(tags); //used this later on
+    play_game(tags); // used this later on
     is_mode_game = 1;
     return 0;
   }

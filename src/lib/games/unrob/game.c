@@ -1,65 +1,12 @@
-//game.c
+// game.c
+#include "game.h"
+#include "../../../img/img.h"
 #include "../../headers/constants.h"
 #include "../../headers/framebf.h"
 #include "../../headers/gengine.h"
+#include "../../headers/uart0.h"
 #include "../../headers/unrob.h"
 #include "../engine/map-bitmap.h"
-#include "../../../img/img.h"
-#include "game.h"
-#include "../../headers/uart0.h"
-
-int logical_map[MAP_SCALE_DIVIDER_WIDTH][MAP_SCALE_DIVIDER_HEIGHT] = {
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-};
 
 struct Object {
   unsigned int type;
@@ -80,7 +27,8 @@ void spawnPlayer() {
   int paddlewidth = 40;
   int paddleheight = 40;
 
-  drawRect((WIDTH - paddlewidth) / 2, (HEIGHT - MARGIN - paddleheight),(WIDTH - paddlewidth) / 2 + paddlewidth, (HEIGHT - MARGIN), 0x11, 1);
+  drawRect((WIDTH - paddlewidth) / 2, (HEIGHT - MARGIN - paddleheight),
+           (WIDTH - paddlewidth) / 2 + paddlewidth, (HEIGHT - MARGIN), 0x11, 1);
 
   unrob_objects[unrob_numobjs].type = OBJ_PADDLE;
   unrob_objects[unrob_numobjs].x = (WIDTH - paddlewidth) / 2;
@@ -92,105 +40,99 @@ void spawnPlayer() {
   unrob_numobjs++;
 }
 
-void start_unrob_game() { 
-  displayImage(SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT, gameMap_bitmap_map1);
-  spawnPlayer(); 
+void start_unrob_game() {
+  displayImage(SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT,
+               gameMap_bitmap_map1);
+  spawnPlayer();
 }
 
 // Function to move the player based on keyboard input
 void movePlayer(char key) {
-    if (!player) return;  // Ensure player object exists
+  if (!player)
+    return; // Ensure player object exists
 
-    int prev_x = player->x;
-    int prev_y = player->y;
-    uart_puts("\n------------------------------\n");
+  int prev_x = player->x;
+  int prev_y = player->y;
+  uart_puts("\n------------------------------\n");
 
-    switch (key) {
-        case 'w':  // Move up
-            uart_puts("\nMoving up to: \n");
-            uart_puts("logical_map[");
-            uart_dec((player->y - MOVE_STEP)/MOVE_STEP);
-            uart_puts("][");
-            uart_dec(player->x/MOVE_STEP);
-            uart_puts("] = ");
-            uart_dec(logical_map[(player->y - MOVE_STEP)/MOVE_STEP][player->x/MOVE_STEP]);
-            
-
-            //since the player is equal to 2 STEP_MOVE, we handle the all case for collision
-            if (player->y - MOVE_STEP >= 0 && player->y != 0 
-            && logical_map[(player->y - MOVE_STEP)/MOVE_STEP][player->x/MOVE_STEP]
-            && logical_map[(player->y - MOVE_STEP)/MOVE_STEP][(player->x + MOVE_STEP)/MOVE_STEP])
-                player->y -= MOVE_STEP;
-            break;
-
-        case 's':  // Move down
-            uart_puts("\nMoving down to: \n");
-            uart_puts("logical_map[");
-            uart_dec((player->y + player->height + MOVE_STEP)/MOVE_STEP);
-            uart_puts("][");
-            uart_dec(player->x/MOVE_STEP);
-            uart_puts("] = ");
-            uart_dec(logical_map[(player->y + player->height + MOVE_STEP)/MOVE_STEP][player->x/MOVE_STEP]);
-            
-
-            if (player->y + player->height + MOVE_STEP <= SCREEN_GAME_HEIGHT 
-            && logical_map[(player->y + player->height)/MOVE_STEP][player->x/MOVE_STEP] 
-            && logical_map[(player->y + player->height)/MOVE_STEP][(player->x + MOVE_STEP)/MOVE_STEP])
-                player->y += MOVE_STEP;
-            break;
-
-        case 'a':  // Move left
-            uart_puts("\nMoving left to: \n");
-            uart_puts("logical_map[");
-            uart_dec(player->y/MOVE_STEP);
-            uart_puts("][");
-            uart_dec((player->x - MOVE_STEP)/MOVE_STEP);
-            uart_puts("] = ");
-            uart_dec(logical_map[player->y/MOVE_STEP][(player->x - MOVE_STEP)/MOVE_STEP]);
-            
-            
-            if (player->x - MOVE_STEP >= 0 && player->x != 0 
-            && logical_map[player->y/MOVE_STEP][(player->x - MOVE_STEP)/MOVE_STEP]
-            && logical_map[(player->y + MOVE_STEP)/MOVE_STEP][(player->x - MOVE_STEP)/MOVE_STEP])
-                player->x -= MOVE_STEP;
-            break;
-
-        case 'd':  // Move right
-            uart_puts("\nMoving right to: \n");
-            uart_puts("logical_map[");
-            uart_dec((player->y)/MOVE_STEP);
-            uart_puts("][");
-            uart_dec((player->x + player->width)/MOVE_STEP);
-            uart_puts("] = ");
-            uart_dec(logical_map[player->y/MOVE_STEP][(player->x + player->width)/MOVE_STEP]);
-            
-
-            if (player->x + player->width <= SCREEN_GAME_WIDTH 
-            && logical_map[player->y/MOVE_STEP][(player->x + player->width)/MOVE_STEP]
-            && logical_map[(player->y + MOVE_STEP)/MOVE_STEP][(player->x + player->width)/MOVE_STEP])
-                player->x += MOVE_STEP;
-            break;
-
-        default:
-            return;  // If the key is not one of 'w', 's', 'a', or 'd', do nothing
-    }
-
-    uart_puts("\nPosition x: ");
-    uart_dec(player->x);
-    uart_puts("\nPosition y: ");
-    uart_dec(player->y);
-    uart_puts("\nLogocal Map position: \n");
-    uart_puts("logical_map[");
-    uart_dec(player->y/MOVE_STEP);
+  switch (key) {
+  case 'w': // Move up
+    uart_puts("\nMoving up to: \n");
+    uart_puts("position[");
+    uart_dec((player->y - MOVE_STEP) / MOVE_STEP);
     uart_puts("][");
-    uart_dec(player->x/MOVE_STEP);
-    uart_puts("] = ");
-    uart_dec(logical_map[player->y/MOVE_STEP][player->x/MOVE_STEP]);
-    uart_puts("\n");
-    
-    // Clear the entire framebuffer and redraw the map
-    displayImage(SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT, gameMap_bitmap_map1);
-    
-    // Draw the new position of the player
-    drawRect(player->x, player->y, player->x + player->width, player->y + player->height, 0x11, 1);
+    uart_dec(player->x / MOVE_STEP);
+    uart_puts("]");
+
+    // since the player is equal to 2 STEP_MOVE, we handle the all case for
+    // collision
+    // if (player->y - MOVE_STEP >= 0 && player->y != 0 &&
+    //     logical_map[(player->y - MOVE_STEP) / MOVE_STEP]
+    //                [player->x / MOVE_STEP] &&
+    //     logical_map[(player->y - MOVE_STEP) / MOVE_STEP]
+    //                [(player->x + MOVE_STEP) / MOVE_STEP])
+    player->y -= MOVE_STEP;
+    break;
+
+  case 's': // Move down
+    uart_puts("\nMoving down to: \n");
+    uart_puts("position[");
+    uart_dec((player->y + player->height + MOVE_STEP) / MOVE_STEP);
+    uart_puts("][");
+    uart_dec(player->x / MOVE_STEP);
+    uart_puts("]");
+
+    // if (player->y + player->height + MOVE_STEP <= SCREEN_GAME_HEIGHT &&
+    //     logical_map[(player->y + player->height) / MOVE_STEP]
+    //                [player->x / MOVE_STEP] &&
+    //     logical_map[(player->y + player->height) / MOVE_STEP]
+    //                [(player->x + MOVE_STEP) / MOVE_STEP])
+    player->y += MOVE_STEP;
+    break;
+
+  case 'a': // Move left
+    uart_puts("\nMoving left to: \n");
+    uart_puts("position[");
+    uart_dec(player->y / MOVE_STEP);
+    uart_puts("][");
+    uart_dec((player->x - MOVE_STEP) / MOVE_STEP);
+    uart_puts("]");
+
+    // if (player->x - MOVE_STEP >= 0 && player->x != 0 &&
+    //     logical_map[player->y / MOVE_STEP]
+    //                [(player->x - MOVE_STEP) / MOVE_STEP] &&
+    //     logical_map[(player->y + MOVE_STEP) / MOVE_STEP]
+    //                [(player->x - MOVE_STEP) / MOVE_STEP])
+    player->x -= MOVE_STEP;
+    break;
+
+  case 'd': // Move right
+    uart_puts("\nMoving right to: \n");
+    uart_puts("position[");
+    uart_dec((player->y) / MOVE_STEP);
+    uart_puts("][");
+    uart_dec((player->x + player->width) / MOVE_STEP);
+    uart_puts("]");
+
+    if (player->x + player->width <= SCREEN_GAME_WIDTH)
+      player->x += MOVE_STEP;
+    break;
+
+  default:
+    return; // If the key is not one of 'w', 's', 'a', or 'd', do nothing
+  }
+
+  uart_puts("\nPosition x: ");
+  uart_dec(player->x);
+  uart_puts("\nPosition y: ");
+  uart_dec(player->y);
+  uart_puts("\n");
+
+  // Clear the entire framebuffer and redraw the map
+  displayImage(SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT,
+               gameMap_bitmap_map1);
+
+  // Draw the new position of the player
+  drawRect(player->x, player->y, player->x + player->width,
+           player->y + player->height, 0x11, 1);
 }

@@ -9,6 +9,7 @@
 #include "../headers/config.h"
 #include "../headers/constants.h"
 #include "../headers/exception.h"
+#include "../headers/framebf.h"
 #include "../headers/interrupt.h"
 #include "../headers/print.h"
 #include "../headers/string.h"
@@ -60,6 +61,10 @@ int run_cli() {
   sys_timer1_irq_enable();
   interrupt_enable();
 
+  // Initialize the frame buffer
+  initialize_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH,
+                          SCREEN_HEIGHT);
+
   // Start the CLI
   int status = 0;
   while (status != -1) {
@@ -81,8 +86,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
   // TODO: Add improved support for image scrolling
   if (is_mode_image) {
     if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
-      scroll_image(c, SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT,
-                   epd_bitmap_image);
+      scroll_image(c, IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);
     } else if (c == 27) { // escape key
       // exit all the modes
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -90,7 +94,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
     }
   } else if (is_mode_video) {
     if (c == 'r') {
-      displayVideo(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT);
+      display_video(IMAGE_WIDTH, IMAGE_HEIGHT);
     } else if (c == 27) { // escape key
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       is_mode_video = 0;

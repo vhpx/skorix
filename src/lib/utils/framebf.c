@@ -116,6 +116,39 @@ void draw_pixel(int x, int y, unsigned int attr) {
   draw_pixel_ARGB_32(x, y, attr);
 }
 
+void draw_transparent_pixel(int x, int y, unsigned int attr) {
+  if (attr == 0)
+    return;
+
+  draw_pixel_ARGB_32(x, y, attr);
+}
+
+void draw_base_image(int x, int y, int width, int height, unsigned long *bitmap,
+                     int transparent) {
+  for (int j = 0; j < height; j++) {
+    for (int i = 0; i < width; i++) {
+      // Calculate the offset for the bitmap pixel
+      int bitmapOffs = (j * width) + i;
+
+      // Draw the pixel from the bitmap to the screen
+      if (transparent) {
+        draw_transparent_pixel(x + i, y + j, bitmap[bitmapOffs]);
+      } else {
+        draw_pixel(x + i, y + j, bitmap[bitmapOffs]);
+      }
+    }
+  }
+}
+
+void draw_image(int x, int y, int width, int height, unsigned long *bitmap) {
+  draw_base_image(x, y, width, height, bitmap, 0);
+}
+
+void draw_transparent_image(int x, int y, int width, int height,
+                            unsigned long *bitmap) {
+  draw_base_image(x, y, width, height, bitmap, 1);
+}
+
 void draw_rect(int x1, int y1, int x2, int y2, unsigned int attr, int fill) {
   draw_rect_ARGB_32(x1, y1, x2, y2, attr, fill);
 }
@@ -203,4 +236,31 @@ void move_rect(int x, int y, int width, int height, int xoff, int yoff,
                unsigned char attr) {
   draw_rect(x, y, x + width, y + height, 0, 1);
   draw_rect(x + xoff, y + yoff, x + width + xoff, y + height + yoff, attr, 1);
+}
+
+void copy_rect(int srcX, int srcY, int width, int height, unsigned long *dest) {
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      // Calculate the offset for the source pixel
+      int srcOffs = ((srcY + y) * pitch) + (COLOR_DEPTH / 8 * (srcX + x));
+
+      // Calculate the offset for the destination pixel
+      int destOffs = (y * width) + x;
+
+      // Copy the pixel from the source to the destination
+      dest[destOffs] = *((unsigned int *)(fb + srcOffs));
+    }
+  }
+}
+
+void draw_rect_from_bitmap(int x, int y, int width, int height,
+                           unsigned long *bitmap) {
+  for (int j = 0; j < height; j++) {
+    for (int i = 0; i < width; i++) {
+      // Calculate the offset for the bitmap pixel
+      int bitmapOffs = (j * width) + i;
+      // Draw the pixel from the bitmap to the screen
+      draw_pixel_ARGB_32(x + i, y + j, bitmap[bitmapOffs]);
+    }
+  }
 }

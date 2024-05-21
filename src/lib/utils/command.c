@@ -90,7 +90,7 @@ Command commands[] = {
     {
         "video",           // Name
         "Display a video", // Description
-        displayVideo,      // Func
+        display_video,     // Func
     },
     {
         "font",           // Name
@@ -250,8 +250,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     uart_puts("d: right\n\n");
     uart_puts("Press Escape to exit Image Mode\n");
 
-    display_image(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT,
-                  epd_bitmap_image);
+    display_image(IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);
     is_mode_image = 1;
     return 0;
   }
@@ -261,7 +260,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     uart_puts("\n---Entering Video Mode---\n\n");
     uart_puts("r: replay video\n\n");
     uart_puts("Press Escape to exit Video Mode\n");
-    displayVideo(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT);
+    display_video(IMAGE_WIDTH, IMAGE_HEIGHT);
     is_mode_video = 1;
     return 0;
   }
@@ -270,7 +269,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
     uart_puts("\n---Entering Font Mode---\n\n");
     uart_puts("Press Escape to exit Font Mode\n");
-    displayFont(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT);
+    displayFont(IMAGE_WIDTH, IMAGE_HEIGHT);
     is_mode_font = 1;
     return 0;
   }

@@ -22,28 +22,32 @@ enum { OBJ_NONE = 0, OBJ_BRICK = 1, OBJ_PADDLE = 2, OBJ_BALL = 3 };
 unsigned int unrob_numobjs = 0;
 struct Object unrob_objects[MAX_GENGINE_ENTITIES];
 struct Object *player;
+unsigned long pre_player_movement_cache[2000];
+
+const int PLAYER_WIDTH = 40;
+const int PLAYER_HEIGHT = 40;
+
+int player_spawn_x = (WIDTH - PLAYER_WIDTH) / 2;
+int player_spawn_y = (HEIGHT - MARGIN - PLAYER_HEIGHT);
 
 void spawnPlayer() {
-  int paddlewidth = 40;
-  int paddleheight = 40;
-
-  draw_rect((WIDTH - paddlewidth) / 2, (HEIGHT - MARGIN - paddleheight),
-            (WIDTH - paddlewidth) / 2 + paddlewidth, (HEIGHT - MARGIN), 0x11,
-            1);
+  draw_rect(player_spawn_x, player_spawn_y, player_spawn_x + PLAYER_WIDTH,
+            (HEIGHT - MARGIN), 0x11, 1);
 
   unrob_objects[unrob_numobjs].type = OBJ_PADDLE;
-  unrob_objects[unrob_numobjs].x = (WIDTH - paddlewidth) / 2;
-  unrob_objects[unrob_numobjs].y = (HEIGHT - MARGIN - paddleheight);
-  unrob_objects[unrob_numobjs].width = paddlewidth;
-  unrob_objects[unrob_numobjs].height = paddleheight;
+  unrob_objects[unrob_numobjs].x = player_spawn_x;
+  unrob_objects[unrob_numobjs].y = player_spawn_y;
+  unrob_objects[unrob_numobjs].width = PLAYER_WIDTH;
+  unrob_objects[unrob_numobjs].height = PLAYER_HEIGHT;
   unrob_objects[unrob_numobjs].alive = 1;
   player = &unrob_objects[unrob_numobjs];
   unrob_numobjs++;
 }
 
 void start_unrob_game() {
-  display_image(SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT,
-                gameMap_bitmap_map1);
+  display_image(MAP_WIDTH, MAP_HEIGHT, gameMap_bitmap_map1);
+  // copy_rect(player_spawn_x, player_spawn_y, player_spawn_x + player->width,
+  //           player_spawn_y + player->height, pre_player_movement_cache);
   spawnPlayer();
 }
 
@@ -129,9 +133,10 @@ void movePlayer(char key) {
   uart_dec(player->y);
   uart_puts("\n");
 
-  // Clear the entire framebuffer and redraw the map
-  display_image(SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT,
-                gameMap_bitmap_map1);
+  // Render player pre-movement cache from pre_player_movement_cache
+  display_image(MAP_WIDTH, MAP_HEIGHT, gameMap_bitmap_map1);
+  // draw_rect_from_bitmap(prev_x, prev_y, player->width, player->height,
+  //                       pre_player_movement_cache);
 
   // Draw the new position of the player
   draw_rect(player->x, player->y, player->x + player->width,

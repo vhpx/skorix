@@ -7,6 +7,7 @@
 #include "../../headers/uart0.h"
 #include "../../headers/unrob.h"
 #include "../engine/map-bitmap.h"
+#include "../engine/item.h"
 
 struct Object {
   unsigned int type;
@@ -42,6 +43,19 @@ void spawnPlayer() {
   unrob_objects[unrob_numobjs].alive = 1;
   player = &unrob_objects[unrob_numobjs];
   unrob_numobjs++;
+
+  for(int i = 0; i < item_m1_allArray_LEN; i++) {//item map 1
+    draw_transparent_image(WIDTH/2 - (7*ITEM_SIZE)/2 + (i*ITEM_SIZE), HEIGHT/2 -200, ITEM_SIZE,
+                           ITEM_SIZE, item_m1_allArray[i]);
+  }
+  // for(int i = 0; i < item_m2_allArray_LEN; i++) {//map 2
+  //   draw_transparent_image(WIDTH/2 - (7*ITEM_SIZE)/2 + (i*ITEM_SIZE), HEIGHT/2 -150, ITEM_SIZE,
+  //                          ITEM_SIZE, item_m2_allArray[i]);
+  // }
+  //   for(int i = 0; i < item_m3_allArray_LEN; i++) {//map 3
+  //   draw_transparent_image(WIDTH/2 - (8*ITEM_SIZE)/2 + (i*ITEM_SIZE), HEIGHT/2 -100, ITEM_SIZE,
+  //                          ITEM_SIZE, item_m3_allArray[i]);
+  // }
 }
 
 void start_unrob_game() {
@@ -141,4 +155,33 @@ void movePlayer(char key) {
   // Draw the new position of the player
   draw_rect(player->x, player->y, player->x + player->width,
             player->y + player->height, 0x11, 1);
+}
+
+int selected_item = 0;
+void rotate_inventory(char key) {
+    switch (key) {
+        case 'q':  // Rotate left
+            selected_item--;
+            if (selected_item < 0) {  // Wrap around if the index goes below 0
+                selected_item = item_m1_allArray_LEN - 1;
+            }
+            break;
+
+        case 'e':  // Rotate right
+            selected_item++;
+            if (selected_item >= item_m1_allArray_LEN) {  // Wrap around if the index exceeds array length
+                selected_item = 0;
+            }
+            break;
+
+        default:
+            break;  // Do nothing if another key is pressed
+    }
+
+    // Draw the inventory box (refresh the display)
+    draw_rect(WIDTH/2, HEIGHT/2 -200, ITEM_SIZE, ITEM_SIZE, 0x00, 1);
+
+    // Draw the selected item in the inventory box
+    draw_transparent_image(WIDTH/2, HEIGHT/2 -200, ITEM_SIZE,
+                           ITEM_SIZE, item_m1_allArray[selected_item]);
 }

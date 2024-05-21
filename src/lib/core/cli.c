@@ -109,7 +109,9 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
   } else if (is_mode_game) {
     if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
       movePlayer(c);
-    } else if (c == 27) { // escape key
+    } else if(c == 'q' || c == 'e'){
+      rotate_inventory(c);
+    }else if (c == 27) { // escape key
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       is_mode_game = 0;
     }

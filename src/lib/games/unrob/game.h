@@ -3,6 +3,7 @@
 #define HEIGHT 1000
 #define MARGIN 0
 #define VIRTWIDTH (WIDTH - (2 * MARGIN))
+#define ITEM_SIZE 40 //square
 
 #define SCREEN_GAME_WIDTH 1000
 #define SCREEN_GAME_HEIGHT 1000
@@ -14,3 +15,4 @@
 
 void start_unrob_game();
 void movePlayer(char key);
+void rotate_inventory(char key);

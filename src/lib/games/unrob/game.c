@@ -27,8 +27,9 @@ void spawnPlayer() {
   int paddlewidth = 40;
   int paddleheight = 40;
 
-  drawRect((WIDTH - paddlewidth) / 2, (HEIGHT - MARGIN - paddleheight),
-           (WIDTH - paddlewidth) / 2 + paddlewidth, (HEIGHT - MARGIN), 0x11, 1);
+  draw_rect((WIDTH - paddlewidth) / 2, (HEIGHT - MARGIN - paddleheight),
+            (WIDTH - paddlewidth) / 2 + paddlewidth, (HEIGHT - MARGIN), 0x11,
+            1);
 
   unrob_objects[unrob_numobjs].type = OBJ_PADDLE;
   unrob_objects[unrob_numobjs].x = (WIDTH - paddlewidth) / 2;
@@ -133,6 +134,6 @@ void movePlayer(char key) {
                 gameMap_bitmap_map1);
 
   // Draw the new position of the player
-  drawRect(player->x, player->y, player->x + player->width,
-           player->y + player->height, 0x11, 1);
+  draw_rect(player->x, player->y, player->x + player->width,
+            player->y + player->height, 0x11, 1);
 }

@@ -39,14 +39,14 @@ struct Object *ball;
 struct Object *paddle;
 
 void removeObject(struct Object *object) {
-  drawRect(object->x, object->y, object->x + object->width,
-           object->y + object->height, 0, 1);
+  draw_rect(object->x, object->y, object->x + object->width,
+            object->y + object->height, 0, 1);
   object->alive = 0;
 }
 
 void moveObject(struct Object *object, int xoff, int yoff) {
-  moveRect(object->x, object->y, object->width, object->height, xoff, yoff,
-           0x00);
+  move_rect(object->x, object->y, object->width, object->height, xoff, yoff,
+            0x00);
   object->x = object->x + xoff;
   object->y = object->y + yoff;
 }
@@ -83,8 +83,8 @@ void initBricks() {
     int xbrick = MARGIN + (VIRTWIDTH / COLS / 2) - (brickwidth / 2);
 
     for (int j = 0; j < COLS; j++) {
-      drawRect(xbrick, ybrick, xbrick + brickwidth, ybrick + brickheight,
-               brickcols[i], 1);
+      draw_rect(xbrick, ybrick, xbrick + brickwidth, ybrick + brickheight,
+                brickcols[i], 1);
 
       objects[numobjs].type = OBJ_BRICK;
       objects[numobjs].x = xbrick;
@@ -103,7 +103,7 @@ void initBricks() {
 void initBall() {
   int ballradius = 15;
 
-  drawCircle(WIDTH / 2, HEIGHT / 2, ballradius, 0x55, 1);
+  draw_circle(WIDTH / 2, HEIGHT / 2, ballradius, 0x55, 1);
 
   objects[numobjs].type = OBJ_BALL;
   objects[numobjs].x = (WIDTH / 2) - ballradius;
@@ -119,8 +119,9 @@ void initPaddle() {
   int paddlewidth = 80;
   int paddleheight = 20;
 
-  drawRect((WIDTH - paddlewidth) / 2, (HEIGHT - MARGIN - paddleheight),
-           (WIDTH - paddlewidth) / 2 + paddlewidth, (HEIGHT - MARGIN), 0x11, 1);
+  draw_rect((WIDTH - paddlewidth) / 2, (HEIGHT - MARGIN - paddleheight),
+            (WIDTH - paddlewidth) / 2 + paddlewidth, (HEIGHT - MARGIN), 0x11,
+            1);
 
   objects[numobjs].type = OBJ_PADDLE;
   objects[numobjs].x = (WIDTH - paddlewidth) / 2;
@@ -137,10 +138,10 @@ void drawScoreboard(int score, int lives) {
   score -= (10 * tens);
   char ones = score;
 
-  // drawString((WIDTH / 2) - 252, MARGIN - 25, "Score: 0     Lives:  ", 0x0f,
-  // 3); drawChar(tens + 0x30, (WIDTH / 2) - 252 + (8 * 8 * 3), MARGIN - 25,
-  // 0x0f, 3); drawChar(ones + 0x30, (WIDTH / 2) - 252 + (8 * 9 * 3), MARGIN -
-  // 25, 0x0f, 3); drawChar((char)lives + 0x30, (WIDTH / 2) - 252 + (8 * 20 *
+  // draw_string((WIDTH / 2) - 252, MARGIN - 25, "Score: 0     Lives:  ", 0x0f,
+  // 3); draw_char(tens + 0x30, (WIDTH / 2) - 252 + (8 * 8 * 3), MARGIN - 25,
+  // 0x0f, 3); draw_char(ones + 0x30, (WIDTH / 2) - 252 + (8 * 9 * 3), MARGIN -
+  // 25, 0x0f, 3); draw_char((char)lives + 0x30, (WIDTH / 2) - 252 + (8 * 20 *
   // 3), MARGIN - 25,
   //          0x0f, 3);
 }
@@ -224,10 +225,10 @@ void start_breakout_game() {
   int strheight = FONT_BPG * zoom;
 
   // if (bricks == 0)
-  //   drawString((WIDTH / 2) - (strwidth / 2), (HEIGHT / 2) - (strheight / 2),
+  //   draw_string((WIDTH / 2) - (strwidth / 2), (HEIGHT / 2) - (strheight / 2),
   //              "Well done!", 0x02, zoom);
   // else
-  //   drawString((WIDTH / 2) - (strwidth / 2), (HEIGHT / 2) - (strheight / 2),
+  //   draw_string((WIDTH / 2) - (strwidth / 2), (HEIGHT / 2) - (strheight / 2),
   //              "Game over!", 0x04, zoom);
 
   while (1)

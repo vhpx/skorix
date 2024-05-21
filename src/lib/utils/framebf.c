@@ -88,7 +88,7 @@ void framebf_init(int physicalWidth, int physicalHeight, int virtualWidth,
   }
 }
 
-void draw_pixelARGB32(int x, int y, unsigned int attr) {
+void draw_pixel_ARGB_32(int x, int y, unsigned int attr) {
   int offs = (y * pitch) + (COLOR_DEPTH / 8 * x);
   /* //Access and assign each byte
    *(fb + offs ) = (attr >> 0 ) & 0xFF; //BLUE (get the least significant byte)
@@ -100,27 +100,27 @@ void draw_pixelARGB32(int x, int y, unsigned int attr) {
   *((unsigned int *)(fb + offs)) = attr;
 }
 
-void drawRectARGB32(int x1, int y1, int x2, int y2, unsigned int attr,
-                    int fill) {
+void draw_rect_ARGB_32(int x1, int y1, int x2, int y2, unsigned int attr,
+                       int fill) {
   for (int y = y1; y <= y2; y++) {
     for (int x = x1; x <= x2; x++) {
       if ((x == x1 || x == x2) || (y == y1 || y == y2))
-        draw_pixelARGB32(x, y, attr);
+        draw_pixel_ARGB_32(x, y, attr);
       else if (fill)
-        draw_pixelARGB32(x, y, attr);
+        draw_pixel_ARGB_32(x, y, attr);
     }
   }
 }
 
 void draw_pixel(int x, int y, unsigned int attr) {
-  draw_pixelARGB32(x, y, attr);
+  draw_pixel_ARGB_32(x, y, attr);
 }
 
-void drawRect(int x1, int y1, int x2, int y2, unsigned int attr, int fill) {
-  drawRectARGB32(x1, y1, x2, y2, attr, fill);
+void draw_rect(int x1, int y1, int x2, int y2, unsigned int attr, int fill) {
+  draw_rect_ARGB_32(x1, y1, x2, y2, attr, fill);
 }
 
-void drawLine(int x1, int y1, int x2, int y2, unsigned char attr) {
+void draw_line(int x1, int y1, int x2, int y2, unsigned char attr) {
   int dx = abs(x2 - x1);
   int dy = abs(y2 - y1);
   int sx = (x1 < x2) ? 1 : -1;
@@ -148,17 +148,17 @@ void drawLine(int x1, int y1, int x2, int y2, unsigned char attr) {
   }
 }
 
-void drawCircle(int x0, int y0, int radius, unsigned char attr, int fill) {
+void draw_circle(int x0, int y0, int radius, unsigned char attr, int fill) {
   int x = radius;
   int y = 0;
   int err = 0;
 
   while (x >= y) {
     if (fill) {
-      drawLine(x0 - y, y0 + x, x0 + y, y0 + x, attr);
-      drawLine(x0 - x, y0 + y, x0 + x, y0 + y, attr);
-      drawLine(x0 - x, y0 - y, x0 + x, y0 - y, attr);
-      drawLine(x0 - y, y0 - x, x0 + y, y0 - x, attr);
+      draw_line(x0 - y, y0 + x, x0 + y, y0 + x, attr);
+      draw_line(x0 - x, y0 + y, x0 + x, y0 + y, attr);
+      draw_line(x0 - x, y0 - y, x0 + x, y0 - y, attr);
+      draw_line(x0 - y, y0 - x, x0 + y, y0 - x, attr);
     }
     y++;
     err += 1 + 2 * y;
@@ -169,7 +169,7 @@ void drawCircle(int x0, int y0, int radius, unsigned char attr, int fill) {
   }
 }
 
-void drawChar(unsigned char ch, int x, int y, unsigned int attr, int zoom) {
+void draw_char(unsigned char ch, int x, int y, unsigned int attr, int zoom) {
   unsigned char *glyph =
       (unsigned char *)&font + (ch < FONT_NUMGLYPHS ? ch : 0) * FONT_BPG;
 
@@ -184,7 +184,7 @@ void drawChar(unsigned char ch, int x, int y, unsigned int attr, int zoom) {
   }
 }
 
-void drawString(int x, int y, char *str, unsigned int attr, int zoom) {
+void draw_string(int x, int y, char *str, unsigned int attr, int zoom) {
   while (*str) {
     if (*str == '\r') {
       x = 0;
@@ -192,15 +192,15 @@ void drawString(int x, int y, char *str, unsigned int attr, int zoom) {
       x = 0;
       y += (FONT_HEIGHT * zoom);
     } else {
-      drawChar(*str, x, y, attr, zoom);
+      draw_char(*str, x, y, attr, zoom);
       x += (FONT_WIDTH * zoom);
     }
     str++;
   }
 }
 
-void moveRect(int x, int y, int width, int height, int xoff, int yoff,
-              unsigned char attr) {
-  drawRect(x, y, x + width, y + height, 0, 1);
-  drawRect(x + xoff, y + yoff, x + width + xoff, y + height + yoff, attr, 1);
+void move_rect(int x, int y, int width, int height, int xoff, int yoff,
+               unsigned char attr) {
+  draw_rect(x, y, x + width, y + height, 0, 1);
+  draw_rect(x + xoff, y + yoff, x + width + xoff, y + height + yoff, attr, 1);
 }

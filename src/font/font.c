@@ -268,12 +268,12 @@ void displayFont(int screen_width, int screen_height, int image_width,
   // Clear the screen or framebuffer here
   clearFramebuffer(screen_width, screen_height);
   // Draw the text on the screen "Linh"
-  drawString(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 100, "Do Phuong Linh",
-             0x00FF0000, 2);
-  drawString(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 100 + 50,
-             "Vo Hoang Phuc", 0x0000FF00, 2);
-  drawString(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 100 + 100,
-             "Le Duy Quang", 0x000000FF, 2);
-  drawString(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 100 + 150,
-             "Tran Thanh Tung", 0x00FFFF00, 2);
+  draw_string(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 100, "Do Phuong Linh",
+              0x00FF0000, 2);
+  draw_string(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 100 + 50,
+              "Vo Hoang Phuc", 0x0000FF00, 2);
+  draw_string(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 100 + 100,
+              "Le Duy Quang", 0x000000FF, 2);
+  draw_string(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 100 + 150,
+              "Tran Thanh Tung", 0x00FFFF00, 2);
 }

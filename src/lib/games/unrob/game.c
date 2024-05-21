@@ -41,8 +41,8 @@ void spawnPlayer() {
 }
 
 void start_unrob_game() {
-  displayImage(SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT,
-               gameMap_bitmap_map1);
+  display_image(SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT,
+                gameMap_bitmap_map1);
   spawnPlayer();
 }
 
@@ -129,8 +129,8 @@ void movePlayer(char key) {
   uart_puts("\n");
 
   // Clear the entire framebuffer and redraw the map
-  displayImage(SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT,
-               gameMap_bitmap_map1);
+  display_image(SCREEN_GAME_WIDTH, SCREEN_GAME_HEIGHT, MAP_WIDTH, MAP_HEIGHT,
+                gameMap_bitmap_map1);
 
   // Draw the new position of the player
   drawRect(player->x, player->y, player->x + player->width,

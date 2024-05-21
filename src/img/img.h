@@ -10,8 +10,8 @@
 void clearFramebuffer(int width, int height);
 
 // Function prototype for displaying an image
-void displayImage(int screen_width, int screen_height, int image_width,
-                  int image_height, const unsigned long *image_data);
+void display_image(int screen_width, int screen_height, int image_width,
+                   int image_height, const unsigned long *image_data);
 void scrollImage(char key, int screen_width, int screen_height, int image_width,
                  int image_height, const unsigned long *image_data);
 

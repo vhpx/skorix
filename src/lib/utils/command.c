@@ -85,7 +85,7 @@ Command commands[] = {
     {
         "image",            // Name
         "Display an image", // Description
-        displayImage,       // Func
+        display_image,      // Func
     },
     {
         "video",           // Name
@@ -250,8 +250,8 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     uart_puts("d: right\n\n");
     uart_puts("Press Escape to exit Image Mode\n");
 
-    displayImage(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT,
-                 epd_bitmap_image);
+    display_image(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT,
+                  epd_bitmap_image);
     is_mode_image = 1;
     return 0;
   }

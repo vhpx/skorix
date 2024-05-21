@@ -58,11 +58,14 @@ void spawnPlayer() {
   // }
 }
 
+int selected_item = 0;
+
 void start_unrob_game() {
   display_image(MAP_WIDTH, MAP_HEIGHT, gameMap_bitmap_map1);
   // copy_rect(player_spawn_x, player_spawn_y, player_spawn_x + player->width,
   //           player_spawn_y + player->height, pre_player_movement_cache);
   spawnPlayer();
+  display_inventory(selected_item); 
 }
 
 // Function to move the player based on keyboard input
@@ -155,9 +158,9 @@ void movePlayer(char key) {
   // Draw the new position of the player
   draw_rect(player->x, player->y, player->x + player->width,
             player->y + player->height, 0x11, 1);
+
 }
 
-int selected_item = 0;
 void rotate_inventory(char key) {
     switch (key) {
         case 'q':  // Rotate left
@@ -178,10 +181,15 @@ void rotate_inventory(char key) {
             break;  // Do nothing if another key is pressed
     }
 
-    // Draw the inventory box (refresh the display)
-    draw_rect(WIDTH/2, HEIGHT/2 -200, ITEM_SIZE, ITEM_SIZE, 0x00, 1);
+  display_inventory(selected_item);  // Display the selected item in the inventory
+}
 
-    // Draw the selected item in the inventory box
-    draw_transparent_image(WIDTH/2, HEIGHT/2 -200, ITEM_SIZE,
-                           ITEM_SIZE, item_m1_allArray[selected_item]);
+void display_inventory(int selected_item) {
+    // display top right corner
+    draw_rect(0, 0, 110, 110, 0x00ffffff, 1);
+    draw_transparent_image(35, 35, ITEM_SIZE, ITEM_SIZE, item_m1_allArray[selected_item]);
+
+    //dispay on top of the player
+    // draw_rect(player->x-10, player->y-50, 110,110, 0x00ffffff, 1);
+    // draw_transparent_image(player->x, player->y - 50, ITEM_SIZE, ITEM_SIZE, item_m1_allArray[selected_item]);
 }

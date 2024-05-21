@@ -13,8 +13,8 @@ unsigned int width, height, pitch;
  * (declare as pointer of unsigned char to access each byte) */
 unsigned char *fb;
 
-void framebf_init(int physicalWidth, int physicalHeight, int virtualWidth,
-                  int virtualHeight) {
+void initialize_frame_buffer(int physicalWidth, int physicalHeight,
+                             int virtualWidth, int virtualHeight) {
   mBuf[0] = 35 * 4; // Length of message in bytes
   mBuf[1] = MBOX_REQUEST;
 

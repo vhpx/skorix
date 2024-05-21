@@ -2,8 +2,8 @@
 #ifndef __FRAMEBF_H__
 #define __FRAMEBF_H__
 
-void framebf_init(int physicalWidth, int physicalHeight, int virtualWidth,
-                  int virtualHeight);
+void initialize_frame_buffer(int physicalWidth, int physicalHeight,
+                             int virtualWidth, int virtualHeight);
 void draw_pixel_ARGB_32(int x, int y, unsigned int attr);
 void draw_rect_ARGB_32(int x1, int y1, int x2, int y2, unsigned int attr,
                        int fill);

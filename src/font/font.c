@@ -263,10 +263,11 @@ unsigned char font[FONT_NUMGLYPHS][FONT_BPG] = {
 void displayFont(int screen_width, int screen_height, int image_width,
                  int image_height) {
   // Initialize the framebuffer
-  framebf_init(screen_width, screen_height, image_width, image_height);
+  initialize_frame_buffer(screen_width, screen_height, image_width,
+                          image_height);
 
   // Clear the screen or framebuffer here
-  clearFramebuffer(screen_width, screen_height);
+  clear_frame_buffer(screen_width, screen_height);
   // Draw the text on the screen "Linh"
   draw_string(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 100, "Do Phuong Linh",
               0x00FF0000, 2);

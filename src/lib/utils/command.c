@@ -241,7 +241,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
   }
 
   if (strcmp(command_name, "image") == 0) {
-    clearFramebuffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+    clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
     uart_puts("\n---Entering Image Mode---\n\n");
     uart_puts("Key to move the camera:\n");
     uart_puts("w: up\n");
@@ -257,7 +257,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
   }
 
   if (strcmp(command_name, "video") == 0) {
-    clearFramebuffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+    clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
     uart_puts("\n---Entering Video Mode---\n\n");
     uart_puts("r: replay video\n\n");
     uart_puts("Press Escape to exit Video Mode\n");
@@ -267,7 +267,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
   }
 
   if (strcmp(command_name, "font") == 0) {
-    clearFramebuffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+    clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
     uart_puts("\n---Entering Font Mode---\n\n");
     uart_puts("Press Escape to exit Font Mode\n");
     displayFont(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT);

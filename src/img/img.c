@@ -8,7 +8,7 @@ int x_offset = 0;
 int y_offset = 0;
 const int scroll_step = 20; // step size
 
-void clearFramebuffer(int width, int height) {
+void clear_frame_buffer(int width, int height) {
   for (int y = 0; y < height; ++y) {
     for (int x = 0; x < width; ++x) {
       draw_pixel(x, y, 0x00000000); // Draw black or 0xFFFFFFFF for white
@@ -19,10 +19,11 @@ void clearFramebuffer(int width, int height) {
 void display_image(int screen_width, int screen_height, int image_width,
                    int image_height, const unsigned long *image_data) {
   // Initialize the framebuffer
-  framebf_init(screen_width, screen_height, image_width, image_height);
+  initialize_frame_buffer(screen_width, screen_height, image_width,
+                          image_height);
 
   // Clear the screen or framebuffer here
-  // clearFramebuffer(screen_width, screen_height); // You might need to
+  // clear_frame_buffer(screen_width, screen_height); // You might need to
   // implement this function based on your system.
 
   // Ensure offsets are within bounds
@@ -52,8 +53,9 @@ void display_image(int screen_width, int screen_height, int image_width,
   }
 }
 
-void scrollImage(char key, int screen_width, int screen_height, int image_width,
-                 int image_height, const unsigned long *image_data) {
+void scroll_image(char key, int screen_width, int screen_height,
+                  int image_width, int image_height,
+                  const unsigned long *image_data) {
   if (key == 'w')
     y_offset -= scroll_step; // scroll up
   if (key == 's')

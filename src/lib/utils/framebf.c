@@ -88,7 +88,7 @@ void framebf_init(int physicalWidth, int physicalHeight, int virtualWidth,
   }
 }
 
-void drawPixelARGB32(int x, int y, unsigned int attr) {
+void draw_pixelARGB32(int x, int y, unsigned int attr) {
   int offs = (y * pitch) + (COLOR_DEPTH / 8 * x);
   /* //Access and assign each byte
    *(fb + offs ) = (attr >> 0 ) & 0xFF; //BLUE (get the least significant byte)
@@ -105,14 +105,16 @@ void drawRectARGB32(int x1, int y1, int x2, int y2, unsigned int attr,
   for (int y = y1; y <= y2; y++) {
     for (int x = x1; x <= x2; x++) {
       if ((x == x1 || x == x2) || (y == y1 || y == y2))
-        drawPixelARGB32(x, y, attr);
+        draw_pixelARGB32(x, y, attr);
       else if (fill)
-        drawPixelARGB32(x, y, attr);
+        draw_pixelARGB32(x, y, attr);
     }
   }
 }
 
-void drawPixel(int x, int y, unsigned int attr) { drawPixelARGB32(x, y, attr); }
+void draw_pixel(int x, int y, unsigned int attr) {
+  draw_pixelARGB32(x, y, attr);
+}
 
 void drawRect(int x1, int y1, int x2, int y2, unsigned int attr, int fill) {
   drawRectARGB32(x1, y1, x2, y2, attr, fill);
@@ -126,7 +128,7 @@ void drawLine(int x1, int y1, int x2, int y2, unsigned char attr) {
   int err = dx - dy;
 
   while (1) {
-    drawPixel(x1, y1, attr);
+    draw_pixel(x1, y1, attr);
 
     if (x1 == x2 && y1 == y2) {
       break;
@@ -175,7 +177,7 @@ void drawChar(unsigned char ch, int x, int y, unsigned int attr, int zoom) {
     for (int j = 0; j < (FONT_WIDTH * zoom); j++) {
       unsigned char mask = 1 << (j / zoom);
       if (*glyph & mask) { // only draw pixels belong to the character glyph
-        drawPixel(x + j, y + i, attr);
+        draw_pixel(x + j, y + i, attr);
       }
     }
     glyph += (i % zoom) ? 0 : FONT_BPL;

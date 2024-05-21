@@ -11,7 +11,7 @@ const int scroll_step = 20; // step size
 void clearFramebuffer(int width, int height) {
   for (int y = 0; y < height; ++y) {
     for (int x = 0; x < width; ++x) {
-      drawPixel(x, y, 0x00000000); // Draw black or 0xFFFFFFFF for white
+      draw_pixel(x, y, 0x00000000); // Draw black or 0xFFFFFFFF for white
     }
   }
 }
@@ -47,7 +47,7 @@ void display_image(int screen_width, int screen_height, int image_width,
         break; // Ensure we don't read past the image buffer
 
       unsigned long pixel = image_data[imgY * image_width + imgX];
-      drawPixel(x, y, pixel); // Draw each pixel
+      draw_pixel(x, y, pixel); // Draw each pixel
     }
   }
 }

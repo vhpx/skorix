@@ -13,6 +13,11 @@
 #define MAP_SCALE_DIVIDER_WIDTH (MAP_WIDTH / MOVE_STEP)
 #define MAP_SCALE_DIVIDER_HEIGHT (MAP_HEIGHT / MOVE_STEP)
 
+#define GAME_TIME_ZOOM 3
+
 void start_unrob_game();
 void movePlayer(char key);
 void rotate_inventory(char key);
+
+void countdown(void);
+void draw_time(void);

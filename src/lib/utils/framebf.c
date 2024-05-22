@@ -164,30 +164,43 @@ void draw_rect(int x1, int y1, int x2, int y2, unsigned int attr, int fill) {
   draw_rect_ARGB_32(x1, y1, x2, y2, attr, fill);
 }
 
-void draw_line(int x1, int y1, int x2, int y2, unsigned char attr) {
+void draw_line(int x1, int y1, int x2, int y2, unsigned int attr,
+               int lineWidth) {
   int dx = abs(x2 - x1);
   int dy = abs(y2 - y1);
   int sx = (x1 < x2) ? 1 : -1;
   int sy = (y1 < y2) ? 1 : -1;
   int err = dx - dy;
 
-  while (1) {
-    draw_pixel(x1, y1, attr);
+  for (int i = 0; i < lineWidth; i++) {
+    int nx1 = x1, ny1 = y1, nx2 = x2, ny2 = y2;
 
-    if (x1 == x2 && y1 == y2) {
-      break;
+    if (dx > dy) {
+      ny1 -= i;
+      ny2 -= i;
+    } else {
+      nx1 -= i;
+      nx2 -= i;
     }
 
-    int e2 = 2 * err;
+    while (1) {
+      draw_pixel(nx1, ny1, attr);
 
-    if (e2 > -dy) {
-      err -= dy;
-      x1 += sx;
-    }
+      if (nx1 == nx2 && ny1 == ny2) {
+        break;
+      }
 
-    if (e2 < dx) {
-      err += dx;
-      y1 += sy;
+      int e2 = 2 * err;
+
+      if (e2 > -dy) {
+        err -= dy;
+        nx1 += sx;
+      }
+
+      if (e2 < dx) {
+        err += dx;
+        ny1 += sy;
+      }
     }
   }
 }
@@ -199,10 +212,10 @@ void draw_circle(int x0, int y0, int radius, unsigned char attr, int fill) {
 
   while (x >= y) {
     if (fill) {
-      draw_line(x0 - y, y0 + x, x0 + y, y0 + x, attr);
-      draw_line(x0 - x, y0 + y, x0 + x, y0 + y, attr);
-      draw_line(x0 - x, y0 - y, x0 + x, y0 - y, attr);
-      draw_line(x0 - y, y0 - x, x0 + y, y0 - x, attr);
+      draw_line(x0 - y, y0 + x, x0 + y, y0 + x, attr, 1);
+      draw_line(x0 - x, y0 + y, x0 + x, y0 + y, attr, 1);
+      draw_line(x0 - x, y0 - y, x0 + x, y0 - y, attr, 1);
+      draw_line(x0 - y, y0 - x, x0 + y, y0 - x, attr, 1);
     }
     y++;
     err += 1 + 2 * y;

@@ -12,35 +12,67 @@
 #include "../engine/item.h"
 #include "../engine/map-bitmap.h"
 
-#define PLAYER_WIDTH 40
-#define PLAYER_HEIGHT 40
-
 struct Object {
   unsigned int type;
-  unsigned int x;
-  unsigned int y;
+  Position position;
   unsigned int width;
   unsigned int height;
   unsigned int alive;
 };
 
-enum { OBJ_NONE = 0, OBJ_BRICK = 1, OBJ_PADDLE = 2, OBJ_BALL = 3 };
+enum { OBJ_NONE = 0, OBJ_PLAYER = 1 };
 
 unsigned int unrob_numobjs = 0;
 struct Object unrob_objects[MAX_GENGINE_ENTITIES];
 struct Object *player;
 unsigned long pre_player_movement_cache[2000];
 
-const int PLAYER_SPAWN_X = (SCREEN_WIDTH - PLAYER_WIDTH) / 2;
-const int PLAYER_SPAWN_Y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT) - 20;
+const Position PLAYER_SPAWN = {.x = (SCREEN_WIDTH - PLAYER_WIDTH) / 2,
+                               .y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT) -
+                                    20};
 
 unsigned long background_cache_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 unsigned long player_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 
+Position map_wall_boundaries[] = {
+    {.x = 105, .y = 145}, {.x = 105, .y = 305}, {.x = 155, .y = 305},
+    {.x = 155, .y = 425}, {.x = 95, .y = 425},  {.x = 95, .y = 635},
+    {.x = 155, .y = 635}, {.x = 155, .y = 755}, {.x = 105, .y = 755},
+    {.x = 105, .y = 865}, {.x = 215, .y = 865}, {.x = 215, .y = 795},
+    {.x = 285, .y = 795}, {.x = 285, .y = 865}, {.x = 425, .y = 865},
+    {.x = 425, .y = 745}, {.x = 465, .y = 745}, {.x = 465, .y = 805},
+    {.x = 465, .y = 805}, {.x = 465, .y = 995}, {.x = 535, .y = 995},
+    {.x = 535, .y = 935}, {.x = 545, .y = 935}, {.x = 545, .y = 805},
+    {.x = 555, .y = 805}, {.x = 555, .y = 745}, {.x = 585, .y = 745},
+    {.x = 585, .y = 865}, {.x = 905, .y = 865}, {.x = 905, .y = 745},
+    {.x = 855, .y = 745}, {.x = 855, .y = 635}, {.x = 915, .y = 635},
+    {.x = 915, .y = 425}, {.x = 855, .y = 425}, {.x = 855, .y = 305},
+    {.x = 905, .y = 305}, {.x = 905, .y = 145}, {.x = 805, .y = 145},
+    {.x = 805, .y = 205}, {.x = 755, .y = 205}, {.x = 755, .y = 145},
+    {.x = 685, .y = 145}, {.x = 685, .y = 205}, {.x = 565, .y = 205},
+    {.x = 565, .y = 225}, {.x = 455, .y = 225}, {.x = 455, .y = 215},
+    {.x = 375, .y = 215}, {.x = 375, .y = 145}, {.x = 315, .y = 145},
+    {.x = 315, .y = 215}, {.x = 205, .y = 215}, {.x = 205, .y = 145},
+    {.x = 105, .y = 145},
+};
+
+Position map_fountain_boundaries[] = {
+    {.x = 445, .y = 480}, {.x = 445, .y = 550}, {.x = 470, .y = 575},
+    {.x = 530, .y = 575}, {.x = 555, .y = 550}, {.x = 555, .y = 480},
+    {.x = 530, .y = 455}, {.x = 470, .y = 455},
+};
+
+Boundary map_boundaries[] = {
+    {.positions = map_wall_boundaries,
+     .num_positions = sizeof(map_wall_boundaries) / sizeof(Position)},
+    {.positions = map_fountain_boundaries,
+     .num_positions = sizeof(map_fountain_boundaries) / sizeof(Position)},
+};
+
 void initialize_game() {
-  unrob_objects[unrob_numobjs].type = OBJ_PADDLE;
-  unrob_objects[unrob_numobjs].x = PLAYER_SPAWN_X;
-  unrob_objects[unrob_numobjs].y = PLAYER_SPAWN_Y;
+  unrob_objects[unrob_numobjs].type = OBJ_PLAYER;
+  unrob_objects[unrob_numobjs].position.x = PLAYER_SPAWN.x;
+  unrob_objects[unrob_numobjs].position.y = PLAYER_SPAWN.y;
   unrob_objects[unrob_numobjs].width = PLAYER_WIDTH;
   unrob_objects[unrob_numobjs].height = PLAYER_HEIGHT;
   unrob_objects[unrob_numobjs].alive = 1;
@@ -55,6 +87,7 @@ void initialize_game() {
     print_rendered_pixels();
     uart_puts(" [DRAWN ITEM]");
   }
+
   // for(int i = 0; i < item_m2_allArray_LEN; i++) {//map 2
   //   draw_transparent_image(WIDTH/2 - (7*ITEM_SIZE)/2 + (i*ITEM_SIZE),
   //   HEIGHT/2 -150, ITEM_SIZE,
@@ -80,7 +113,7 @@ void initialize_buffers() {
   draw_rect_from_bitmap(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_map_1_bitmap);
 
   // Copy the initial portion of the background to the cache buffer
-  copy_rect(PLAYER_SPAWN_X, PLAYER_SPAWN_Y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
+  copy_rect(PLAYER_SPAWN.x, PLAYER_SPAWN.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
             PLAYER_HEIGHT, game_map_1_bitmap, background_cache_buffer);
 
   uart_puts("\nProcessed pixels: ");
@@ -88,7 +121,7 @@ void initialize_buffers() {
   uart_puts(" [DRAWN MAP]");
 
   // Display the player sprite
-  draw_rect_from_bitmap(PLAYER_SPAWN_X, PLAYER_SPAWN_Y, PLAYER_WIDTH,
+  draw_rect_from_bitmap(PLAYER_SPAWN.x, PLAYER_SPAWN.y, PLAYER_WIDTH,
                         PLAYER_HEIGHT, player_sprite_buffer);
 
   uart_puts("\nProcessed pixels: ");
@@ -100,6 +133,10 @@ void start_unrob_game() {
   initialize_buffers();
   initialize_game();
   display_inventory(selected_item);
+  render_boundary(map_wall_boundaries,
+                  sizeof(map_wall_boundaries) / sizeof(Position));
+  render_boundary(map_fountain_boundaries,
+                  sizeof(map_fountain_boundaries) / sizeof(Position));
 
   game_time = 61;
   draw_time();
@@ -126,102 +163,18 @@ void draw_time(void) {
   draw_string(SCREEN_WIDTH -
                   strlen(game_time_str) * FONT_WIDTH * GAME_TIME_ZOOM,
               0, game_time_str, 0x00FFFFFF, GAME_TIME_ZOOM);
-  uart_puts("\nProcessed pixels: ");
-  print_rendered_pixels();
-  uart_puts(" [DRAWN TIME]");
+  // uart_puts("\nProcessed pixels: ");
+  // print_rendered_pixels();
+  // uart_puts(" [DRAWN TIME]");
 }
 
 void move_player(char key) {
   if (!player)
     return; // Ensure player object exists
 
-  int offsetX = 0, offsetY = 0;
-
-  switch (key) {
-  case 'w':
-    offsetY = -STEP_SIZE;
-    break;
-  case 's':
-    offsetY = STEP_SIZE;
-    break;
-  case 'a':
-    offsetX = -STEP_SIZE;
-    break;
-  case 'd':
-    offsetX = STEP_SIZE;
-    break;
-  default:
-    uart_puts("\nInvalid key.");
-    return; // Invalid key
-  }
-
-  int next_x = player->x + offsetX;
-  int next_y = player->y + offsetY;
-
-  // Boundary check
-  if (next_x < 0 || next_y < 0 || next_x + PLAYER_WIDTH > SCREEN_WIDTH ||
-      next_y + PLAYER_HEIGHT > SCREEN_HEIGHT) {
-    return; // Out of bounds
-  }
-
-  // Display position change
-  uart_puts("\n\nReceived key: ");
-  uart_sendc(key);
-
-  uart_puts("\nPlayer position: ");
-  uart_puts("(");
-  uart_dec(player->x);
-  uart_puts(", ");
-  uart_dec(player->y);
-  uart_puts(") -> (");
-  uart_dec(next_x);
-  uart_puts(", ");
-  uart_dec(next_y);
-  uart_puts(")\n");
-
-  // Calculate rectangular regions that need to be updated
-  int erase_x = player->x;
-  int erase_y = player->y;
-  int redraw_x = next_x;
-  int redraw_y = next_y;
-  int update_width = PLAYER_WIDTH;
-  int update_height = PLAYER_HEIGHT;
-
-  // Adjust regions if the player moved partially off-screen
-  if (erase_x < 0) {
-    erase_x = 0;
-    update_width += player->x;
-  }
-  if (erase_y < 0) {
-    erase_y = 0;
-    update_height += player->y;
-  }
-  if (redraw_x + PLAYER_WIDTH > SCREEN_WIDTH) {
-    update_width = SCREEN_WIDTH - redraw_x;
-  }
-  if (redraw_y + PLAYER_HEIGHT > SCREEN_HEIGHT) {
-    update_height = SCREEN_HEIGHT - redraw_y;
-  }
-
-  // Update only the necessary portions of the background and sprite
-  draw_rect_from_bitmap(erase_x, erase_y, update_width, update_height,
-                        background_cache_buffer);
-  uart_puts("\nProcessed pixels: ");
-  print_rendered_pixels();
-  uart_puts(" [ERASED PLAYER]");
-
-  copy_rect(redraw_x, redraw_y, 0, 0, SCREEN_WIDTH, update_width, update_height,
-            game_map_1_bitmap, background_cache_buffer);
-  draw_rect_from_bitmap(redraw_x, redraw_y, update_width, update_height,
-                        player_sprite_buffer);
-
-  uart_puts("\nProcessed pixels: ");
-  print_rendered_pixels();
-  uart_puts(" [REDRAWN PLAYER]");
-
-  // Update the player object's position
-  player->x = next_x;
-  player->y = next_y;
+  move_in_boundaries(map_boundaries, sizeof(map_boundaries) / sizeof(Boundary),
+                     key, &player->position, game_map_1_bitmap,
+                     background_cache_buffer, player_sprite_buffer);
 }
 
 void rotate_inventory(char key) {
@@ -262,7 +215,8 @@ void display_inventory(int selected_item) {
   uart_puts(" [DRAWN INVENTORY]");
 
   // dispay on top of the player
-  //  draw_rect(player->x-10, player->y-50, 110,110, 0x00ffffff, 1);
-  //  draw_transparent_image(player->x, player->y - 50, ITEM_SIZE, ITEM_SIZE,
+  //  draw_rect(player->position.x-10, player->position.y-50, 110,110,
+  //  0x00ffffff, 1); draw_transparent_image(player->position.x,
+  //  player->position.y - 50, ITEM_SIZE, ITEM_SIZE,
   //  item_m1_allArray[selected_item]);
 }

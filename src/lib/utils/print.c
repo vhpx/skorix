@@ -137,11 +137,26 @@ void print_os_info() {
 }
 
 void print_creator_info() {
-  print_row("Author", OS_INFO.creator.name, 0);
-  print_row("Email", OS_INFO.creator.email, 0);
-  print_row("Website", OS_INFO.creator.website, 1);
-  print_row("GitHub", OS_INFO.creator.github, 1);
-  print_row("LinkedIn", OS_INFO.creator.linkedin, 1);
+  for (int i = 0; i < sizeof(OS_INFO.creators) / sizeof(Creator); i++) {
+    if (!OS_INFO.creators[i].name || *OS_INFO.creators[i].name == '\0' ||
+        strlen(OS_INFO.creators[i].name) == 0) {
+      break;
+    }
+
+    char creator[MAX_STR_LENGTH];
+    char index[3];
+    int2str(i + 1, index);
+
+    append_str(creator, "Contributer ");
+    append_str(creator, index);
+
+    print_row(creator, OS_INFO.creators[i].name, 0);
+    print_row("Email", OS_INFO.creators[i].email, 0);
+    print_divider(1);
+
+    clrstr(creator);
+    clrstr(index);
+  }
 }
 
 void print_system_info() {
@@ -154,7 +169,6 @@ void print_system_info() {
   print_os_info();
   print_divider(1);
   print_creator_info();
-  print_divider(1);
   new_line_with_color();
 }
 
@@ -179,7 +193,7 @@ void print_welcome_message() {
   print_divider(1);
   print_system_info();
 
-  uart_puts("Welcome to Skorix, a simple OS for the Raspberry Pi 3.\n");
+  uart_puts("Welcome to Skorix, a simple OS for the Raspberry Pi 3 & 4.\n");
   uart_puts("Type 'help' to see available commands.\n\n");
 }
 

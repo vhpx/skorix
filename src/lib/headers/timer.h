@@ -21,5 +21,7 @@
 
 void sys_timer1_init(void);
 void handle_sys_timer1(void);
+void sys_timer3_init(void);
+void handle_sys_timer3(void);
 
 #endif

@@ -9,17 +9,19 @@
 #include "../headers/config.h"
 #include "../headers/constants.h"
 #include "../headers/exception.h"
+#include "../headers/framebf.h"
 #include "../headers/interrupt.h"
 #include "../headers/print.h"
 #include "../headers/string.h"
 #include "../headers/timer.h"
 #include "../headers/uart0.h"
-#include "../headers/unrob.h"
 
 int is_mode_image = 0;
 int is_mode_video = 0;
 int is_mode_font = 0;
-int is_mode_game = 0;
+
+// TODO: Set back to 0 after the game is done
+int is_mode_game = 1;
 
 int cli() {
   static char cli_buffer[MAX_CMD_SIZE];
@@ -60,6 +62,13 @@ int run_cli() {
   sys_timer1_irq_enable();
   interrupt_enable();
 
+  // Initialize the frame buffer
+  initialize_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH,
+                          SCREEN_HEIGHT);
+
+  // TODO: Remove this after the game is done
+  start_unrob_game();
+
   // Start the CLI
   int status = 0;
   while (status != -1) {
@@ -81,8 +90,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
   // TODO: Add improved support for image scrolling
   if (is_mode_image) {
     if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
-      scroll_image(c, SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT,
-                   epd_bitmap_image);
+      scroll_image(c, IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);
     } else if (c == 27) { // escape key
       // exit all the modes
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -90,7 +98,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
     }
   } else if (is_mode_video) {
     if (c == 'r') {
-      displayVideo(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT);
+      display_video(IMAGE_WIDTH, IMAGE_HEIGHT);
     } else if (c == 27) { // escape key
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       is_mode_video = 0;
@@ -104,10 +112,18 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
 
   } else if (is_mode_game) {
     if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
-      movePlayer(c);
+      move_player(c);
+    } else if (c == 'q' || c == 'e') {
+      rotate_inventory(c);
     } else if (c == 27) { // escape key
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+      sys_timer3_irq_disable();
       is_mode_game = 0;
+    } else {
+      // Display position change
+      uart_puts("\n\nReceived invalid key: ");
+      uart_sendc(c);
+      uart_puts("\n");
     }
 
   } else if (c == '\b') {
@@ -239,7 +255,8 @@ int handle_newline(char *cli_buffer, int *index, int *past_cmd_index,
   // Save the command to the history
   save_command(cli_buffer, cmd_history, past_cmd_index);
   int has_cmd = execute_command(cli_buffer, cmd_history);
-  reset_console();
+  if (is_mode_game == 0)
+    reset_console();
 
   // Shutdown the system if the command is exit
   if (has_cmd == -1) {

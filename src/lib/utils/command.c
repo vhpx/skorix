@@ -4,7 +4,6 @@
 #include "../../img/img_src.h"
 #include "../../video/video.h"
 #include "../games/unrob/game.h"
-#include "../headers/breakout.h"
 #include "../headers/cli.h"
 #include "../headers/color.h"
 #include "../headers/config.h"
@@ -12,7 +11,6 @@
 #include "../headers/print.h"
 #include "../headers/string.h"
 #include "../headers/uart0.h"
-#include "../headers/unrob.h"
 
 Command commands[] = {
     {
@@ -90,7 +88,7 @@ Command commands[] = {
     {
         "video",           // Name
         "Display a video", // Description
-        displayVideo,      // Func
+        display_video,     // Func
     },
     {
         "font",           // Name
@@ -98,12 +96,11 @@ Command commands[] = {
         displayFont,      // Func
     },
     {
-        "play",        // Name
-        "Play a game", // Description
-        play_game,     // Func
-        {"p"},         // Aliases
-        {"play -g <game> | Available games:\n- unrob (ur)\n- breakout "
-         "(bk)"} // Usage
+        "play",                                             // Name
+        "Play a game",                                      // Description
+        play_game,                                          // Func
+        {"p"},                                              // Aliases
+        {"play -g <game> | Available games:\n- unrob (ur)"} // Usage
     },
 };
 
@@ -250,8 +247,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     uart_puts("d: right\n\n");
     uart_puts("Press Escape to exit Image Mode\n");
 
-    display_image(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT,
-                  epd_bitmap_image);
+    display_image(IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);
     is_mode_image = 1;
     return 0;
   }
@@ -261,7 +257,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     uart_puts("\n---Entering Video Mode---\n\n");
     uart_puts("r: replay video\n\n");
     uart_puts("Press Escape to exit Video Mode\n");
-    displayVideo(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT);
+    display_video(IMAGE_WIDTH, IMAGE_HEIGHT);
     is_mode_video = 1;
     return 0;
   }
@@ -270,7 +266,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
     uart_puts("\n---Entering Font Mode---\n\n");
     uart_puts("Press Escape to exit Font Mode\n");
-    displayFont(SCREEN_WIDTH, SCREEN_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT);
+    displayFont(IMAGE_WIDTH, IMAGE_HEIGHT);
     is_mode_font = 1;
     return 0;
   }
@@ -549,9 +545,6 @@ void play_game(Tag tags[MAX_CMD_ARGS]) {
       if (strcmp(tags[i].value, "unrob") == 0 ||
           strcmp(tags[i].value, "ur") == 0) {
         start_unrob_game();
-      } else if (strcmp(tags[i].value, "breakout") == 0 ||
-                 strcmp(tags[i].value, "bk") == 0) {
-        start_breakout_game();
       } else {
         uart_puts("\nInvalid game.\n");
         uart_puts("Available games: unrob (ur).\n\n");

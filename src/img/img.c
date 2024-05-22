@@ -1,5 +1,6 @@
 // this file is img.c
 #include "img.h"
+#include "../lib/headers/constants.h"
 #include "../lib/headers/framebf.h"
 #include "img_src.h"
 
@@ -16,14 +17,10 @@ void clear_frame_buffer(int width, int height) {
   }
 }
 
-void display_image(int screen_width, int screen_height, int image_width,
-                   int image_height, const unsigned long *image_data) {
-  // Initialize the framebuffer
-  initialize_frame_buffer(screen_width, screen_height, image_width,
-                          image_height);
-
+void display_image(int image_width, int image_height,
+                   const unsigned long *image_data) {
   // Clear the screen or framebuffer here
-  // clear_frame_buffer(screen_width, screen_height); // You might need to
+  // clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT); // You might need to
   // implement this function based on your system.
 
   // Ensure offsets are within bounds
@@ -31,18 +28,18 @@ void display_image(int screen_width, int screen_height, int image_width,
     x_offset = 0;
   if (y_offset < 0)
     y_offset = 0;
-  if (x_offset > image_width - screen_width)
-    x_offset = image_width - screen_width;
-  if (y_offset > image_height - screen_height)
-    y_offset = image_height - screen_height;
+  if (x_offset > image_width - SCREEN_WIDTH)
+    x_offset = image_width - SCREEN_WIDTH;
+  if (y_offset > image_height - SCREEN_HEIGHT)
+    y_offset = image_height - SCREEN_HEIGHT;
 
   // Render the image within the valid area
-  for (int y = 0; y < screen_height; ++y) {
+  for (int y = 0; y < SCREEN_HEIGHT; ++y) {
     int imgY = y + y_offset;
     if (imgY >= image_height) {
       break; // Ensure we don't read past the image buffer
     }
-    for (int x = 0; x < screen_width; ++x) {
+    for (int x = 0; x < SCREEN_WIDTH; ++x) {
       int imgX = x + x_offset;
       if (imgX >= image_width)
         break; // Ensure we don't read past the image buffer
@@ -53,8 +50,7 @@ void display_image(int screen_width, int screen_height, int image_width,
   }
 }
 
-void scroll_image(char key, int screen_width, int screen_height,
-                  int image_width, int image_height,
+void scroll_image(char key, int image_width, int image_height,
                   const unsigned long *image_data) {
   if (key == 'w')
     y_offset -= scroll_step; // scroll up
@@ -66,6 +62,5 @@ void scroll_image(char key, int screen_width, int screen_height,
     x_offset += scroll_step; // scroll right
 
   // redraw image
-  display_image(screen_width, screen_height, image_width, image_height,
-                image_data);
+  display_image(image_width, image_height, image_data);
 }

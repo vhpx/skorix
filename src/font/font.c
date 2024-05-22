@@ -1,6 +1,7 @@
 // This is font.c
 #include "../lib/headers/font.h"
 #include "../img/img.h"
+#include "../lib/headers/constants.h"
 #include "../lib/headers/framebf.h"
 
 unsigned char font[FONT_NUMGLYPHS][FONT_BPG] = {
@@ -260,14 +261,9 @@ unsigned char font[FONT_NUMGLYPHS][FONT_BPG] = {
 };
 
 /* Functions to display text on the screen */
-void displayFont(int screen_width, int screen_height, int image_width,
-                 int image_height) {
-  // Initialize the framebuffer
-  initialize_frame_buffer(screen_width, screen_height, image_width,
-                          image_height);
-
+void displayFont(int image_width, int image_height) {
   // Clear the screen or framebuffer here
-  clear_frame_buffer(screen_width, screen_height);
+  clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
   // Draw the text on the screen "Linh"
   draw_string(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 100, "Do Phuong Linh",
               0x00FF0000, 2);

@@ -19,7 +19,9 @@
 int is_mode_image = 0;
 int is_mode_video = 0;
 int is_mode_font = 0;
-int is_mode_game = 0;
+
+// TODO: Set back to 0 after the game is done
+int is_mode_game = 1;
 
 int cli() {
   static char cli_buffer[MAX_CMD_SIZE];
@@ -63,6 +65,9 @@ int run_cli() {
   // Initialize the frame buffer
   initialize_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH,
                           SCREEN_HEIGHT);
+
+  // TODO: Remove this after the game is done
+  start_unrob_game();
 
   // Start the CLI
   int status = 0;

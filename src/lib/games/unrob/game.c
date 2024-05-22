@@ -32,7 +32,7 @@ struct Object *player;
 unsigned long pre_player_movement_cache[2000];
 
 const int PLAYER_SPAWN_X = (SCREEN_WIDTH - PLAYER_WIDTH) / 2;
-const int PLAYER_SPAWN_Y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT);
+const int PLAYER_SPAWN_Y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT) - 20;
 
 unsigned long background_cache_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 unsigned long player_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
@@ -71,18 +71,17 @@ int selected_item = 0;
 unsigned int game_time = 0;
 char *game_time_str = "0:00";
 
-// Function to initialize background buffer and sprite buffer
 void initialize_buffers() {
-  // Copy the background to the cache buffer
-  copy_rect(PLAYER_SPAWN_X, PLAYER_SPAWN_Y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
-            PLAYER_HEIGHT, game_map_1_bitmap, background_cache_buffer);
-
   uart_puts("\n\nProcessed pixels: ");
   print_rendered_pixels();
   uart_puts(" [INITIALIZED UNROB GAME]");
 
   // Display the map
   draw_rect_from_bitmap(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_map_1_bitmap);
+
+  // Copy the initial portion of the background to the cache buffer
+  copy_rect(PLAYER_SPAWN_X, PLAYER_SPAWN_Y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
+            PLAYER_HEIGHT, game_map_1_bitmap, background_cache_buffer);
 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
@@ -132,29 +131,24 @@ void draw_time(void) {
   uart_puts(" [DRAWN TIME]");
 }
 
-// Function to move the player based on keyboard input
 void move_player(char key) {
   if (!player)
     return; // Ensure player object exists
 
-  int offsetX, offsetY;
+  int offsetX = 0, offsetY = 0;
 
   switch (key) {
   case 'w':
     offsetY = -STEP_SIZE;
-    offsetX = 0;
     break;
   case 's':
     offsetY = STEP_SIZE;
-    offsetX = 0;
     break;
   case 'a':
     offsetX = -STEP_SIZE;
-    offsetY = 0;
     break;
   case 'd':
     offsetX = STEP_SIZE;
-    offsetY = 0;
     break;
   default:
     uart_puts("\nInvalid key.");
@@ -163,6 +157,12 @@ void move_player(char key) {
 
   int next_x = player->x + offsetX;
   int next_y = player->y + offsetY;
+
+  // Boundary check
+  if (next_x < 0 || next_y < 0 || next_x + PLAYER_WIDTH > SCREEN_WIDTH ||
+      next_y + PLAYER_HEIGHT > SCREEN_HEIGHT) {
+    return; // Out of bounds
+  }
 
   // Display position change
   uart_puts("\n\nReceived key: ");
@@ -179,29 +179,47 @@ void move_player(char key) {
   uart_dec(next_y);
   uart_puts(")\n");
 
-  // TODO: Implement boundary and collision check
+  // Calculate rectangular regions that need to be updated
+  int erase_x = player->x;
+  int erase_y = player->y;
+  int redraw_x = next_x;
+  int redraw_y = next_y;
+  int update_width = PLAYER_WIDTH;
+  int update_height = PLAYER_HEIGHT;
 
-  // 1. Erase the old player position from the framebuffer
-  draw_rect_from_bitmap(player->x, player->y, PLAYER_WIDTH, PLAYER_HEIGHT,
+  // Adjust regions if the player moved partially off-screen
+  if (erase_x < 0) {
+    erase_x = 0;
+    update_width += player->x;
+  }
+  if (erase_y < 0) {
+    erase_y = 0;
+    update_height += player->y;
+  }
+  if (redraw_x + PLAYER_WIDTH > SCREEN_WIDTH) {
+    update_width = SCREEN_WIDTH - redraw_x;
+  }
+  if (redraw_y + PLAYER_HEIGHT > SCREEN_HEIGHT) {
+    update_height = SCREEN_HEIGHT - redraw_y;
+  }
+
+  // Update only the necessary portions of the background and sprite
+  draw_rect_from_bitmap(erase_x, erase_y, update_width, update_height,
                         background_cache_buffer);
-
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
   uart_puts(" [ERASED PLAYER]");
 
-  // 2. Update the necessary portion of the background cache
-  copy_rect(next_x, next_y, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
+  copy_rect(redraw_x, redraw_y, 0, 0, SCREEN_WIDTH, update_width, update_height,
             game_map_1_bitmap, background_cache_buffer);
-
-  // 3. Redraw the player at the new position
-  draw_rect_from_bitmap(next_x, next_y, PLAYER_WIDTH, PLAYER_HEIGHT,
+  draw_rect_from_bitmap(redraw_x, redraw_y, update_width, update_height,
                         player_sprite_buffer);
 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
   uart_puts(" [REDRAWN PLAYER]");
 
-  // 4. Update the player object's position
+  // Update the player object's position
   player->x = next_x;
   player->y = next_y;
 }

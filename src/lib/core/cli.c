@@ -16,10 +16,7 @@
 #include "../headers/timer.h"
 #include "../headers/uart0.h"
 
-int is_mode_image = 0;
-int is_mode_video = 0;
-int is_mode_font = 0;
-int is_mode_game = 0;
+int mode = CLI;
 
 int cli() {
   static char cli_buffer[MAX_CMD_SIZE];
@@ -83,29 +80,29 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
   int reset_past_cmd_index = 1;
 
   // TODO: Add improved support for image scrolling
-  if (is_mode_image) {
+  if (mode == IMAGE) {
     if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
       scroll_image(c, IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);
     } else if (c == 27) { // escape key
       // exit all the modes
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-      is_mode_image = 0;
+      mode = CLI;
     }
-  } else if (is_mode_video) {
+  } else if (mode == VIDEO) {
     if (c == 'r') {
       display_video(IMAGE_WIDTH, IMAGE_HEIGHT);
     } else if (c == 27) { // escape key
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-      is_mode_video = 0;
+      mode = CLI;
     }
 
-  } else if (is_mode_font) {
+  } else if (mode == FONT) {
     if (c == 27) { // escape key
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-      is_mode_font = 0;
+      mode = CLI;
     }
 
-  } else if (is_mode_game) {
+  } else if (mode == GAME) {
     if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
       move_player(c);
     } else if (c == 'q' || c == 'e') {
@@ -113,7 +110,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
     } else if (c == 27) { // escape key
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       sys_timer3_irq_disable();
-      is_mode_game = 0;
+      mode = CLI;
     } else {
       // Display position change
       uart_puts("\n\nReceived invalid key: ");
@@ -250,7 +247,7 @@ int handle_newline(char *cli_buffer, int *index, int *past_cmd_index,
   // Save the command to the history
   save_command(cli_buffer, cmd_history, past_cmd_index);
   int has_cmd = execute_command(cli_buffer, cmd_history);
-  if (is_mode_game == 0)
+  if (mode != GAME)
     reset_console();
 
   // Shutdown the system if the command is exit

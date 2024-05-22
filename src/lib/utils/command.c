@@ -250,7 +250,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     uart_puts("Press Escape to exit Image Mode\n");
 
     display_image(IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);
-    is_mode_image = 1;
+    mode = IMAGE;
     return 0;
   }
 
@@ -260,7 +260,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     uart_puts("r: replay video\n\n");
     uart_puts("Press Escape to exit Video Mode\n");
     display_video(IMAGE_WIDTH, IMAGE_HEIGHT);
-    is_mode_video = 1;
+    mode = VIDEO;
     return 0;
   }
 
@@ -269,7 +269,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     uart_puts("\n---Entering Font Mode---\n\n");
     uart_puts("Press Escape to exit Font Mode\n");
     displayFont(IMAGE_WIDTH, IMAGE_HEIGHT);
-    is_mode_font = 1;
+    mode = FONT;
     return 0;
   }
 
@@ -282,7 +282,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
       return 0;
     }
     play_game(tags); // used this later on
-    is_mode_game = 1;
+    mode = GAME;
     return 0;
   }
 

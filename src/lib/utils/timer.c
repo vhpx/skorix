@@ -41,7 +41,7 @@ void handle_sys_timer3(void) {
     TIMER_C3 = timer3_cmp;
     TIMER_CS |= TIMER_CS_M3;
 
-    if (is_mode_game) {
+    if (mode == GAME) {
         countdown();
     }
 }

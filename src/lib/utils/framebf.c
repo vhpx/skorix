@@ -123,8 +123,8 @@ void draw_transparent_pixel(int x, int y, unsigned int attr) {
   draw_pixel_ARGB_32(x, y, attr);
 }
 
-void draw_base_image(int x, int y, int width, int height, unsigned long *bitmap,
-                     int transparent) {
+void draw_base_image(int x, int y, int width, int height,
+                     const unsigned long *bitmap, int transparent) {
   for (int j = 0; j < height; j++) {
     for (int i = 0; i < width; i++) {
       // Calculate the offset for the bitmap pixel
@@ -140,12 +140,13 @@ void draw_base_image(int x, int y, int width, int height, unsigned long *bitmap,
   }
 }
 
-void draw_image(int x, int y, int width, int height, unsigned long *bitmap) {
+void draw_image(int x, int y, int width, int height,
+                const unsigned long *bitmap) {
   draw_base_image(x, y, width, height, bitmap, 0);
 }
 
 void draw_transparent_image(int x, int y, int width, int height,
-                            unsigned long *bitmap) {
+                            const unsigned long *bitmap) {
   draw_base_image(x, y, width, height, bitmap, 1);
 }
 

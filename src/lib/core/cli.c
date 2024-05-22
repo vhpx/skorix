@@ -15,7 +15,6 @@
 #include "../headers/string.h"
 #include "../headers/timer.h"
 #include "../headers/uart0.h"
-#include "../headers/unrob.h"
 
 int is_mode_image = 0;
 int is_mode_video = 0;
@@ -108,13 +107,18 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
 
   } else if (is_mode_game) {
     if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
-      movePlayer(c);
-    } else if(c == 'q' || c == 'e'){
+      move_player(c);
+    } else if (c == 'q' || c == 'e') {
       rotate_inventory(c);
     } else if (c == 27) { // escape key
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       sys_timer3_irq_disable();
       is_mode_game = 0;
+    } else {
+      // Display position change
+      uart_puts("\n\nReceived invalid key: ");
+      uart_sendc(c);
+      uart_puts("\n");
     }
 
   } else if (c == '\b') {
@@ -246,7 +250,8 @@ int handle_newline(char *cli_buffer, int *index, int *past_cmd_index,
   // Save the command to the history
   save_command(cli_buffer, cmd_history, past_cmd_index);
   int has_cmd = execute_command(cli_buffer, cmd_history);
-  reset_console();
+  if (is_mode_game == 0)
+    reset_console();
 
   // Shutdown the system if the command is exit
   if (has_cmd == -1) {

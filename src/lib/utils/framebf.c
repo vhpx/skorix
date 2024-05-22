@@ -13,6 +13,12 @@ unsigned int width, height, pitch;
  * (declare as pointer of unsigned char to access each byte) */
 unsigned char *fb;
 
+unsigned long long rendered_pixels = 0;
+
+long long get_rendered_pixels() { return rendered_pixels; }
+
+void print_rendered_pixels() { uart_dec(rendered_pixels); }
+
 void initialize_frame_buffer(int physicalWidth, int physicalHeight,
                              int virtualWidth, int virtualHeight) {
   mBuf[0] = 35 * 4; // Length of message in bytes
@@ -98,6 +104,10 @@ void draw_pixel_ARGB_32(int x, int y, unsigned int attr) {
    */
   // Access 32-bit together
   *((unsigned int *)(fb + offs)) = attr;
+
+  // TODO: Only for debugging
+  // Disable this for performance
+  rendered_pixels++;
 }
 
 void draw_rect_ARGB_32(int x1, int y1, int x2, int y2, unsigned int attr,
@@ -239,17 +249,19 @@ void move_rect(int x, int y, int width, int height, int xoff, int yoff,
   draw_rect(x + xoff, y + yoff, x + width + xoff, y + height + yoff, attr, 1);
 }
 
-void copy_rect(int srcX, int srcY, int width, int height, unsigned long *dest) {
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      // Calculate the offset for the source pixel
-      int srcOffs = ((srcY + y) * pitch) + (COLOR_DEPTH / 8 * (srcX + x));
+void copy_rect(int srcX, int srcY, int destX, int destY, int srcWidth,
+               int destWidth, int destHeight, const unsigned long *srcBitmap,
+               unsigned long *dest) {
+  for (int y = 0; y < destHeight; y++) {
+    for (int x = 0; x < destWidth; x++) {
+      // Calculate the offset for the source bitmap pixel
+      int srcOffs = ((srcY + y) * srcWidth) + (srcX + x);
 
-      // Calculate the offset for the destination pixel
-      int destOffs = (y * width) + x;
+      // Calculate the offset for the destination bitmap pixel
+      int destOffs = ((destY + y) * destWidth) + (destX + x);
 
-      // Copy the pixel from the source to the destination
-      dest[destOffs] = *((unsigned int *)(fb + srcOffs));
+      // Copy the pixel from the source bitmap to the destination
+      dest[destOffs] = srcBitmap[srcOffs];
     }
   }
 }
@@ -261,7 +273,7 @@ void draw_rect_from_bitmap(int x, int y, int width, int height,
       // Calculate the offset for the bitmap pixel
       int bitmapOffs = (j * width) + i;
       // Draw the pixel from the bitmap to the screen
-      draw_pixel_ARGB_32(x + i, y + j, bitmap[bitmapOffs]);
+      draw_pixel(x + i, y + j, bitmap[bitmapOffs]);
     }
   }
 }

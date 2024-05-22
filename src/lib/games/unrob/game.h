@@ -5,14 +5,14 @@
 #define VIRTWIDTH (WIDTH - (2 * MARGIN))
 #define ITEM_SIZE 40 // square
 
-#define MOVE_STEP 20
-#define MAP_SCALE_DIVIDER_WIDTH (SCREEN_WIDTH / MOVE_STEP)
-#define MAP_SCALE_DIVIDER_HEIGHT (SCREEN_HEIGHT / MOVE_STEP)
+#define STEP_SIZE 10
+#define MAP_SCALE_DIVIDER_WIDTH (SCREEN_WIDTH / STEP_SIZE)
+#define MAP_SCALE_DIVIDER_HEIGHT (SCREEN_HEIGHT / STEP_SIZE)
 
 #define GAME_TIME_ZOOM 3
 
 void start_unrob_game();
-void movePlayer(char key);
+void move_player(char key);
 void rotate_inventory(char key);
 void display_inventory(int selected_item);
 

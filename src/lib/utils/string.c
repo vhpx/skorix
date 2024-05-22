@@ -129,6 +129,36 @@ void int2str(int num, char *str) {
   reverse(str);
 }
 
+void ll2str(long long num, char *str) {
+  // If the number is 0, return "0"
+  if (num == 0) {
+    str[0] = '0';
+    str[1] = '\0';
+    return;
+  }
+
+  // Initialize the index to 0
+  int index = 0;
+  // Initialize the result to 0
+  long long result = num;
+
+  // Loop until the result is greater than 0
+  while (result > 0) {
+    // Get the last digit of the result
+    int digit = result % 10;
+    // Convert the digit to character
+    str[index] = digit + '0';
+    // Divide the result by 10
+    result = result / 10;
+    // Move to the next index
+    index++;
+  }
+  // Add a null character at the end of the string
+  str[index] = '\0';
+  // Reverse the string
+  reverse(str);
+}
+
 void reverse(char *str) {
   // Initialize the length of the string
   int len = strlen(str);

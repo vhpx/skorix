@@ -1,15 +1,14 @@
 // game.c
 #include "game.h"
-#include "../../../img/img.h"
 #include "../../headers/constants.h"
 #include "../../headers/font.h"
 #include "../../headers/framebf.h"
 #include "../../headers/gengine.h"
 #include "../../headers/interrupt.h"
+#include "../../headers/print.h"
 #include "../../headers/string.h"
 #include "../../headers/timer.h"
 #include "../../headers/uart0.h"
-#include "../../headers/unrob.h"
 #include "../engine/item.h"
 #include "../engine/map-bitmap.h"
 
@@ -32,20 +31,16 @@ struct Object unrob_objects[MAX_GENGINE_ENTITIES];
 struct Object *player;
 unsigned long pre_player_movement_cache[2000];
 
-int player_spawn_x = (SCREEN_WIDTH - PLAYER_WIDTH) / 2;
-int player_spawn_y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT);
+const int PLAYER_SPAWN_X = (SCREEN_WIDTH - PLAYER_WIDTH) / 2;
+const int PLAYER_SPAWN_Y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT);
 
-unsigned long
-    background_buffer[SCREEN_WIDTH * SCREEN_HEIGHT];       // Full-screen buffer
-unsigned long sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT]; // Player sprite
+unsigned long background_cache_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
+unsigned long player_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 
-void spawnPlayer() {
-  draw_rect(player_spawn_x, player_spawn_y, player_spawn_x + PLAYER_WIDTH,
-            (SCREEN_HEIGHT - MARGIN), 0x11, 1);
-
+void initialize_game() {
   unrob_objects[unrob_numobjs].type = OBJ_PADDLE;
-  unrob_objects[unrob_numobjs].x = player_spawn_x;
-  unrob_objects[unrob_numobjs].y = player_spawn_y;
+  unrob_objects[unrob_numobjs].x = PLAYER_SPAWN_X;
+  unrob_objects[unrob_numobjs].y = PLAYER_SPAWN_Y;
   unrob_objects[unrob_numobjs].width = PLAYER_WIDTH;
   unrob_objects[unrob_numobjs].height = PLAYER_HEIGHT;
   unrob_objects[unrob_numobjs].alive = 1;
@@ -56,6 +51,9 @@ void spawnPlayer() {
     draw_transparent_image(
         SCREEN_WIDTH / 2 - (7 * ITEM_SIZE) / 2 + (i * ITEM_SIZE),
         SCREEN_HEIGHT / 2 - 200, ITEM_SIZE, ITEM_SIZE, item_m1_allArray[i]);
+    uart_puts("\nProcessed pixels: ");
+    print_rendered_pixels();
+    uart_puts(" [DRAWN ITEM]");
   }
   // for(int i = 0; i < item_m2_allArray_LEN; i++) {//map 2
   //   draw_transparent_image(WIDTH/2 - (7*ITEM_SIZE)/2 + (i*ITEM_SIZE),
@@ -73,11 +71,35 @@ int selected_item = 0;
 unsigned int game_time = 0;
 char *game_time_str = "0:00";
 
+// Function to initialize background buffer and sprite buffer
+void initialize_buffers() {
+  // Copy the background to the cache buffer
+  copy_rect(PLAYER_SPAWN_X, PLAYER_SPAWN_Y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
+            PLAYER_HEIGHT, game_map_1_bitmap, background_cache_buffer);
+
+  uart_puts("\n\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" [INITIALIZED UNROB GAME]");
+
+  // Display the map
+  draw_rect_from_bitmap(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_map_1_bitmap);
+
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" [DRAWN MAP]");
+
+  // Display the player sprite
+  draw_rect_from_bitmap(PLAYER_SPAWN_X, PLAYER_SPAWN_Y, PLAYER_WIDTH,
+                        PLAYER_HEIGHT, player_sprite_buffer);
+
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" [DRAWN PLAYER]");
+}
+
 void start_unrob_game() {
-  display_image(SCREEN_WIDTH, SCREEN_HEIGHT, gameMap_bitmap_map1);
-  // copy_rect(player_spawn_x, player_spawn_y, player_spawn_x + player->width,
-  //           player_spawn_y + player->height, pre_player_movement_cache);
-  spawnPlayer();
+  initialize_buffers();
+  initialize_game();
   display_inventory(selected_item);
 
   game_time = 61;
@@ -105,98 +127,83 @@ void draw_time(void) {
   draw_string(SCREEN_WIDTH -
                   strlen(game_time_str) * FONT_WIDTH * GAME_TIME_ZOOM,
               0, game_time_str, 0x00FFFFFF, GAME_TIME_ZOOM);
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" [DRAWN TIME]");
 }
 
 // Function to move the player based on keyboard input
-void movePlayer(char key) {
+void move_player(char key) {
   if (!player)
     return; // Ensure player object exists
 
-  int prev_x = player->x;
-  int prev_y = player->y;
-  uart_puts("\n------------------------------\n");
+  int offsetX, offsetY;
 
   switch (key) {
-  case 'w': // Move up
-    uart_puts("\nMoving up to: \n");
-    uart_puts("position[");
-    uart_dec((player->y - MOVE_STEP) / MOVE_STEP);
-    uart_puts("][");
-    uart_dec(player->x / MOVE_STEP);
-    uart_puts("]");
-
-    // since the player is equal to 2 STEP_MOVE, we handle the all case for
-    // collision
-    // if (player->y - MOVE_STEP >= 0 && player->y != 0 &&
-    //     logical_map[(player->y - MOVE_STEP) / MOVE_STEP]
-    //                [player->x / MOVE_STEP] &&
-    //     logical_map[(player->y - MOVE_STEP) / MOVE_STEP]
-    //                [(player->x + MOVE_STEP) / MOVE_STEP])
-    player->y -= MOVE_STEP;
+  case 'w':
+    offsetY = -STEP_SIZE;
+    offsetX = 0;
     break;
-
-  case 's': // Move down
-    uart_puts("\nMoving down to: \n");
-    uart_puts("position[");
-    uart_dec((player->y + player->height + MOVE_STEP) / MOVE_STEP);
-    uart_puts("][");
-    uart_dec(player->x / MOVE_STEP);
-    uart_puts("]");
-
-    // if (player->y + player->height + MOVE_STEP <= SCREEN_GAME_HEIGHT &&
-    //     logical_map[(player->y + player->height) / MOVE_STEP]
-    //                [player->x / MOVE_STEP] &&
-    //     logical_map[(player->y + player->height) / MOVE_STEP]
-    //                [(player->x + MOVE_STEP) / MOVE_STEP])
-    player->y += MOVE_STEP;
+  case 's':
+    offsetY = STEP_SIZE;
+    offsetX = 0;
     break;
-
-  case 'a': // Move left
-    uart_puts("\nMoving left to: \n");
-    uart_puts("position[");
-    uart_dec(player->y / MOVE_STEP);
-    uart_puts("][");
-    uart_dec((player->x - MOVE_STEP) / MOVE_STEP);
-    uart_puts("]");
-
-    // if (player->x - MOVE_STEP >= 0 && player->x != 0 &&
-    //     logical_map[player->y / MOVE_STEP]
-    //                [(player->x - MOVE_STEP) / MOVE_STEP] &&
-    //     logical_map[(player->y + MOVE_STEP) / MOVE_STEP]
-    //                [(player->x - MOVE_STEP) / MOVE_STEP])
-    player->x -= MOVE_STEP;
+  case 'a':
+    offsetX = -STEP_SIZE;
+    offsetY = 0;
     break;
-
-  case 'd': // Move right
-    uart_puts("\nMoving right to: \n");
-    uart_puts("position[");
-    uart_dec((player->y) / MOVE_STEP);
-    uart_puts("][");
-    uart_dec((player->x + player->width) / MOVE_STEP);
-    uart_puts("]");
-
-    if (player->x + player->width <= SCREEN_WIDTH)
-      player->x += MOVE_STEP;
+  case 'd':
+    offsetX = STEP_SIZE;
+    offsetY = 0;
     break;
-
   default:
-    return; // If the key is not one of 'w', 's', 'a', or 'd', do nothing
+    uart_puts("\nInvalid key.");
+    return; // Invalid key
   }
 
-  uart_puts("\nPosition x: ");
+  int next_x = player->x + offsetX;
+  int next_y = player->y + offsetY;
+
+  // Display position change
+  uart_puts("\n\nReceived key: ");
+  uart_sendc(key);
+
+  uart_puts("\nPlayer position: ");
+  uart_puts("(");
   uart_dec(player->x);
-  uart_puts("\nPosition y: ");
+  uart_puts(", ");
   uart_dec(player->y);
-  uart_puts("\n");
+  uart_puts(") -> (");
+  uart_dec(next_x);
+  uart_puts(", ");
+  uart_dec(next_y);
+  uart_puts(")\n");
 
-  // Render player pre-movement cache from pre_player_movement_cache
-  display_image(SCREEN_WIDTH, SCREEN_HEIGHT, gameMap_bitmap_map1);
-  // draw_rect_from_bitmap(prev_x, prev_y, player->width, player->height,
-  //                       pre_player_movement_cache);
+  // TODO: Implement boundary and collision check
 
-  // Draw the new position of the player
-  draw_rect(player->x, player->y, player->x + player->width,
-            player->y + player->height, 0x11, 1);
+  // 1. Erase the old player position from the framebuffer
+  draw_rect_from_bitmap(player->x, player->y, PLAYER_WIDTH, PLAYER_HEIGHT,
+                        background_cache_buffer);
+
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" [ERASED PLAYER]");
+
+  // 2. Update the necessary portion of the background cache
+  copy_rect(next_x, next_y, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
+            game_map_1_bitmap, background_cache_buffer);
+
+  // 3. Redraw the player at the new position
+  draw_rect_from_bitmap(next_x, next_y, PLAYER_WIDTH, PLAYER_HEIGHT,
+                        player_sprite_buffer);
+
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" [REDRAWN PLAYER]");
+
+  // 4. Update the player object's position
+  player->x = next_x;
+  player->y = next_y;
 }
 
 void rotate_inventory(char key) {
@@ -232,6 +239,9 @@ void display_inventory(int selected_item) {
   draw_rect(0, 0, 110, 110, 0x00ffffff, 1);
   draw_transparent_image(35, 35, ITEM_SIZE, ITEM_SIZE,
                          item_m1_allArray[selected_item]);
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" [DRAWN INVENTORY]");
 
   // dispay on top of the player
   //  draw_rect(player->x-10, player->y-50, 110,110, 0x00ffffff, 1);

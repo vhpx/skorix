@@ -108,6 +108,8 @@ void interrupt_disable(void);
 // C functions
 void sys_timer1_irq_enable(void);
 void sys_timer1_irq_disable(void);
+void sys_timer3_irq_enable(void);
+void sys_timer3_irq_disable(void);
 void handle_irq_elx(void);
 
 #endif

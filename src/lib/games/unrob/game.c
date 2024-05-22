@@ -8,6 +8,10 @@
 #include "../../headers/unrob.h"
 #include "../engine/map-bitmap.h"
 #include "../engine/item.h"
+#include "../../headers/timer.h"
+#include "../../headers/interrupt.h"
+#include "../../headers/font.h"
+#include "../../headers/string.h"
 
 struct Object {
   unsigned int type;
@@ -15,7 +19,7 @@ struct Object {
   unsigned int y;
   unsigned int width;
   unsigned int height;
-  unsigned char alive;
+  unsigned int alive;
 };
 
 enum { OBJ_NONE = 0, OBJ_BRICK = 1, OBJ_PADDLE = 2, OBJ_BALL = 3 };
@@ -59,6 +63,8 @@ void spawnPlayer() {
 }
 
 int selected_item = 0;
+unsigned int game_time = 0;
+char* game_time_str = "0:00";
 
 void start_unrob_game() {
   display_image(MAP_WIDTH, MAP_HEIGHT, gameMap_bitmap_map1);
@@ -66,6 +72,29 @@ void start_unrob_game() {
   //           player_spawn_y + player->height, pre_player_movement_cache);
   spawnPlayer();
   display_inventory(selected_item); 
+
+  game_time = 61;
+  draw_time();
+  sys_timer3_init();
+  sys_timer3_irq_enable();
+}
+
+void countdown(void) {
+    if (game_time) {
+        game_time--;
+        draw_time();
+    } else {
+        // Game over?
+    }
+}
+
+void draw_time(void) {
+    game_time_str[0] = '0' + game_time / 60;
+    game_time_str[2] = '0' + (game_time % 60) / 10;
+    game_time_str[3] = '0' + (game_time % 60) % 10;
+    draw_rect_ARGB_32(SCREEN_GAME_WIDTH - strlen(game_time_str) * FONT_WIDTH * GAME_TIME_ZOOM - 1, 0, 
+                        SCREEN_GAME_WIDTH, FONT_HEIGHT * GAME_TIME_ZOOM, 0x00000000, 1);
+    draw_string(SCREEN_GAME_WIDTH - strlen(game_time_str) * FONT_WIDTH * GAME_TIME_ZOOM, 0, game_time_str, 0x00FFFFFF, GAME_TIME_ZOOM);
 }
 
 // Function to move the player based on keyboard input

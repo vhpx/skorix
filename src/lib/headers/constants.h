@@ -32,7 +32,7 @@ typedef struct {
   char *release_date;
   char *prefix;
   char *logo_mark;
-  Creator creator;
+  Creator creators[4];
 } OSInfo;
 
 extern OSInfo OS_INFO;

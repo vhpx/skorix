@@ -28,10 +28,9 @@ FONT_CFILES = $(wildcard $(FONT_DIR)/*.c)
 # Game Engine files
 GENGINE_LIB_CFILES = $(wildcard $(LIB_DIR)/games/engine/*.c)
 UNROB_GAME_LIB_CFILES = $(wildcard $(LIB_DIR)/games/unrob/*.c)
-BREAKOUT_GAME_LIB_CFILES = $(wildcard $(LIB_DIR)/games/breakout/*.c)
 
 # C System files
-CFILES = $(KERNEL_CFILES) $(CORE_LIB_CFILES) $(MBOX_LIB_CFILES) $(UTILS_LIB_CFILES) $(IMAGE_CFILES) $(VIDEO_CFILES) $(FONT_CFILES) $(GENGINE_LIB_CFILES) $(UNROB_GAME_LIB_CFILES) $(BREAKOUT_GAME_LIB_CFILES)
+CFILES = $(KERNEL_CFILES) $(CORE_LIB_CFILES) $(MBOX_LIB_CFILES) $(UTILS_LIB_CFILES) $(IMAGE_CFILES) $(VIDEO_CFILES) $(FONT_CFILES) $(GENGINE_LIB_CFILES) $(UNROB_GAME_LIB_CFILES)
 OFILES = $(addprefix $(BUILD_DIR)/, $(notdir $(CFILES:%.c=%.o)))
 
 # Assembly System files
@@ -53,9 +52,11 @@ ifeq ($(OS), Windows_NT)
 	SHELL = cmd
 	RMIMG = if exist .\build\img_src.o del .\build\img_src.o
 	RMVIDEO = if exist .\build\video_src.o del .\build\video_src.o
+	RMMAP = if exist .\build\map-bitmap.o del .\build\map-bitmap.o
 else
 	RMIMG = rm -f ./build/img_src.o
 	RMVIDEO = rm -f ./build/video_src.o
+	RMMAP = rm -f ./build/map-bitmap.o
 endif
 
 #----------------------------------------
@@ -101,7 +102,7 @@ clean:
 	if exist .\src\build rmdir .\src\build /s /q
 
 #   Remove new build files (.\build)
-	for %%f in (.\build\*.o) do if not %%~nxf == video_src.o (if not %%~nxf == img_src.o del %%~f)
+	for %%f in (.\build\*.o) do if not %%~nxf == video_src.o (if not %%~nxf == img_src.o (if not %%~nxf == map-bitmap.o del %%~f))
 	if exist .\build\kernel\*.elf del .\build\kernel\*.elf
 	if exist .\build\images\*.img del .\build\images\*.img
 
@@ -110,7 +111,7 @@ clean_mac:
 	rm -rf ./src/build
 	
 #   Remove new build files (./build)
-	find -iwholename './build/*.o' -not -iname 'video_src.o' -not -iname 'img_src.o' -execdir rm {} \;
+	find -iwholename './build/*.o' -not -iname 'video_src.o' -not -iname 'img_src.o' -not -iname 'map-bitmap.o' -execdir rm {} \;
 	rm -f ./build/kernel/*.elf
 	rm -f ./build/images/*.img
 
@@ -119,6 +120,9 @@ clean_img:
 
 clean_video:
 	$(RMVIDEO)
+
+clean_map:
+	$(RMMAP)
 
 #----------------------------------------
 # Compilation & Linking
@@ -160,9 +164,6 @@ $(BUILD_DIR)/%.o: $(LIB_DIR)/games/engine/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.o: $(LIB_DIR)/games/unrob/%.c
-	$(CC) $(GCCFLAGS) -c $< -o $@
-
-$(BUILD_DIR)/%.o: $(LIB_DIR)/games/breakout/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@
 
 #----------------------------------------

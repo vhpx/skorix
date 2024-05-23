@@ -1,10 +1,10 @@
-//gengine-entity.h
+// gengine-entity.h
 #include "gengine-core.h"
 
 typedef struct {
   Position position;
   Size size;
-  Color color;
+  EntityColor color;
 } Entity;
 
 Entity create_entity(int x, int y, int width, int height, int r, int g, int b);

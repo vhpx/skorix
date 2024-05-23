@@ -21,6 +21,6 @@ typedef struct {
   int r;
   int g;
   int b;
-} Color;
+} EntityColor;
 
 #endif

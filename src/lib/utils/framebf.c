@@ -1,6 +1,8 @@
+#include "../headers/color.h"
 #include "../headers/font.h"
 #include "../headers/math.h"
 #include "../headers/mbox.h"
+#include "../headers/string.h"
 #include "../headers/uart0.h"
 
 // Use RGBA32 (32 bits for each pixel)
@@ -17,7 +19,30 @@ unsigned long long rendered_pixels = 0;
 
 long long get_rendered_pixels() { return rendered_pixels; }
 
-void print_rendered_pixels() { uart_dec(rendered_pixels); }
+void reset_rendered_pixels() { rendered_pixels = 0; }
+
+void print_rendered_pixels() {
+  char buffer[20];
+  format_num(rendered_pixels, buffer);
+  pad_str(buffer, 10, ' ');
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts(buffer);
+  uart_puts(COLOR.RESET);
+}
+
+void print_pixel_diff(unsigned long long start, char *message) {
+  char buffer[20];
+  format_num(rendered_pixels - start, buffer);
+  pad_str(buffer, 10, ' ');
+  uart_puts(COLOR.TEXT.GREEN);
+  uart_puts("+");
+  uart_puts(buffer);
+  uart_puts(COLOR.RESET);
+  uart_puts(" | ");
+  uart_puts(COLOR.TEXT.YELLOW);
+  uart_puts(message);
+  uart_puts(COLOR.RESET);
+}
 
 void initialize_frame_buffer(int physicalWidth, int physicalHeight,
                              int virtualWidth, int virtualHeight) {
@@ -280,7 +305,7 @@ void copy_rect(int srcX, int srcY, int destX, int destY, int srcWidth,
 }
 
 void draw_rect_from_bitmap(int x, int y, int width, int height,
-                           unsigned long *bitmap) {
+                           const unsigned long *bitmap) {
   for (int j = 0; j < height; j++) {
     for (int i = 0; i < width; i++) {
       // Calculate the offset for the bitmap pixel

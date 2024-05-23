@@ -1,5 +1,6 @@
 // game.c
 #include "game.h"
+#include "../../headers/color.h"
 #include "../../headers/constants.h"
 #include "../../headers/font.h"
 #include "../../headers/framebf.h"
@@ -11,6 +12,7 @@
 #include "../../headers/uart0.h"
 #include "../engine/item.h"
 #include "../engine/map-bitmap.h"
+
 
 struct Object {
   unsigned int type;
@@ -80,12 +82,15 @@ void initialize_game() {
   unrob_numobjs++;
 
   for (int i = 0; i < item_m1_allArray_LEN; i++) { // item map 1
+    long long prev_pixels = get_rendered_pixels();
+
     draw_transparent_image(
         SCREEN_WIDTH / 2 - (7 * ITEM_SIZE) / 2 + (i * ITEM_SIZE),
         SCREEN_HEIGHT / 2 - 200, ITEM_SIZE, ITEM_SIZE, item_m1_allArray[i]);
     uart_puts("\nProcessed pixels: ");
     print_rendered_pixels();
-    uart_puts(" [DRAWN ITEM]");
+    uart_puts(" | ");
+    print_pixel_diff(prev_pixels, "[DRAWN ITEM]");
   }
 
   // for(int i = 0; i < item_m2_allArray_LEN; i++) {//map 2
@@ -105,9 +110,12 @@ unsigned int game_time = 0;
 char *game_time_str = "0:00";
 
 void initialize_buffers() {
+  long long prev_pixels = get_rendered_pixels();
+
   uart_puts("\n\nProcessed pixels: ");
   print_rendered_pixels();
-  uart_puts(" [INITIALIZED UNROB GAME]");
+  uart_puts(" | ");
+  print_pixel_diff(prev_pixels, "[RESET RENDERED PIXELS]");
 
   // Display the map
   draw_rect_from_bitmap(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_map_1_bitmap);
@@ -118,7 +126,10 @@ void initialize_buffers() {
 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
-  uart_puts(" [DRAWN MAP]");
+  uart_puts(" | ");
+  print_pixel_diff(prev_pixels, "[DRAWN MAP]");
+
+  prev_pixels = get_rendered_pixels();
 
   // Display the player sprite
   draw_rect_from_bitmap(PLAYER_SPAWN.x, PLAYER_SPAWN.y, PLAYER_WIDTH,
@@ -126,10 +137,12 @@ void initialize_buffers() {
 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
-  uart_puts(" [DRAWN PLAYER]");
+  uart_puts(" | ");
+  print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
 }
 
 void start_unrob_game() {
+  reset_rendered_pixels();
   initialize_buffers();
   initialize_game();
   display_inventory(selected_item);
@@ -157,15 +170,20 @@ void draw_time(void) {
   game_time_str[0] = '0' + game_time / 60;
   game_time_str[2] = '0' + (game_time % 60) / 10;
   game_time_str[3] = '0' + (game_time % 60) % 10;
+
+  long long prev_pixels = get_rendered_pixels();
+
   draw_rect_ARGB_32(
       SCREEN_WIDTH - strlen(game_time_str) * FONT_WIDTH * GAME_TIME_ZOOM - 1, 0,
       SCREEN_WIDTH, FONT_HEIGHT * GAME_TIME_ZOOM, 0x00000000, 1);
   draw_string(SCREEN_WIDTH -
                   strlen(game_time_str) * FONT_WIDTH * GAME_TIME_ZOOM,
               0, game_time_str, 0x00FFFFFF, GAME_TIME_ZOOM);
-  // uart_puts("\nProcessed pixels: ");
-  // print_rendered_pixels();
-  // uart_puts(" [DRAWN TIME]");
+
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" | ");
+  print_pixel_diff(prev_pixels, "[DRAWN TIME]");
 }
 
 void move_player(char key) {
@@ -198,21 +216,30 @@ void rotate_inventory(char key) {
     break;
 
   default:
-    break; // Do nothing if another key is pressed
+    return; // Do nothing if another key is pressed
   }
+
+  uart_puts("\n\nReceived key: ");
+  uart_puts(COLOR.TEXT.BLUE);
+  char2upper(&key);
+  uart_sendc(key);
+  uart_puts(COLOR.RESET);
 
   // Display the selected item in the inventory
   display_inventory(selected_item);
 }
 
 void display_inventory(int selected_item) {
+  long long prev_pixels = get_rendered_pixels();
+
   // display top right corner
   draw_rect(0, 0, 110, 110, 0x00ffffff, 1);
   draw_transparent_image(35, 35, ITEM_SIZE, ITEM_SIZE,
                          item_m1_allArray[selected_item]);
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
-  uart_puts(" [DRAWN INVENTORY]");
+  uart_puts(" | ");
+  print_pixel_diff(prev_pixels, "[DRAWN INVENTORY]");
 
   // dispay on top of the player
   //  draw_rect(player->position.x-10, player->position.y-50, 110,110,

@@ -9,10 +9,17 @@ int strlen_no_color(const char *str);
 int str2int(char *str);
 void int2str(int num, char *str);
 void ll2str(long long num, char *str);
-void reverse(char *str);
+void reverse(char *str, int length);
 void append_str(char *str, char *new_str);
 void str_auto_newline(char *str, int max_length, char *starts_with,
                       char *ends_with, int required_length);
 int has_prefix(char *str, char *prefix);
 void strncat(char *dest, const char *src, int n);
 void clrstr(char *str);
+void format_num(long long num, char *str);
+void pad_str(char *str, int length, char pad_char);
+void char2lower(char *c);
+void char2upper(char *c);
+void str2lower(char *str);
+void str2upper(char *str);
+void center_text(char *str);

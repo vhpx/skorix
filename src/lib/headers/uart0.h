@@ -106,22 +106,20 @@
 #define UART0_IMSC_FE (1 << 7)  /* FERIS = Framing Interrupt Raw Status */
 #define UART0_IMSC_RT (1 << 6)  /* RTRIS = Receivce Timeout Raw Status */
 #define UART0_IMSC_TX (1 << 5)  /* TXRIS = Transmit Interrupt Raw Status */
-#define UART0_IMSC_RX                                                          \
-  (1 << 4) /* RXRIS = Receive Masked Interrupt Raw Status                      \
-            */
+#define UART0_IMSC_RX (1 << 4)  /* RXRIS = Receive Masked Interrupt Raw Status */
 /*    3 = DSRRIS (unsupported) */
 /*    2 = DCDRIS (unsupported) */
 #define UART0_IMSC_CTS (1 << 1) /* CTSRIS = nUARTCTS Raw Status */
 /*    0 = RIRIS (unsupported) */
 #define UART0_RIS (*(volatile unsigned int *)(UART0_BASE + 0x3C))
 /* MIS = Masked Interrupt Status */
-/*   10 = OEMIS = Overrun Interrupt Masked Status */
-/*    9 = BEMIS = Break Interrupt Masked Status*/
-/*    8 = PEMIS = Parity Interrupt Masked Status */
-/*    7 = FEMIS = Framing Interrupt Masked Status */
-/*    6 = RTMIS = Receivce Timeout Masked Status */
-/*    5 = TXMIS = Transmit Interrupt Masked Status */
-/*    4 = RXMIS = Receive Masked Interrupt Masked Status */
+#define UART0_MIS_OE (1 << 10)  /*   10 = OEMIS = Overrun Interrupt Masked Status */
+#define UART0_MIS_BE (1 << 9)   /*    9 = BEMIS = Break Interrupt Masked Status*/
+#define UART0_MIS_PE (1 << 8)   /*    8 = PEMIS = Parity Interrupt Masked Status */
+#define UART0_MIS_FE (1 << 7)   /*    7 = FEMIS = Framing Interrupt Masked Status */
+#define UART0_MIS_RT (1 << 6)   /*    6 = RTMIS = Receivce Timeout Masked Status */
+#define UART0_MIS_TX (1 << 5)   /*    5 = TXMIS = Transmit Interrupt Masked Status */
+#define UART0_MIS_RX (1 << 4)   /*    4 = RXMIS = Receive Masked Interrupt Masked Status */
 /*    3 = DSRMIS (unsupported) */
 /*    2 = DCDMIS (unsupported) */
 /*    1 = CTSMIS = nUARTCTS Masked Status */

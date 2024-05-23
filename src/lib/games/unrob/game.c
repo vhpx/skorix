@@ -76,17 +76,17 @@ void initialize_game() {
   //   TODO: Actually fix this
   //   Probable cause: Unfinished unrob_objects initialization
   unrob_objects[unrob_numobjs].type = OBJ_PLAYER;
-  uart_puts("");
+  wait_msec(200);
   unrob_objects[unrob_numobjs].position.x = PLAYER_SPAWN.x;
-  uart_puts("");
+  wait_msec(200);
   unrob_objects[unrob_numobjs].position.y = PLAYER_SPAWN.y;
-  uart_puts("");
+  wait_msec(200);
   unrob_objects[unrob_numobjs].width = PLAYER_WIDTH;
-  uart_puts("");
+  wait_msec(200);
   unrob_objects[unrob_numobjs].height = PLAYER_HEIGHT;
-  uart_puts("");
+  wait_msec(200);
   unrob_objects[unrob_numobjs].alive = 1;
-  uart_puts("");
+  wait_msec(200);
   player = &unrob_objects[unrob_numobjs];
   unrob_numobjs++;
 

@@ -145,6 +145,9 @@ void print_creator_info() {
 
     char creator[MAX_STR_LENGTH];
     char index[3];
+
+    clrstr(creator);
+    clrstr(index);
     int2str(i + 1, index);
 
     append_str(creator, "Contributer ");
@@ -153,9 +156,6 @@ void print_creator_info() {
     print_row(creator, OS_INFO.creators[i].name, 0);
     print_row("Email", OS_INFO.creators[i].email, 0);
     print_divider(1);
-
-    clrstr(creator);
-    clrstr(index);
   }
 }
 

@@ -32,7 +32,7 @@ int cli(char c) {
       .size = -1,
   };
   // read and send back each char
-//   char c = uart_getc();
+  //   char c = uart_getc();
   int shutdown =
       handle_input(c, cli_buffer, &index, &past_cmd_index, &cmd_history,
                    pre_autofilled_cmd, post_autofilled_cmd);
@@ -67,24 +67,24 @@ int run_cli() {
   start_unrob_game();
 
   // Start the CLI
-//   int status = 0;
-//   while (status != -1) {
-//     status = cli();
+  //   int status = 0;
+  //   while (status != -1) {
+  //     status = cli();
 
-//     // Break if the status is -1
-//     if (status == -1)
-//       break;
-//   }
+  //     // Break if the status is -1
+  //     if (status == -1)
+  //       break;
+  //   }
 
-//   return status;
+  //   return status;
 
-    while (1) {
-        if (mode == SHUTDOWN) {
-            break;
-        }
+  while (1) {
+    if (mode == SHUTDOWN) {
+      break;
     }
+  }
 
-    return mode;
+  return mode;
 }
 
 int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
@@ -109,11 +109,11 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
         video_restart = 1;
       }
     } else if (c == 'p') {
-        if (video_pause) {
-            video_pause = 0;
-        } else {
-            video_pause = 1;
-        }
+      if (video_pause) {
+        video_pause = 0;
+      } else {
+        video_pause = 1;
+      }
     } else if (c == 27) { // escape key
       video_exit = 1;
       mode = CLI;
@@ -136,8 +136,12 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       mode = CLI;
     } else {
       // Display position change
+      uart_puts(COLOR.TEXT.RED);
       uart_puts("\n\nReceived invalid key: ");
+      uart_puts(COLOR.TEXT.BLUE);
+      char2upper(&c);
       uart_sendc(c);
+      uart_puts(COLOR.RESET);
       uart_puts("\n");
     }
 

@@ -126,7 +126,7 @@ void int2str(int num, char *str) {
   // Add a null character at the end of the string
   str[index] = '\0';
   // Reverse the string
-  reverse(str);
+  reverse(str, strlen(str));
 }
 
 void ll2str(long long num, char *str) {
@@ -156,18 +156,18 @@ void ll2str(long long num, char *str) {
   // Add a null character at the end of the string
   str[index] = '\0';
   // Reverse the string
-  reverse(str);
+  reverse(str, strlen(str));
 }
 
-void reverse(char *str) {
-  // Initialize the length of the string
-  int len = strlen(str);
-  // Loop until the middle of the string
-  for (int i = 0; i < len / 2; i++) {
-    // Swap the characters from start and end
-    char temp = str[i];
-    str[i] = str[len - i - 1];
-    str[len - i - 1] = temp;
+void reverse(char *str, int length) {
+  int start = 0;
+  int end = length - 1;
+  while (start < end) {
+    char temp = *(str + start);
+    *(str + start) = *(str + end);
+    *(str + end) = temp;
+    start++;
+    end--;
   }
 }
 
@@ -350,4 +350,119 @@ void clrstr(char *str) {
     // Add a null character at each index
     str[i] = '\0';
   }
+}
+
+int int_to_str(int x, char str[], int d) {
+  int i = 0;
+  while (x) {
+    str[i++] = (x % 10) + '0';
+    x = x / 10;
+  }
+
+  while (i < d)
+    str[i++] = '0';
+
+  reverse(str, i);
+  str[i] = '\0';
+  return i;
+}
+
+void format_num(long long num, char *str) {
+  // If the number is 0, return "0"
+  if (num == 0) {
+    str[0] = '0';
+    str[1] = '\0';
+    return;
+  }
+
+  // If the number is less than 1000, print as is
+  // If the number is less than 1 million, print with K suffix
+  // If the number is less than 1 billion, print with M suffix
+  // If the number is less than 1 trillion, print with B suffix
+
+  if (num < 1000) {
+    int_to_str(num, str, 0);
+  } else if (num < 1000000) {
+    int_to_str(num / 1000, str, 0);
+    int len = strlen(str);
+    str[len] = ',';
+    int_to_str(num % 1000, str + len + 1, 3);
+    str[strlen(str)] = 'K';
+  } else if (num < 1000000000) {
+    int_to_str(num / 1000000, str, 0);
+    int len = strlen(str);
+    str[len] = ',';
+    int_to_str((num % 1000000) / 1000, str + len + 1, 3);
+    str[strlen(str)] = 'M';
+  } else if (num < 1000000000000) {
+    int_to_str(num / 1000000000, str, 0);
+    int len = strlen(str);
+    str[len] = ',';
+    int_to_str((num % 1000000000) / 1000000, str + len + 1, 3);
+    str[strlen(str)] = 'B';
+  } else {
+    // Numbers larger than a trillion are not supported
+    str[0] = '\0';
+  }
+}
+
+void pad_str(char *str, int length, char pad_char) {
+  int len = strlen(str);
+  if (len < length) {
+    for (int i = len; i < length; i++) {
+      str[i] = pad_char;
+    }
+    str[length] = '\0';
+  }
+}
+
+void char2lower(char *c) {
+  // If the character is uppercase, convert it to lowercase
+  if (*c >= 'A' && *c <= 'Z') {
+    *c = *c + 32;
+  }
+}
+
+void char2upper(char *c) {
+  // If the character is lowercase, convert it to uppercase
+  if (*c >= 'a' && *c <= 'z') {
+    *c = *c - 32;
+  }
+}
+
+void str2lower(char *str) {
+  // Loop until the end of the string
+  while (*str) {
+    // Convert each character to lowercase
+    char2lower(str);
+    // Move to the next character
+    str++;
+  }
+}
+
+void str2upper(char *str) {
+  // Loop until the end of the string
+  while (*str) {
+    // Convert each character to uppercase
+    char2upper(str);
+    // Move to the next character
+    str++;
+  }
+}
+
+void center_text(char *str) {
+  // Calculate the length of the string
+  int len = strlen(str);
+  // Calculate the number of spaces to add before the string
+  int spaces = len / 2;
+  // Add the spaces before the string
+  for (int i = 0; i < spaces; i++) {
+    str[i] = ' ';
+  }
+  // Shift the string to the right
+  for (int i = 0; i < len; i++) {
+    str[i + spaces] = str[i];
+  }
+  // Add a null character at the end of the string
+  str[len + spaces] = '\0';
 }

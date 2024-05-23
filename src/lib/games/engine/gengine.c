@@ -1,8 +1,10 @@
 // gengine.c
 #include "../../headers/gengine.h"
+#include "../../headers/color.h"
 #include "../../headers/framebf.h"
 #include "../../headers/math.h"
 #include "../../headers/print.h"
+#include "../../headers/string.h"
 #include "../../headers/uart0.h"
 
 void render_boundary(Position *boundaries, int num_boundaries) {
@@ -57,7 +59,8 @@ int is_intersect(Position p1, Position q1, Position p2, Position q2) {
 }
 
 void move_in_boundaries(Boundary *boundaries, int num_boundaries, char key,
-                        Position *current_pos, unsigned long *game_map_bitmap,
+                        Position *current_pos,
+                        const unsigned long *game_map_bitmap,
                         unsigned long *background_cache_buffer,
                         unsigned long *player_sprite_buffer) {
   int offsetX = 0, offsetY = 0;
@@ -92,17 +95,28 @@ void move_in_boundaries(Boundary *boundaries, int num_boundaries, char key,
 
   // Display position change
   uart_puts("\n\nReceived key: ");
+  uart_puts(COLOR.TEXT.BLUE);
+  char2upper(&key);
   uart_sendc(key);
+  uart_puts(COLOR.RESET);
 
   uart_puts("\nPlayer position: ");
   uart_puts("(");
+  uart_puts(COLOR.TEXT.YELLOW);
   uart_dec(current_pos->x);
+  uart_puts(COLOR.RESET);
   uart_puts(", ");
+  uart_puts(COLOR.TEXT.YELLOW);
   uart_dec(current_pos->y);
+  uart_puts(COLOR.RESET);
   uart_puts(") -> (");
+  uart_puts(COLOR.TEXT.YELLOW);
   uart_dec(next_pos.x);
+  uart_puts(COLOR.RESET);
   uart_puts(", ");
+  uart_puts(COLOR.TEXT.YELLOW);
   uart_dec(next_pos.y);
+  uart_puts(COLOR.RESET);
   uart_puts(")\n");
 
   // Check intersections with boundaries
@@ -115,14 +129,25 @@ void move_in_boundaries(Boundary *boundaries, int num_boundaries, char key,
       for (int k = 0; k < 4; k++) {
         if (is_intersect(*current_pos, next_corners[k], boundary_start,
                          boundary_end)) {
-          uart_puts("Intersection detected with boundary: (");
+          uart_puts(COLOR.TEXT.RED);
+          uart_puts("Intersection detected with boundary");
+          uart_puts(COLOR.RESET);
+          uart_puts(": (");
+          uart_puts(COLOR.TEXT.YELLOW);
           uart_dec(boundary_start.x);
+          uart_puts(COLOR.RESET);
           uart_puts(", ");
+          uart_puts(COLOR.TEXT.YELLOW);
           uart_dec(boundary_start.y);
+          uart_puts(COLOR.RESET);
           uart_puts(") -> (");
+          uart_puts(COLOR.TEXT.YELLOW);
           uart_dec(boundary_end.x);
+          uart_puts(COLOR.RESET);
           uart_puts(", ");
+          uart_puts(COLOR.TEXT.YELLOW);
           uart_dec(boundary_end.y);
+          uart_puts(COLOR.RESET);
           uart_puts(")\n");
 
           return; // Intersection detected
@@ -144,23 +169,31 @@ void move_in_boundaries(Boundary *boundaries, int num_boundaries, char key,
     erase_x = 0;
     update_width += current_pos->x;
   }
+
   if (erase_y < 0) {
     erase_y = 0;
     update_height += current_pos->y;
   }
+
   if (redraw_x + PLAYER_WIDTH > SCREEN_WIDTH) {
     update_width = SCREEN_WIDTH - redraw_x;
   }
+
   if (redraw_y + PLAYER_HEIGHT > SCREEN_HEIGHT) {
     update_height = SCREEN_HEIGHT - redraw_y;
   }
+
+  long long prev_pixels = get_rendered_pixels();
 
   // Update only the necessary portions of the background and sprite
   draw_rect_from_bitmap(erase_x, erase_y, update_width, update_height,
                         background_cache_buffer);
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
-  uart_puts(" [ERASED PLAYER]");
+  uart_puts(" | ");
+  print_pixel_diff(prev_pixels, "[ERASED PLAYER]");
+
+  prev_pixels = get_rendered_pixels();
 
   copy_rect(redraw_x, redraw_y, 0, 0, SCREEN_WIDTH, update_width, update_height,
             game_map_bitmap, background_cache_buffer);
@@ -169,7 +202,10 @@ void move_in_boundaries(Boundary *boundaries, int num_boundaries, char key,
 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
-  uart_puts(" [REDRAWN PLAYER]");
+  uart_puts(" | ");
+  print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
+
+  prev_pixels = get_rendered_pixels();
 
   // Update player's current position
   current_pos->x = next_pos.x;

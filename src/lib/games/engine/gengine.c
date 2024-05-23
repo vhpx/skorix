@@ -27,8 +27,8 @@ void render_boundary(Position *boundaries, int num_boundaries) {
 // 0 --> p, q, and r are colinear
 // 1 --> Clockwise
 // 2 --> Counterclockwise
-int orientation(Position p, Position q, Position r) {
-  int val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+int orientation(const Position *p, const Position *q, const Position *r) {
+  int val = (q->y - p->y) * (r->x - q->x) - (q->x - p->x) * (r->y - q->y);
   if (val == 0)
     return 0;               // colinear
   return (val > 0) ? 1 : 2; // clock or counterclockwise
@@ -36,15 +36,15 @@ int orientation(Position p, Position q, Position r) {
 
 // Given three colinear points p, q, r, the function checks if
 // point q lies on the line segment 'pr'
-int on_segment(Position p, Position q, Position r) {
-  if (q.x <= max(p.x, r.x) && q.x >= min(p.x, r.x) && q.y <= max(p.y, r.y) &&
-      q.y >= min(p.y, r.y))
+int on_segment(const Position *p, const Position *q, const Position *r) {
+  if (q->x <= max(p->x, r->x) && q->x >= min(p->x, r->x) && q->y <= max(p->y, r->y) &&
+      q->y >= min(p->y, r->y))
     return true;
   return false;
 }
 
 // The function returns true if line segment 'p1q1' and 'p2q2' intersect.
-int is_intersect(Position p1, Position q1, Position p2, Position q2) {
+int is_intersect(const Position *p1, const Position *q1, const Position *p2, const Position *q2) {
   int o1 = orientation(p1, q1, p2);
   int o2 = orientation(p1, q1, q2);
   int o3 = orientation(p2, q2, p1);
@@ -129,31 +129,31 @@ void move_in_boundaries(Boundary *boundaries, int num_boundaries, char key,
   // Check intersections with boundaries
   for (int i = 0; i < num_boundaries; i++) {
     for (int j = 0; j < boundaries[i].num_positions; j++) {
-      Position boundary_start = boundaries[i].positions[j];
-      Position boundary_end =
-          boundaries[i].positions[(j + 1) % boundaries[i].num_positions];
+      Position *boundary_start = &boundaries[i].positions[j];
+      Position *boundary_end =
+          &boundaries[i].positions[(j + 1) % boundaries[i].num_positions];
 
       for (int k = 0; k < 4; k++) {
-        if (is_intersect(*current_pos, next_corners[k], boundary_start,
+        if (is_intersect(current_pos, &next_corners[k], boundary_start,
                          boundary_end)) {
           uart_puts(COLOR.TEXT.RED);
           uart_puts("Intersection detected with boundary");
           uart_puts(COLOR.RESET);
           uart_puts(": (");
           uart_puts(COLOR.TEXT.YELLOW);
-          uart_dec(boundary_start.x);
+          uart_dec(boundary_start->x);
           uart_puts(COLOR.RESET);
           uart_puts(", ");
           uart_puts(COLOR.TEXT.YELLOW);
-          uart_dec(boundary_start.y);
+          uart_dec(boundary_start->y);
           uart_puts(COLOR.RESET);
           uart_puts(") -> (");
           uart_puts(COLOR.TEXT.YELLOW);
-          uart_dec(boundary_end.x);
+          uart_dec(boundary_end->x);
           uart_puts(COLOR.RESET);
           uart_puts(", ");
           uart_puts(COLOR.TEXT.YELLOW);
-          uart_dec(boundary_end.y);
+          uart_dec(boundary_end->y);
           uart_puts(COLOR.RESET);
           uart_puts(")\n");
 

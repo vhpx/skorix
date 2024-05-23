@@ -1,18 +1,20 @@
 {
-  "files.associations": {
-    "*.rmd": "markdown",
-    "gpio.h": "c",
-    "uart0.h": "c",
-    "uart1.h": "c",
-    "cli.h": "c",
-    "string.h": "c",
-    "color.h": "c",
-    "config.h": "c",
-    "constants.h": "c",
-    "framebf.h": "c",
-    "img.h": "c",
-    "img_src.h": "c",
-    "video.h": "c",
-    "print.h": "c"
-  }
+    "files.associations": {
+        "*.ejs": "html",
+        "*.rmd": "markdown",
+        "gpio.h": "c",
+        "uart0.h": "c",
+        "uart1.h": "c",
+        "cli.h": "c",
+        "string.h": "c",
+        "color.h": "c",
+        "config.h": "c",
+        "constants.h": "c",
+        "framebf.h": "c",
+        "img.h": "c",
+        "img_src.h": "c",
+        "video.h": "c",
+        "print.h": "c",
+        "random": "c"
+    }
 }

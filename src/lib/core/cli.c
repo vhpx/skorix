@@ -18,7 +18,7 @@
 
 int mode = CLI;
 
-int cli() {
+int cli(char c) {
   static char cli_buffer[MAX_CMD_SIZE];
   static int index = 0;
 
@@ -31,7 +31,7 @@ int cli() {
       .size = -1,
   };
   // read and send back each char
-  char c = uart_getc();
+//   char c = uart_getc();
   int shutdown =
       handle_input(c, cli_buffer, &index, &past_cmd_index, &cmd_history,
                    pre_autofilled_cmd, post_autofilled_cmd);
@@ -55,6 +55,7 @@ int run_cli() {
   interrupt_init();
   sys_timer1_init();
   sys_timer1_irq_enable();
+  uart0_irq_enable();
   interrupt_enable();
 
   // Initialize the frame buffer
@@ -62,16 +63,24 @@ int run_cli() {
                           SCREEN_HEIGHT);
 
   // Start the CLI
-  int status = 0;
-  while (status != -1) {
-    status = cli();
+//   int status = 0;
+//   while (status != -1) {
+//     status = cli();
 
-    // Break if the status is -1
-    if (status == -1)
-      break;
-  }
+//     // Break if the status is -1
+//     if (status == -1)
+//       break;
+//   }
 
-  return status;
+//   return status;
+
+    while (1) {
+        if (mode == SHUTDOWN) {
+            break;
+        }
+    }
+
+    return mode;
 }
 
 int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
@@ -90,9 +99,19 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
     }
   } else if (mode == VIDEO) {
     if (c == 'r') {
-      display_video(IMAGE_WIDTH, IMAGE_HEIGHT);
+      if (video_end) {
+        display_video(IMAGE_WIDTH, IMAGE_HEIGHT);
+      } else {
+        video_restart = 1;
+      }
+    } else if (c == 'p') {
+        if (video_pause) {
+            video_pause = 0;
+        } else {
+            video_pause = 1;
+        }
     } else if (c == 27) { // escape key
-      clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+      video_exit = 1;
       mode = CLI;
     }
 

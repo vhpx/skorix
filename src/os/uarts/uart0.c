@@ -4,6 +4,7 @@
 #include "../../lib/headers/constants.h"
 #include "../../lib/headers/string.h"
 #include "../../lib/headers/utils.h"
+#include "../../lib/headers/cli.h"
 
 enum {
   AUX_BASE = MMIO_BASE + 0x215000,
@@ -136,6 +137,8 @@ void uart_init(int restart) {
 
   // Setup UART
   setup_uart();
+
+  UART0_IMSC |= UART0_IMSC_RX;
 
   // Display restart message
   if (restart == 1) {
@@ -275,4 +278,15 @@ void uart_loadOutputFifo() {
     uart_output_queue_read =
         (uart_output_queue_read + 1) & (UART_MAX_QUEUE - 1); // Don't overrun
   }
+}
+
+void handle_uart0(void) {
+    if (UART0_MIS & UART0_IMSC_RX) {
+        unsigned char c = (unsigned char)(UART0_DR);
+        c = (c == '\r' ? '\n' : c);
+
+        if (cli(c) == -1) {
+            mode = SHUTDOWN;
+        }
+    }
 }

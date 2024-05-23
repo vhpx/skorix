@@ -249,18 +249,20 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     uart_puts("d: right\n\n");
     uart_puts("Press Escape to exit Image Mode\n");
 
-    display_image(IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);
     mode = IMAGE;
+    display_image(IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);
     return 0;
   }
 
   if (strcmp(command_name, "video") == 0) {
     clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
     uart_puts("\n---Entering Video Mode---\n\n");
+    uart_puts("p: play/pause video\n");
     uart_puts("r: replay video\n\n");
     uart_puts("Press Escape to exit Video Mode\n");
-    display_video(IMAGE_WIDTH, IMAGE_HEIGHT);
+
     mode = VIDEO;
+    display_video(IMAGE_WIDTH, IMAGE_HEIGHT);
     return 0;
   }
 
@@ -268,8 +270,9 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
     uart_puts("\n---Entering Font Mode---\n\n");
     uart_puts("Press Escape to exit Font Mode\n");
-    displayFont(IMAGE_WIDTH, IMAGE_HEIGHT);
+
     mode = FONT;
+    displayFont(IMAGE_WIDTH, IMAGE_HEIGHT);
     return 0;
   }
 
@@ -281,8 +284,9 @@ int execute_command(char *input, CommandHistory *cmd_history) {
       uart_puts("Usage: play -g <game> | Available games: unrob (ur)\n\n");
       return 0;
     }
-    play_game(tags); // used this later on
+
     mode = GAME;
+    play_game(tags); // used this later on
     return 0;
   }
 
@@ -313,7 +317,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
   return 0;
 }
 
-void set_color(Tag *tags) {
+void set_color(Tag tags[MAX_CMD_ARGS]) {
   char text_color[10];
   char background_color[10];
 
@@ -412,7 +416,7 @@ void set_color(Tag *tags) {
   new_line_force_color(text_color, background_color);
 }
 
-void set_config(Tag *tags) {
+void set_config(Tag tags[MAX_CMD_ARGS]) {
   int config_changed = 0;
 
   // tag can be -b for baudrate, -d for databits, -p for parity, -s for

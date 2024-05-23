@@ -111,7 +111,7 @@ clean_mac:
 	rm -rf ./src/build
 	
 #   Remove new build files (./build)
-    find ./build -path '*.o' -not -iname 'video_src.o' -not -iname 'img_src.o' -not -iname 'map-bitmap.o' -exec rm {} \;
+	find ./build -path '*.o' -not -iname 'video_src.o' -not -iname 'img_src.o' -not -iname 'map-bitmap.o' -exec rm {} \;
 	rm -f ./build/kernel/*.elf
 	rm -f ./build/images/*.img
 

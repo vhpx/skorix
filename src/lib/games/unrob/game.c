@@ -13,6 +13,7 @@
 #include "../../headers/utils.h"
 #include "../engine/item.h"
 #include "../engine/map-bitmap.h"
+#include "../engine/player.h"
 
 struct Object {
   unsigned int type;
@@ -182,9 +183,15 @@ void draw_player() {
             PLAYER_WIDTH, PLAYER_HEIGHT, game_map_1_bitmap,
             background_cache_buffer);
 
+  copy_rect(0, 0, 0, 0, PLAYER_WIDTH,
+          PLAYER_WIDTH, PLAYER_HEIGHT, player_up,
+          player_sprite_buffer);          
+
   // Draw the player sprite
-  draw_rect_from_bitmap(player->position.x, player->position.y, PLAYER_WIDTH,
-                        PLAYER_HEIGHT, player_sprite_buffer);
+  // draw_rect_from_bitmap(player->position.x, player->position.y, PLAYER_WIDTH,
+  //                       PLAYER_HEIGHT, player_sprite_buffer);
+    draw_transparent_image(player->position.x, player->position.y, PLAYER_WIDTH, PLAYER_HEIGHT,
+                         player_sprite_buffer);
 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
@@ -215,6 +222,30 @@ void draw_time() {
 void move_player(char key) {
   if (!player)
     return; // Ensure player object exists
+  switch (key) {
+  case 'w':
+  copy_rect(0, 0, 0, 0, PLAYER_WIDTH,
+          PLAYER_WIDTH, PLAYER_HEIGHT, player_up,
+          player_sprite_buffer);       
+          break;
+  case 's':
+  copy_rect(0, 0, 0, 0, PLAYER_WIDTH,
+          PLAYER_WIDTH, PLAYER_HEIGHT, player_down,
+          player_sprite_buffer);       
+          break;
+  case 'a':
+  copy_rect(0, 0, 0, 0, PLAYER_WIDTH,
+          PLAYER_WIDTH, PLAYER_HEIGHT, player_left,
+          player_sprite_buffer);       
+          break;
+  case 'd':
+  copy_rect(0, 0, 0, 0, PLAYER_WIDTH,
+          PLAYER_WIDTH, PLAYER_HEIGHT, player_right,
+          player_sprite_buffer);       
+          break;
+  default:
+    return; // Do nothing if another key is pressed
+  }
 
   move_in_boundaries(map_boundaries, sizeof(map_boundaries) / sizeof(Boundary),
                      key, &player->position, game_map_1_bitmap,

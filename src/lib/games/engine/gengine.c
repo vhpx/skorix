@@ -204,7 +204,7 @@ void move_in_boundaries(Boundary *boundaries, int num_boundaries, char key,
 
   copy_rect(redraw_x, redraw_y, 0, 0, SCREEN_WIDTH, update_width, update_height,
             game_map_bitmap, background_cache_buffer);
-  draw_rect_from_bitmap(redraw_x, redraw_y, update_width, update_height,
+  draw_transparent_image(redraw_x, redraw_y, update_width, update_height,
                         player_sprite_buffer);
 
   uart_puts("\nProcessed pixels: ");

@@ -164,3 +164,4 @@ void uart_hex(unsigned int num);
 void uart_dec(int num);
 unsigned char uart_readByte();
 void uart_loadOutputFifo();
+void handle_uart0(void);

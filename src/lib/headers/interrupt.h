@@ -100,6 +100,8 @@
 #define SYS_TIMER_1_IRQ     (1 << 1)
 #define SYS_TIMER_3_IRQ     (1 << 3)
 
+#define UART_0_IRQ          (1 << 25)
+
 // Assembly functions
 void interrupt_init(void);
 void interrupt_enable(void);
@@ -110,6 +112,8 @@ void sys_timer1_irq_enable(void);
 void sys_timer1_irq_disable(void);
 void sys_timer3_irq_enable(void);
 void sys_timer3_irq_disable(void);
+void uart0_irq_enable(void);
+void uart0_irq_disable(void);
 void handle_irq_elx(void);
 
 #endif

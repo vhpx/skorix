@@ -16,14 +16,10 @@
 #include "../headers/timer.h"
 #include "../headers/uart0.h"
 
-int is_mode_image = 0;
-int is_mode_video = 0;
-int is_mode_font = 0;
+// TODO: Reset to CLI after the game is done
+int mode = GAME;
 
-// TODO: Set back to 0 after the game is done
-int is_mode_game = 1;
-
-int cli() {
+int cli(char c) {
   static char cli_buffer[MAX_CMD_SIZE];
   static int index = 0;
 
@@ -36,7 +32,7 @@ int cli() {
       .size = -1,
   };
   // read and send back each char
-  char c = uart_getc();
+//   char c = uart_getc();
   int shutdown =
       handle_input(c, cli_buffer, &index, &past_cmd_index, &cmd_history,
                    pre_autofilled_cmd, post_autofilled_cmd);
@@ -60,6 +56,7 @@ int run_cli() {
   interrupt_init();
   sys_timer1_init();
   sys_timer1_irq_enable();
+  uart0_irq_enable();
   interrupt_enable();
 
   // Initialize the frame buffer
@@ -70,16 +67,24 @@ int run_cli() {
   start_unrob_game();
 
   // Start the CLI
-  int status = 0;
-  while (status != -1) {
-    status = cli();
+//   int status = 0;
+//   while (status != -1) {
+//     status = cli();
 
-    // Break if the status is -1
-    if (status == -1)
-      break;
-  }
+//     // Break if the status is -1
+//     if (status == -1)
+//       break;
+//   }
 
-  return status;
+//   return status;
+
+    while (1) {
+        if (mode == SHUTDOWN) {
+            break;
+        }
+    }
+
+    return mode;
 }
 
 int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
@@ -88,29 +93,39 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
   int reset_past_cmd_index = 1;
 
   // TODO: Add improved support for image scrolling
-  if (is_mode_image) {
+  if (mode == IMAGE) {
     if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
       scroll_image(c, IMAGE_WIDTH, IMAGE_HEIGHT, epd_bitmap_image);
     } else if (c == 27) { // escape key
       // exit all the modes
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-      is_mode_image = 0;
+      mode = CLI;
     }
-  } else if (is_mode_video) {
+  } else if (mode == VIDEO) {
     if (c == 'r') {
-      display_video(IMAGE_WIDTH, IMAGE_HEIGHT);
+      if (video_end) {
+        display_video(IMAGE_WIDTH, IMAGE_HEIGHT);
+      } else {
+        video_restart = 1;
+      }
+    } else if (c == 'p') {
+        if (video_pause) {
+            video_pause = 0;
+        } else {
+            video_pause = 1;
+        }
     } else if (c == 27) { // escape key
-      clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-      is_mode_video = 0;
+      video_exit = 1;
+      mode = CLI;
     }
 
-  } else if (is_mode_font) {
+  } else if (mode == FONT) {
     if (c == 27) { // escape key
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-      is_mode_font = 0;
+      mode = CLI;
     }
 
-  } else if (is_mode_game) {
+  } else if (mode == GAME) {
     if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
       move_player(c);
     } else if (c == 'q' || c == 'e') {
@@ -118,7 +133,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
     } else if (c == 27) { // escape key
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       sys_timer3_irq_disable();
-      is_mode_game = 0;
+      mode = CLI;
     } else {
       // Display position change
       uart_puts("\n\nReceived invalid key: ");
@@ -255,7 +270,7 @@ int handle_newline(char *cli_buffer, int *index, int *past_cmd_index,
   // Save the command to the history
   save_command(cli_buffer, cmd_history, past_cmd_index);
   int has_cmd = execute_command(cli_buffer, cmd_history);
-  if (is_mode_game == 0)
+  if (mode != GAME)
     reset_console();
 
   // Shutdown the system if the command is exit

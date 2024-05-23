@@ -18,7 +18,7 @@
 
 #define PLAYER_WIDTH 42
 #define PLAYER_HEIGHT 60
-#define GENGINE_STEP_SIZE 10
+#define GENGINE_STEP_SIZE 20
 
 #ifndef __CONSTANTS_H__
 #define __CONSTANTS_H__

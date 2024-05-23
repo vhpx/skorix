@@ -21,3 +21,4 @@ int get_collision_debugger_status();
 
 void countdown(void);
 void draw_time(void);
+void draw_score(void);

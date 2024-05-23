@@ -116,7 +116,9 @@ void initialize_game() {
 
 int selected_item = 0;
 unsigned int game_time = 0;
-char *game_time_str = "0:00";
+unsigned int game_score = 0;
+char *game_time_str =  "Time: 0:00";
+char *game_score_str = "Score: 000";
 
 void initialize_buffers() {
   long long prev_pixels = get_rendered_pixels();
@@ -161,6 +163,8 @@ void start_unrob_game() {
   draw_time();
   sys_timer3_init();
   sys_timer3_irq_enable();
+
+  draw_score();
 }
 
 void countdown(void) {
@@ -199,9 +203,9 @@ void draw_player() {
 }
 
 void draw_time() {
-  game_time_str[0] = '0' + game_time / 60;
-  game_time_str[2] = '0' + (game_time % 60) / 10;
-  game_time_str[3] = '0' + (game_time % 60) % 10;
+  game_time_str[6] = '0' + game_time / 60;
+  game_time_str[8] = '0' + (game_time % 60) / 10;
+  game_time_str[9] = '0' + (game_time % 60) % 10;
 
   long long prev_pixels = get_rendered_pixels();
 
@@ -216,6 +220,25 @@ void draw_time() {
   print_rendered_pixels();
   uart_puts(" | ");
   print_pixel_diff(prev_pixels, "[DRAWN COUNTDOWN TIMER]");
+}
+
+void draw_score() {
+  game_score_str[7] = '0' + game_score / 100;
+  game_score_str[8] = '0' + (game_score / 10) % 10;
+  game_score_str[9] = '0' + game_score % 100;
+
+  long long prev_pixels = get_rendered_pixels();
+
+  draw_rect_ARGB_32(
+      SCREEN_WIDTH - strlen(game_score_str) * FONT_WIDTH * GAME_TIME_ZOOM - 1, FONT_HEIGHT * GAME_TIME_ZOOM,
+      SCREEN_WIDTH, (FONT_HEIGHT * GAME_TIME_ZOOM) * 2, 0x00000000, 1);
+  draw_string(SCREEN_WIDTH - strlen(game_score_str) * FONT_WIDTH * GAME_TIME_ZOOM,
+              FONT_HEIGHT * GAME_TIME_ZOOM, game_score_str, 0x00FFFFFF, GAME_TIME_ZOOM);
+
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" | ");
+  print_pixel_diff(prev_pixels, "[DRAWN SCORE]");
 }
 
 enum { UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3 };

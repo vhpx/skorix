@@ -16,7 +16,8 @@
 #include "../headers/timer.h"
 #include "../headers/uart0.h"
 
-int mode = CLI;
+// TODO: Reset to CLI after the game is done
+int mode = GAME;
 
 int cli(char c) {
   static char cli_buffer[MAX_CMD_SIZE];
@@ -61,6 +62,9 @@ int run_cli() {
   // Initialize the frame buffer
   initialize_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH,
                           SCREEN_HEIGHT);
+
+  // TODO: Remove this after the game is done
+  start_unrob_game();
 
   // Start the CLI
 //   int status = 0;

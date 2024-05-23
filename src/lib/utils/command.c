@@ -4,7 +4,6 @@
 #include "../../img/img_src.h"
 #include "../../video/video.h"
 #include "../games/unrob/game.h"
-#include "../headers/breakout.h"
 #include "../headers/cli.h"
 #include "../headers/color.h"
 #include "../headers/config.h"
@@ -97,12 +96,11 @@ Command commands[] = {
         displayFont,      // Func
     },
     {
-        "play",        // Name
-        "Play a game", // Description
-        play_game,     // Func
-        {"p"},         // Aliases
-        {"play -g <game> | Available games:\n- unrob (ur)\n- breakout "
-         "(bk)"} // Usage
+        "play",                                             // Name
+        "Play a game",                                      // Description
+        play_game,                                          // Func
+        {"p"},                                              // Aliases
+        {"play -g <game> | Available games:\n- unrob (ur)"} // Usage
     },
 };
 
@@ -551,9 +549,6 @@ void play_game(Tag tags[MAX_CMD_ARGS]) {
       if (strcmp(tags[i].value, "unrob") == 0 ||
           strcmp(tags[i].value, "ur") == 0) {
         start_unrob_game();
-      } else if (strcmp(tags[i].value, "breakout") == 0 ||
-                 strcmp(tags[i].value, "bk") == 0) {
-        start_breakout_game();
       } else {
         uart_puts("\nInvalid game.\n");
         uart_puts("Available games: unrob (ur).\n\n");

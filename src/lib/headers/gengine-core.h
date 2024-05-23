@@ -1,4 +1,4 @@
-//gengine-core.h
+// gengine-core.h
 #ifndef __GENGINE_CORE_H__
 #define __GENGINE_CORE_H__
 
@@ -6,6 +6,11 @@ typedef struct {
   int x;
   int y;
 } Position;
+
+typedef struct {
+  Position *positions;
+  int num_positions;
+} Boundary;
 
 typedef struct {
   int width;

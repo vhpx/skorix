@@ -1,3 +1,6 @@
+#define true 1
+#define false 0
+
 #define MAX_CMD_ALIAS 10
 #define MAX_CMD_USAGE 10
 #define MAX_CMD_ARGS 10
@@ -13,6 +16,10 @@
 #define MAX_GENGINE_MAPS 100
 #define MAX_GENGINE_MAP_ROWS 100
 #define MAX_GENGINE_MAP_COLUMNS 100
+
+#define PLAYER_WIDTH 40
+#define PLAYER_HEIGHT 40
+#define GENGINE_STEP_SIZE 10
 
 #ifndef __CONSTANTS_H__
 #define __CONSTANTS_H__

@@ -1,4 +1,4 @@
-//gengine.h
+// gengine.h
 #include "constants.h"
 #include "gengine-entity.h"
 #include "gengine-map.h"
@@ -13,6 +13,10 @@ struct Game {
   int num_maps;
 };
 
-void game_loop();
+void render_boundary(Position *boundaries, int num_boundaries);
+void move_in_boundaries(Boundary *boundaries, int num_boundaries, char key,
+                        Position *current_pos, unsigned long *game_map_bitmap,
+                        unsigned long *background_cache_buffer,
+                        unsigned long *player_sprite_buffer);
 
 #endif

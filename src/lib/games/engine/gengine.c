@@ -8,11 +8,18 @@
 #include "../../headers/uart0.h"
 
 void render_boundary(Position *boundaries, int num_boundaries) {
+  long long prev_pixels = get_rendered_pixels();
+
   for (int i = 0; i < num_boundaries; i++) {
     draw_line(boundaries[i].x, boundaries[i].y,
               boundaries[(i + 1) % num_boundaries].x,
               boundaries[(i + 1) % num_boundaries].y, 0xFF0000, 4);
   }
+
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" | ");
+  print_pixel_diff(prev_pixels, "[DRAWN COLLISION BOUNDARY]");
 }
 
 // Function to find the orientation of ordered triplet (p, q, r).

@@ -192,7 +192,7 @@ void draw_time() {
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
   uart_puts(" | ");
-  print_pixel_diff(prev_pixels, "[DRAWN TIME]");
+  print_pixel_diff(prev_pixels, "[DRAWN COUNTDOWN TIMER]");
 }
 
 void move_player(char key) {
@@ -268,13 +268,20 @@ void toggle_collision_debugger() {
     render_boundary(map_fountain_boundaries,
                     sizeof(map_fountain_boundaries) / sizeof(Position));
   } else {
+    long long prev_pixels = get_rendered_pixels();
+
     draw_rect_from_bitmap(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_map_1_bitmap);
+    uart_puts("\nProcessed pixels: ");
+    print_rendered_pixels();
+    uart_puts(" | ");
+    print_pixel_diff(prev_pixels, "[DRAWN MAP]");
+
     draw_player();
     draw_time();
     draw_inventory(selected_item);
 
     for (int i = 0; i < item_m1_allArray_LEN; i++) { // item map 1
-      long long prev_pixels = get_rendered_pixels();
+      prev_pixels = get_rendered_pixels();
 
       draw_transparent_image(
           SCREEN_WIDTH / 2 - (7 * ITEM_SIZE) / 2 + (i * ITEM_SIZE),

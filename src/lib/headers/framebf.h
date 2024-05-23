@@ -27,6 +27,9 @@ void copy_rect(int srcX, int srcY, int destX, int destY, int srcWidth,
                unsigned long *dest);
 void draw_rect_from_bitmap(int x, int y, int width, int height,
                            const unsigned long *bitmap);
+void draw_rect_from_bitmap_alpha(int x, int y, int width, int height,
+                                 const unsigned long *bitmap,
+                                 unsigned int attr);
 void draw_transparent_image(int x, int y, int width, int height,
                             const unsigned long *bitmap);
 

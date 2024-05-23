@@ -315,3 +315,46 @@ void draw_rect_from_bitmap(int x, int y, int width, int height,
     }
   }
 }
+
+void draw_rect_from_bitmap_alpha(int x, int y, int width, int height,
+                                 const unsigned long *bitmap,
+                                 unsigned char opacity) {
+  // Clamp opacity to valid range (0-255)
+  if (opacity > 255) {
+    opacity = 255;
+  }
+
+  for (int j = 0; j < height; j++) {
+    for (int i = 0; i < width; i++) {
+      int bitmapOffs = (j * width) + i;
+      unsigned long pixel = bitmap[bitmapOffs];
+
+      // Extract RGB components from the bitmap pixel
+      unsigned char red = (pixel >> 16) & 0xFF;
+      unsigned char green = (pixel >> 8) & 0xFF;
+      unsigned char blue = pixel & 0xFF;
+
+      // Get the existing background pixel from the framebuffer
+      int offs = (y + j) * pitch + (COLOR_DEPTH / 8) * (x + i);
+      unsigned long bgPixel = *((unsigned int *)(fb + offs));
+
+      // Extract RGB components from the background pixel
+      unsigned char bgRed = (bgPixel >> 16) & 0xFF;
+      unsigned char bgGreen = (bgPixel >> 8) & 0xFF;
+      unsigned char bgBlue = bgPixel & 0xFF;
+
+      // Blend the colors based on the fixed opacity
+      unsigned char newRed = (opacity * red + (255 - opacity) * bgRed) / 255;
+      unsigned char newGreen =
+          (opacity * green + (255 - opacity) * bgGreen) / 255;
+      unsigned char newBlue = (opacity * blue + (255 - opacity) * bgBlue) / 255;
+
+      // Combine the new RGB components with full opacity
+      unsigned int newPixel =
+          (255 << 24) | (newRed << 16) | (newGreen << 8) | newBlue;
+
+      // Draw the blended pixel
+      draw_pixel(x + i, y + j, newPixel);
+    }
+  }
+}

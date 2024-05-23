@@ -10,6 +10,7 @@
 #include "../../headers/string.h"
 #include "../../headers/timer.h"
 #include "../../headers/uart0.h"
+#include "../../headers/utils.h"
 #include "../engine/item.h"
 #include "../engine/map-bitmap.h"
 
@@ -117,7 +118,15 @@ void initialize_buffers() {
   print_pixel_diff(prev_pixels, "[RESET RENDERED PIXELS]");
 
   // Display the map
-  draw_rect_from_bitmap(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_map_1_bitmap);
+  draw_rect_from_bitmap_alpha(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
+                              game_map_1_bitmap, 50);
+  wait_msec(5000);
+
+  for (int i = 50; i < 100; i += 5) {
+    draw_rect_from_bitmap_alpha(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
+                                game_map_1_bitmap, i);
+    wait_msec(300);
+  }
 
   // Copy the initial portion of the background to the cache buffer
   copy_rect(PLAYER_SPAWN.x, PLAYER_SPAWN.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,

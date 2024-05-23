@@ -138,6 +138,7 @@ void uart_init(int restart) {
   // Setup UART
   setup_uart();
 
+  // Enable UART0 RX interrupts
   UART0_IMSC |= UART0_IMSC_RX;
 
   // Display restart message

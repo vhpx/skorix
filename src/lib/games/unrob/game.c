@@ -73,8 +73,8 @@ Boundary map_boundaries[] = {
 };
 
 void initialize_game() {
-//   TODO: Actually fix this
-//   Probable cause: Unfinished unrob_objects initialization
+  //   TODO: Actually fix this
+  //   Probable cause: Unfinished unrob_objects initialization
   unrob_objects[unrob_numobjs].type = OBJ_PLAYER;
   uart_puts("");
   unrob_objects[unrob_numobjs].position.x = PLAYER_SPAWN.x;
@@ -183,15 +183,14 @@ void draw_player() {
             PLAYER_WIDTH, PLAYER_HEIGHT, game_map_1_bitmap,
             background_cache_buffer);
 
-  copy_rect(0, 0, 0, 0, PLAYER_WIDTH,
-          PLAYER_WIDTH, PLAYER_HEIGHT, player_up,
-          player_sprite_buffer);          
+  copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, player_up,
+            player_sprite_buffer);
 
   // Draw the player sprite
   // draw_rect_from_bitmap(player->position.x, player->position.y, PLAYER_WIDTH,
   //                       PLAYER_HEIGHT, player_sprite_buffer);
-    draw_transparent_image(player->position.x, player->position.y, PLAYER_WIDTH, PLAYER_HEIGHT,
-                         player_sprite_buffer);
+  draw_transparent_image(player->position.x, player->position.y, PLAYER_WIDTH,
+                         PLAYER_HEIGHT, player_sprite_buffer);
 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
@@ -219,37 +218,57 @@ void draw_time() {
   print_pixel_diff(prev_pixels, "[DRAWN COUNTDOWN TIMER]");
 }
 
+enum { UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3 };
+static int player_direction = UP;
+
 void move_player(char key) {
   if (!player)
     return; // Ensure player object exists
+
+  int force_redraw = false;
+
   switch (key) {
   case 'w':
-  copy_rect(0, 0, 0, 0, PLAYER_WIDTH,
-          PLAYER_WIDTH, PLAYER_HEIGHT, player_up,
-          player_sprite_buffer);       
-          break;
+    if (player_direction != UP) {
+      player_direction = UP;
+      force_redraw = true;
+      copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
+                player_up, player_sprite_buffer);
+    }
+    break;
   case 's':
-  copy_rect(0, 0, 0, 0, PLAYER_WIDTH,
-          PLAYER_WIDTH, PLAYER_HEIGHT, player_down,
-          player_sprite_buffer);       
-          break;
+    if (player_direction != DOWN) {
+      player_direction = DOWN;
+      force_redraw = true;
+      copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
+                player_down, player_sprite_buffer);
+    }
+    break;
   case 'a':
-  copy_rect(0, 0, 0, 0, PLAYER_WIDTH,
-          PLAYER_WIDTH, PLAYER_HEIGHT, player_left,
-          player_sprite_buffer);       
-          break;
+    if (player_direction != LEFT) {
+      player_direction = LEFT;
+      force_redraw = true;
+      copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
+                player_left, player_sprite_buffer);
+    }
+    break;
   case 'd':
-  copy_rect(0, 0, 0, 0, PLAYER_WIDTH,
-          PLAYER_WIDTH, PLAYER_HEIGHT, player_right,
-          player_sprite_buffer);       
-          break;
+    if (player_direction != RIGHT) {
+      player_direction = RIGHT;
+      force_redraw = true;
+      copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
+                player_right, player_sprite_buffer);
+    }
+    break;
+
   default:
     return; // Do nothing if another key is pressed
   }
 
   move_in_boundaries(map_boundaries, sizeof(map_boundaries) / sizeof(Boundary),
                      key, &player->position, game_map_1_bitmap,
-                     background_cache_buffer, player_sprite_buffer);
+                     background_cache_buffer, player_sprite_buffer,
+                     force_redraw);
 }
 
 void rotate_inventory(char key) {

@@ -37,14 +37,15 @@ int orientation(const Position *p, const Position *q, const Position *r) {
 // Given three colinear points p, q, r, the function checks if
 // point q lies on the line segment 'pr'
 int on_segment(const Position *p, const Position *q, const Position *r) {
-  if (q->x <= max(p->x, r->x) && q->x >= min(p->x, r->x) && q->y <= max(p->y, r->y) &&
-      q->y >= min(p->y, r->y))
+  if (q->x <= max(p->x, r->x) && q->x >= min(p->x, r->x) &&
+      q->y <= max(p->y, r->y) && q->y >= min(p->y, r->y))
     return true;
   return false;
 }
 
 // The function returns true if line segment 'p1q1' and 'p2q2' intersect.
-int is_intersect(const Position *p1, const Position *q1, const Position *p2, const Position *q2) {
+int is_intersect(const Position *p1, const Position *q1, const Position *p2,
+                 const Position *q2) {
   int o1 = orientation(p1, q1, p2);
   int o2 = orientation(p1, q1, q2);
   int o3 = orientation(p2, q2, p1);
@@ -69,7 +70,7 @@ void move_in_boundaries(Boundary *boundaries, int num_boundaries, char key,
                         Position *current_pos,
                         const unsigned long *game_map_bitmap,
                         unsigned long *background_cache_buffer,
-                        unsigned long *player_sprite_buffer) {
+                        unsigned long *player_sprite_buffer, int force_redraw) {
   int offsetX = 0, offsetY = 0;
 
   switch (key) {
@@ -126,6 +127,14 @@ void move_in_boundaries(Boundary *boundaries, int num_boundaries, char key,
   uart_puts(COLOR.RESET);
   uart_puts(")\n");
 
+  // Calculate rectangular regions that need to be updated
+  int erase_x = current_pos->x;
+  int erase_y = current_pos->y;
+  int redraw_x = next_pos.x;
+  int redraw_y = next_pos.y;
+  int update_width = PLAYER_WIDTH;
+  int update_height = PLAYER_HEIGHT;
+
   // Check intersections with boundaries
   for (int i = 0; i < num_boundaries; i++) {
     for (int j = 0; j < boundaries[i].num_positions; j++) {
@@ -157,19 +166,40 @@ void move_in_boundaries(Boundary *boundaries, int num_boundaries, char key,
           uart_puts(COLOR.RESET);
           uart_puts(")\n");
 
+          if (force_redraw == false)
+            return; // Intersection detected
+
+          // Adjust redraw region to the intersection point
+          redraw_x = current_pos->x;
+          redraw_y = current_pos->y;
+
+          long long prev_pixels = get_rendered_pixels();
+
+          // Update only the necessary portions of the background and sprite
+          draw_rect_from_bitmap(erase_x, erase_y, update_width, update_height,
+                                background_cache_buffer);
+          uart_puts("\nProcessed pixels: ");
+          print_rendered_pixels();
+          uart_puts(" | ");
+          print_pixel_diff(prev_pixels, "[ERASED PLAYER]");
+
+          prev_pixels = get_rendered_pixels();
+
+          copy_rect(redraw_x, redraw_y, 0, 0, SCREEN_WIDTH, update_width,
+                    update_height, game_map_bitmap, background_cache_buffer);
+          draw_transparent_image(redraw_x, redraw_y, update_width,
+                                 update_height, player_sprite_buffer);
+
+          uart_puts("\nProcessed pixels: ");
+          print_rendered_pixels();
+          uart_puts(" | ");
+          print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
+
           return; // Intersection detected
         }
       }
     }
   }
-
-  // Calculate rectangular regions that need to be updated
-  int erase_x = current_pos->x;
-  int erase_y = current_pos->y;
-  int redraw_x = next_pos.x;
-  int redraw_y = next_pos.y;
-  int update_width = PLAYER_WIDTH;
-  int update_height = PLAYER_HEIGHT;
 
   // Adjust regions if the player moved partially off-screen
   if (erase_x < 0) {
@@ -205,14 +235,12 @@ void move_in_boundaries(Boundary *boundaries, int num_boundaries, char key,
   copy_rect(redraw_x, redraw_y, 0, 0, SCREEN_WIDTH, update_width, update_height,
             game_map_bitmap, background_cache_buffer);
   draw_transparent_image(redraw_x, redraw_y, update_width, update_height,
-                        player_sprite_buffer);
+                         player_sprite_buffer);
 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
   uart_puts(" | ");
   print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
-
-  prev_pixels = get_rendered_pixels();
 
   // Update player's current position
   current_pos->x = next_pos.x;

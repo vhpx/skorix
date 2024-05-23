@@ -14,7 +14,10 @@
 void start_unrob_game();
 void move_player(char key);
 void rotate_inventory(char key);
-void display_inventory(int selected_item);
+void draw_player();
+void draw_inventory(int selected_item);
+void toggle_collision_debugger();
+int get_collision_debugger_status();
 
 void countdown(void);
 void draw_time(void);

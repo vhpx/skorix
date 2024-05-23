@@ -13,7 +13,6 @@
 #include "../engine/item.h"
 #include "../engine/map-bitmap.h"
 
-
 struct Object {
   unsigned int type;
   Position position;
@@ -130,26 +129,15 @@ void initialize_buffers() {
   print_pixel_diff(prev_pixels, "[DRAWN MAP]");
 
   prev_pixels = get_rendered_pixels();
-
-  // Display the player sprite
-  draw_rect_from_bitmap(PLAYER_SPAWN.x, PLAYER_SPAWN.y, PLAYER_WIDTH,
-                        PLAYER_HEIGHT, player_sprite_buffer);
-
-  uart_puts("\nProcessed pixels: ");
-  print_rendered_pixels();
-  uart_puts(" | ");
-  print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
 }
 
 void start_unrob_game() {
   reset_rendered_pixels();
   initialize_buffers();
   initialize_game();
-  display_inventory(selected_item);
-  render_boundary(map_wall_boundaries,
-                  sizeof(map_wall_boundaries) / sizeof(Position));
-  render_boundary(map_fountain_boundaries,
-                  sizeof(map_fountain_boundaries) / sizeof(Position));
+
+  draw_player();
+  draw_inventory(selected_item);
 
   game_time = 61;
   draw_time();
@@ -166,7 +154,28 @@ void countdown(void) {
   }
 }
 
-void draw_time(void) {
+void draw_player() {
+  if (!player)
+    return; // Ensure player object exists
+
+  long long prev_pixels = get_rendered_pixels();
+
+  // Copy the background to the player's position
+  copy_rect(player->position.x, player->position.y, 0, 0, SCREEN_WIDTH,
+            PLAYER_WIDTH, PLAYER_HEIGHT, game_map_1_bitmap,
+            background_cache_buffer);
+
+  // Draw the player sprite
+  draw_rect_from_bitmap(player->position.x, player->position.y, PLAYER_WIDTH,
+                        PLAYER_HEIGHT, player_sprite_buffer);
+
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" | ");
+  print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
+}
+
+void draw_time() {
   game_time_str[0] = '0' + game_time / 60;
   game_time_str[2] = '0' + (game_time % 60) / 10;
   game_time_str[3] = '0' + (game_time % 60) % 10;
@@ -226,10 +235,10 @@ void rotate_inventory(char key) {
   uart_puts(COLOR.RESET);
 
   // Display the selected item in the inventory
-  display_inventory(selected_item);
+  draw_inventory(selected_item);
 }
 
-void display_inventory(int selected_item) {
+void draw_inventory(int selected_item) {
   long long prev_pixels = get_rendered_pixels();
 
   // display top right corner
@@ -247,3 +256,35 @@ void display_inventory(int selected_item) {
   //  player->position.y - 50, ITEM_SIZE, ITEM_SIZE,
   //  item_m1_allArray[selected_item]);
 }
+
+static int collision_debugger = 0;
+
+void toggle_collision_debugger() {
+  collision_debugger = !collision_debugger;
+
+  if (collision_debugger) {
+    render_boundary(map_wall_boundaries,
+                    sizeof(map_wall_boundaries) / sizeof(Position));
+    render_boundary(map_fountain_boundaries,
+                    sizeof(map_fountain_boundaries) / sizeof(Position));
+  } else {
+    draw_rect_from_bitmap(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_map_1_bitmap);
+    draw_player();
+    draw_time();
+    draw_inventory(selected_item);
+
+    for (int i = 0; i < item_m1_allArray_LEN; i++) { // item map 1
+      long long prev_pixels = get_rendered_pixels();
+
+      draw_transparent_image(
+          SCREEN_WIDTH / 2 - (7 * ITEM_SIZE) / 2 + (i * ITEM_SIZE),
+          SCREEN_HEIGHT / 2 - 200, ITEM_SIZE, ITEM_SIZE, item_m1_allArray[i]);
+      uart_puts("\nProcessed pixels: ");
+      print_rendered_pixels();
+      uart_puts(" | ");
+      print_pixel_diff(prev_pixels, "[DRAWN ITEM]");
+    }
+  }
+}
+
+int get_collision_debugger_status() { return collision_debugger; }

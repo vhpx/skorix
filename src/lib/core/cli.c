@@ -130,6 +130,21 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       move_player(c);
     } else if (c == 'q' || c == 'e') {
       rotate_inventory(c);
+    } else if (c == 'c') {
+      // Display position change
+      uart_puts("\n\nReceived key: ");
+      uart_puts(COLOR.TEXT.BLUE);
+      char2upper(&c);
+      uart_sendc(c);
+      uart_puts(COLOR.RESET);
+      uart_puts("\nCollision Debug Mode: ");
+      uart_puts(get_collision_debugger_status() ? COLOR.TEXT.RED
+                                                : COLOR.TEXT.GREEN);
+      uart_puts(get_collision_debugger_status() ? "OFF" : "ON");
+      uart_puts(COLOR.RESET);
+      uart_puts("\n");
+
+      toggle_collision_debugger();
     } else if (c == 27) { // escape key
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       sys_timer3_irq_disable();

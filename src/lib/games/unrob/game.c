@@ -117,7 +117,7 @@ void initialize_game() {
 int selected_item = 0;
 unsigned int game_time = 0;
 unsigned int game_score = 0;
-char *game_time_str =  "Time: 0:00";
+char *game_time_str = "Time: 0:00";
 char *game_score_str = "Score: 000";
 
 void initialize_buffers() {
@@ -131,22 +131,38 @@ void initialize_buffers() {
   // Display the map
   draw_rect_from_bitmap_alpha(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                               game_map_1_bitmap, 50);
-  wait_msec(5000);
 
-  for (int i = 50; i < 100; i += 5) {
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" | ");
+  print_pixel_diff(prev_pixels, "[DRAWN INITIAL MAP] ALPHA: 50");
+
+  // wait_msec(5000);
+
+  for (int i = 50; i <= 100; i += 5) {
+    prev_pixels = get_rendered_pixels();
+    char msg[MAX_STR_LENGTH];
+    char alpha[4];
+
+    clrstr(msg);
+    clrstr(alpha);
+
+    append_str(msg, "[DRAWN MAP] ALPHA: ");
+    int2str(i, alpha);
+    append_str(msg, alpha);
+
     draw_rect_from_bitmap_alpha(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                                 game_map_1_bitmap, i);
+    uart_puts("\nProcessed pixels: ");
+    print_rendered_pixels();
+    uart_puts(" | ");
+    print_pixel_diff(prev_pixels, msg);
     wait_msec(300);
   }
 
   // Copy the initial portion of the background to the cache buffer
   copy_rect(PLAYER_SPAWN.x, PLAYER_SPAWN.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
             PLAYER_HEIGHT, game_map_1_bitmap, background_cache_buffer);
-
-  uart_puts("\nProcessed pixels: ");
-  print_rendered_pixels();
-  uart_puts(" | ");
-  print_pixel_diff(prev_pixels, "[DRAWN MAP]");
 
   prev_pixels = get_rendered_pixels();
 }
@@ -176,6 +192,24 @@ void countdown(void) {
   }
 }
 
+enum { UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3 };
+static int player_direction = UP;
+
+const unsigned long *get_player_sprite() {
+  switch (player_direction) {
+  case UP:
+    return player_up;
+  case DOWN:
+    return player_down;
+  case LEFT:
+    return player_left;
+  case RIGHT:
+    return player_right;
+  default:
+    return player_up;
+  }
+}
+
 void draw_player() {
   if (!player)
     return; // Ensure player object exists
@@ -187,8 +221,8 @@ void draw_player() {
             PLAYER_WIDTH, PLAYER_HEIGHT, game_map_1_bitmap,
             background_cache_buffer);
 
-  copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, player_up,
-            player_sprite_buffer);
+  copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
+            get_player_sprite(), player_sprite_buffer);
 
   // Draw the player sprite
   // draw_rect_from_bitmap(player->position.x, player->position.y, PLAYER_WIDTH,
@@ -230,19 +264,18 @@ void draw_score() {
   long long prev_pixels = get_rendered_pixels();
 
   draw_rect_ARGB_32(
-      SCREEN_WIDTH - strlen(game_score_str) * FONT_WIDTH * GAME_TIME_ZOOM - 1, FONT_HEIGHT * GAME_TIME_ZOOM,
-      SCREEN_WIDTH, (FONT_HEIGHT * GAME_TIME_ZOOM) * 2, 0x00000000, 1);
-  draw_string(SCREEN_WIDTH - strlen(game_score_str) * FONT_WIDTH * GAME_TIME_ZOOM,
-              FONT_HEIGHT * GAME_TIME_ZOOM, game_score_str, 0x00FFFFFF, GAME_TIME_ZOOM);
+      SCREEN_WIDTH - strlen(game_score_str) * FONT_WIDTH * GAME_TIME_ZOOM - 1,
+      FONT_HEIGHT * GAME_TIME_ZOOM, SCREEN_WIDTH,
+      (FONT_HEIGHT * GAME_TIME_ZOOM) * 2, 0x00000000, 1);
+  draw_string(
+      SCREEN_WIDTH - strlen(game_score_str) * FONT_WIDTH * GAME_TIME_ZOOM,
+      FONT_HEIGHT * GAME_TIME_ZOOM, game_score_str, 0x00FFFFFF, GAME_TIME_ZOOM);
 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
   uart_puts(" | ");
   print_pixel_diff(prev_pixels, "[DRAWN SCORE]");
 }
-
-enum { UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3 };
-static int player_direction = UP;
 
 void move_player(char key) {
   if (!player)
@@ -255,38 +288,34 @@ void move_player(char key) {
     if (player_direction != UP) {
       player_direction = UP;
       force_redraw = true;
-      copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
-                player_up, player_sprite_buffer);
     }
     break;
   case 's':
     if (player_direction != DOWN) {
       player_direction = DOWN;
       force_redraw = true;
-      copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
-                player_down, player_sprite_buffer);
     }
     break;
   case 'a':
     if (player_direction != LEFT) {
       player_direction = LEFT;
       force_redraw = true;
-      copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
-                player_left, player_sprite_buffer);
     }
     break;
   case 'd':
     if (player_direction != RIGHT) {
       player_direction = RIGHT;
       force_redraw = true;
-      copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
-                player_right, player_sprite_buffer);
     }
     break;
 
   default:
     return; // Do nothing if another key is pressed
   }
+
+  if (force_redraw)
+    copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
+              get_player_sprite(), player_sprite_buffer);
 
   move_in_boundaries(map_boundaries, sizeof(map_boundaries) / sizeof(Boundary),
                      key, &player->position, game_map_1_bitmap,

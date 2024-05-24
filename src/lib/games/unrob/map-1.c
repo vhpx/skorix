@@ -10,10 +10,11 @@ const Size map_size = {
     .height = SCREEN_HEIGHT,
 };
 
-const Item map_items[] = {
+Item map_items[] = {
     {
         .id = 1,
         .name = "Item 1",
+        .final_position = {.x = 125, .y = 150},
         .entity =
             {
                 .position = {.x = 100, .y = 100},
@@ -28,6 +29,7 @@ const Item map_items[] = {
     {
         .id = 2,
         .name = "Item 2",
+        .final_position = {.x = 320, .y = 150},
         .entity =
             {
                 .position = {.x = 100, .y = 100},
@@ -42,6 +44,7 @@ const Item map_items[] = {
     {
         .id = 3,
         .name = "Item 3",
+        .final_position = {.x = 690, .y = 150},
         .entity =
             {
                 .position = {.x = 100, .y = 100},
@@ -56,6 +59,7 @@ const Item map_items[] = {
     {
         .id = 4,
         .name = "Item 4",
+        .final_position = {.x = 830, .y = 150},
         .entity =
             {
                 .position = {.x = 100, .y = 100},
@@ -70,6 +74,7 @@ const Item map_items[] = {
     {
         .id = 5,
         .name = "Item 5",
+        .final_position = {.x = 120, .y = 810},
         .entity =
             {
                 .position = {.x = 100, .y = 100},
@@ -84,6 +89,7 @@ const Item map_items[] = {
     {
         .id = 6,
         .name = "Item 6",
+        .final_position = {.x = 330, .y = 810},
         .entity =
             {
                 .position = {.x = 100, .y = 100},
@@ -98,6 +104,7 @@ const Item map_items[] = {
     {
         .id = 7,
         .name = "Item 7",
+        .final_position = {.x = 850, .y = 810},
         .entity =
             {
                 .position = {.x = 100, .y = 100},
@@ -146,11 +153,12 @@ const Boundary map_boundaries[] = {
      .num_positions = sizeof(map_fountain_boundaries) / sizeof(Position)},
 };
 
-const GameMap map1 = {
+GameMap map1 = {
     .spawn_point = spawn_point,
     .bitmap = game_map_1_bitmap,
     .size = map_size,
     .items = map_items,
+    .num_items = sizeof(map_items) / sizeof(Item),
     .boundaries = map_boundaries,
     .num_boundaries = sizeof(map_boundaries) / sizeof(Boundary),
 };

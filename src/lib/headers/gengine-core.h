@@ -5,6 +5,8 @@
 #ifndef __GENGINE_CORE_H__
 #define __GENGINE_CORE_H__
 
+typedef unsigned long Bitmap;
+
 typedef struct {
   int x;
   int y;
@@ -23,26 +25,28 @@ typedef struct {
 typedef struct {
   Position position;
   const Size size;
-  const unsigned long *bitmap;
+  const Bitmap *bitmap;
 } Entity;
 
 typedef struct {
   const int id;
-  const char name[MAX_GENGINE_ITEM_NAME_LENGTH];
+  char *name;
+  Position final_position;
   Entity entity;
 } Item;
 
 typedef struct {
   const Position spawn_point;
-  const unsigned long *bitmap;
+  const Bitmap *bitmap;
   const Size size;
-  const Item *items;
+  Item *items;
   const Boundary *boundaries;
+  const int num_items;
   const int num_boundaries;
 } GameMap;
 
 struct Game {
-  Entity entities[MAX_GENGINE_ENTITIES];
+  Entity *entities;
   GameMap *maps;
   int num_entities;
   const int num_maps;

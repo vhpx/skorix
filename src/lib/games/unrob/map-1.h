@@ -3,4 +3,4 @@
 #include "../engine/item.h"
 #include "../engine/map-bitmap.h"
 
-extern const GameMap map1;
+extern GameMap map1;

@@ -27,14 +27,26 @@ enum { OBJ_NONE = 0, OBJ_PLAYER = 1 };
 unsigned int unrob_numobjs = 0;
 struct Object unrob_objects[MAX_GENGINE_ENTITIES];
 struct Object *player;
+struct Object *guard;
 unsigned long pre_player_movement_cache[2000];
 
 const Position PLAYER_SPAWN = {.x = (SCREEN_WIDTH - PLAYER_WIDTH) / 2,
                                .y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT) -
                                     20};
+const Position GUARD_SPAWN = {.x = 200,
+                              .y = (SCREEN_HEIGHT)/2-200};                                    
 
 unsigned long background_cache_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 unsigned long player_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
+unsigned long background_guard_cache_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
+unsigned long guard_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
+
+//guard direction
+//1: up
+//2: right
+//3: down
+//4: left
+static int guard1_direction = 2;
 
 Position map_wall_boundaries[] = {
     {.x = 105, .y = 145}, {.x = 105, .y = 305}, {.x = 155, .y = 305},
@@ -89,6 +101,21 @@ void initialize_game() {
   player = &unrob_objects[unrob_numobjs];
   unrob_numobjs++;
 
+    unrob_objects[unrob_numobjs].type = OBJ_PLAYER;
+  uart_puts("");
+  unrob_objects[unrob_numobjs].position.x = GUARD_SPAWN.x;
+  uart_puts("");
+  unrob_objects[unrob_numobjs].position.y = GUARD_SPAWN.y;
+  uart_puts("");
+  unrob_objects[unrob_numobjs].width = PLAYER_WIDTH;
+  uart_puts("");
+  unrob_objects[unrob_numobjs].height = PLAYER_HEIGHT;
+  uart_puts("");
+  unrob_objects[unrob_numobjs].alive = 99;
+  uart_puts("");
+  guard = &unrob_objects[unrob_numobjs];
+  unrob_numobjs++;
+
   for (int i = 0; i < item_m1_allArray_LEN; i++) { // item map 1
     long long prev_pixels = get_rendered_pixels();
 
@@ -128,17 +155,19 @@ void initialize_buffers() {
   // Display the map
   draw_rect_from_bitmap_alpha(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                               game_map_1_bitmap, 50);
-  wait_msec(5000);
+  // wait_msec(5000);
 
   for (int i = 50; i < 100; i += 5) {
     draw_rect_from_bitmap_alpha(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                                 game_map_1_bitmap, i);
-    wait_msec(300);
+    wait_msec(100);
   }
 
   // Copy the initial portion of the background to the cache buffer
   copy_rect(PLAYER_SPAWN.x, PLAYER_SPAWN.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
             PLAYER_HEIGHT, game_map_1_bitmap, background_cache_buffer);
+  copy_rect(GUARD_SPAWN.x, GUARD_SPAWN.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
+          PLAYER_HEIGHT, game_map_1_bitmap, background_guard_cache_buffer);          
 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
@@ -154,6 +183,7 @@ void start_unrob_game() {
   initialize_game();
 
   draw_player();
+  draw_guard();
   draw_inventory(selected_item);
 
   game_time = 61;
@@ -161,11 +191,76 @@ void start_unrob_game() {
   sys_timer3_init();
   sys_timer3_irq_enable();
 }
+//1: up
+//2: right
+//3: down
+//4: left
+void move_guard(struct Object *guard, int max_x, int max_y, int min_x, int min_y, int step_size, int *guard_direction, unsigned long *background_cache_buffer, unsigned long *guard_sprite_buffer) {
+  if (!guard)
+    return; // Ensure player object exists
+  //upadte guard position
+  if(*guard_direction == 1){
+    guard->position.y -= step_size;
+  }else if(*guard_direction == 2){
+    guard->position.x += step_size;
+  }else if(*guard_direction == 3){
+    guard->position.y += step_size;
+  }else if(*guard_direction == 4){
+    guard->position.x -= step_size;
+  }
+
+  //update guard direction
+  // if(guard->position.x >= max_x || guard->position.x <= min_x || guard->position.y >= max_y || guard->position.y <= min_y){
+
+    if(*guard_direction == 1){
+      if(guard->position.y <= min_y){
+      *guard_direction = 2;
+      }
+    }else if(*guard_direction == 2){
+      if(guard->position.x >= max_x){
+      *guard_direction = 3;
+      }
+    }else if(*guard_direction == 3){
+      if(guard->position.y >= max_y){
+      *guard_direction = 4;
+      }
+    }else if(*guard_direction == 4){
+      if(guard->position.x <= min_x){
+      *guard_direction = 1;
+      }
+    }
+  // }
+  
+  //draw guard
+    if(*guard_direction == 1){
+      move_in_boundaries(map_boundaries, sizeof(map_boundaries) / sizeof(Boundary),
+                        'w', &guard->position, game_map_1_bitmap,
+                        background_cache_buffer, guard_sprite_buffer);
+    }else if(*guard_direction == 2){
+      move_in_boundaries(map_boundaries, sizeof(map_boundaries) / sizeof(Boundary),
+                        'd', &guard->position, game_map_1_bitmap,
+                        background_cache_buffer, guard_sprite_buffer);
+    }else if(*guard_direction == 3){
+      move_in_boundaries(map_boundaries, sizeof(map_boundaries) / sizeof(Boundary),
+                        's', &guard->position, game_map_1_bitmap,
+                        background_cache_buffer, guard_sprite_buffer);
+    }else if(*guard_direction == 4){
+      move_in_boundaries(map_boundaries, sizeof(map_boundaries) / sizeof(Boundary),
+                        'a', &guard->position, game_map_1_bitmap,
+                        background_cache_buffer, guard_sprite_buffer);
+    }
+}
+
 
 void countdown(void) {
   if (game_time) {
     game_time--;
     draw_time();
+    // move_guard();
+
+    // Rest of the code
+
+    move_guard(guard, 700, SCREEN_HEIGHT/2-200, 200, SCREEN_HEIGHT/2-200, GENGINE_STEP_SIZE, &guard1_direction, background_guard_cache_buffer, guard_sprite_buffer);
   } else {
     // Game over?
   }
@@ -190,6 +285,30 @@ void draw_player() {
   print_rendered_pixels();
   uart_puts(" | ");
   print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
+}
+
+void draw_guard() {
+  if (!guard)
+    return; // Ensure player object exists
+
+  long long prev_pixels = get_rendered_pixels();
+
+  // Copy the background to the player's position
+  copy_rect(guard->position.x, guard->position.y, 0, 0, SCREEN_WIDTH,
+            PLAYER_WIDTH, PLAYER_HEIGHT, game_map_1_bitmap,
+            background_guard_cache_buffer);
+  // copy_rect(0, 0, 0, 0, SCREEN_WIDTH,
+  //           PLAYER_WIDTH, PLAYER_HEIGHT, game_map_1_bitmap,
+  //           background_cache_buffer);
+  // Draw the player sprite
+  draw_rect_from_bitmap(guard->position.x, guard->position.y, PLAYER_WIDTH,
+                        PLAYER_HEIGHT, guard_sprite_buffer);
+
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" | ");
+  print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
+
 }
 
 void draw_time() {
@@ -220,6 +339,8 @@ void move_player(char key) {
                      key, &player->position, game_map_1_bitmap,
                      background_cache_buffer, player_sprite_buffer);
 }
+
+
 
 void rotate_inventory(char key) {
   switch (key) {
@@ -294,6 +415,7 @@ void toggle_collision_debugger() {
     print_pixel_diff(prev_pixels, "[DRAWN MAP]");
 
     draw_player();
+    draw_guard();
     draw_time();
     draw_inventory(selected_item);
 

@@ -13,8 +13,10 @@
 
 void start_unrob_game();
 void move_player(char key);
+// void move_guard(struct Object *guard, int x, int y, int max_x, int max_y, int min_x, int min_y, int direction, int step_size, int *guard_direction);
 void rotate_inventory(char key);
 void draw_player();
+void draw_guard();
 void draw_inventory(int selected_item);
 void toggle_collision_debugger();
 int get_collision_debugger_status();

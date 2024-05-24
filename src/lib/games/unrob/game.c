@@ -27,19 +27,26 @@ enum { OBJ_NONE = 0, OBJ_PLAYER = 1 };
 unsigned int unrob_numobjs = 0;
 struct Object unrob_objects[MAX_GENGINE_ENTITIES];
 struct Object *player;
-struct Object *guard;
+struct Object *guard1;
+struct Object *guard2;
 unsigned long pre_player_movement_cache[2000];
 
 const Position PLAYER_SPAWN = {.x = (SCREEN_WIDTH - PLAYER_WIDTH) / 2,
                                .y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT) -
                                     20};
-const Position GUARD_SPAWN = {.x = 200,
-                              .y = (SCREEN_HEIGHT)/2-200};                                    
+const Position GUARD1_SPAWN = {.x = 250,
+                              .y = (SCREEN_HEIGHT)/2-200};       
+                                                           
+const Position GUARD2_SPAWN = {.x = 750,
+                              .y = (SCREEN_HEIGHT)/2+200}; 
 
 unsigned long background_cache_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 unsigned long player_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
-unsigned long background_guard_cache_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
-unsigned long guard_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
+
+unsigned long background_guard1_cache_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
+unsigned long guard1_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
+unsigned long background_guard2_cache_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
+unsigned long guard2_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 
 //guard direction
 //1: up
@@ -47,6 +54,8 @@ unsigned long guard_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 //3: down
 //4: left
 static int guard1_direction = 2;
+static int guard2_direction = 4;
+
 
 Position map_wall_boundaries[] = {
     {.x = 105, .y = 145}, {.x = 105, .y = 305}, {.x = 155, .y = 305},
@@ -101,11 +110,11 @@ void initialize_game() {
   player = &unrob_objects[unrob_numobjs];
   unrob_numobjs++;
 
-    unrob_objects[unrob_numobjs].type = OBJ_PLAYER;
+  unrob_objects[unrob_numobjs].type = OBJ_PLAYER;
   uart_puts("");
-  unrob_objects[unrob_numobjs].position.x = GUARD_SPAWN.x;
+  unrob_objects[unrob_numobjs].position.x = GUARD1_SPAWN.x;
   uart_puts("");
-  unrob_objects[unrob_numobjs].position.y = GUARD_SPAWN.y;
+  unrob_objects[unrob_numobjs].position.y = GUARD1_SPAWN.y;
   uart_puts("");
   unrob_objects[unrob_numobjs].width = PLAYER_WIDTH;
   uart_puts("");
@@ -113,7 +122,22 @@ void initialize_game() {
   uart_puts("");
   unrob_objects[unrob_numobjs].alive = 99;
   uart_puts("");
-  guard = &unrob_objects[unrob_numobjs];
+  guard1 = &unrob_objects[unrob_numobjs];
+  unrob_numobjs++;
+
+  unrob_objects[unrob_numobjs].type = OBJ_PLAYER;
+  uart_puts("");
+  unrob_objects[unrob_numobjs].position.x = GUARD2_SPAWN.x;
+  uart_puts("");
+  unrob_objects[unrob_numobjs].position.y = GUARD2_SPAWN.y;
+  uart_puts("");
+  unrob_objects[unrob_numobjs].width = PLAYER_WIDTH;
+  uart_puts("");
+  unrob_objects[unrob_numobjs].height = PLAYER_HEIGHT;
+  uart_puts("");
+  unrob_objects[unrob_numobjs].alive = 99;
+  uart_puts("");
+  guard2 = &unrob_objects[unrob_numobjs];
   unrob_numobjs++;
 
   for (int i = 0; i < item_m1_allArray_LEN; i++) { // item map 1
@@ -166,8 +190,10 @@ void initialize_buffers() {
   // Copy the initial portion of the background to the cache buffer
   copy_rect(PLAYER_SPAWN.x, PLAYER_SPAWN.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
             PLAYER_HEIGHT, game_map_1_bitmap, background_cache_buffer);
-  copy_rect(GUARD_SPAWN.x, GUARD_SPAWN.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
-          PLAYER_HEIGHT, game_map_1_bitmap, background_guard_cache_buffer);          
+  copy_rect(GUARD1_SPAWN.x, GUARD1_SPAWN.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
+          PLAYER_HEIGHT, game_map_1_bitmap, background_guard1_cache_buffer);
+  copy_rect(GUARD2_SPAWN.x, GUARD2_SPAWN.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
+        PLAYER_HEIGHT, game_map_1_bitmap, background_guard2_cache_buffer);                       
 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
@@ -177,20 +203,27 @@ void initialize_buffers() {
   prev_pixels = get_rendered_pixels();
 }
 
-void start_unrob_game() {
-  reset_rendered_pixels();
-  initialize_buffers();
-  initialize_game();
+void draw_guard(struct Object *guard, unsigned long *background_cache_buffer, unsigned long *guard_sprite_buffer) {
+  if (!guard)
+    return; // Ensure player object exists
 
-  draw_player();
-  draw_guard();
-  draw_inventory(selected_item);
+  long long prev_pixels = get_rendered_pixels();
 
-  game_time = 61;
-  draw_time();
-  sys_timer3_init();
-  sys_timer3_irq_enable();
+  // Copy the background to the player's position
+  copy_rect(guard->position.x, guard->position.y, 0, 0, SCREEN_WIDTH,
+            PLAYER_WIDTH, PLAYER_HEIGHT, game_map_1_bitmap,
+            background_cache_buffer);
+  // Draw the player sprite
+  draw_rect_from_bitmap(guard->position.x, guard->position.y, PLAYER_WIDTH,
+                        PLAYER_HEIGHT, guard_sprite_buffer);
+
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" | ");
+  print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
+
 }
+
 //1: up
 //2: right
 //3: down
@@ -210,8 +243,6 @@ void move_guard(struct Object *guard, int max_x, int max_y, int min_x, int min_y
   }
 
   //update guard direction
-  // if(guard->position.x >= max_x || guard->position.x <= min_x || guard->position.y >= max_y || guard->position.y <= min_y){
-
     if(*guard_direction == 1){
       if(guard->position.y <= min_y){
       *guard_direction = 2;
@@ -251,16 +282,30 @@ void move_guard(struct Object *guard, int max_x, int max_y, int min_x, int min_y
     }
 }
 
+void start_unrob_game() {
+  reset_rendered_pixels();
+  initialize_buffers();
+  initialize_game();
+
+  draw_player();
+  draw_guard(guard1, background_guard1_cache_buffer, guard1_sprite_buffer);
+  draw_guard(guard2, background_guard2_cache_buffer, guard2_sprite_buffer);
+
+  draw_inventory(selected_item);
+
+  game_time = 61;
+  draw_time();
+  sys_timer3_init();
+  sys_timer3_irq_enable();
+}
 
 void countdown(void) {
   if (game_time) {
     game_time--;
     draw_time();
-    // move_guard();
 
-    // Rest of the code
-
-    move_guard(guard, 700, SCREEN_HEIGHT/2-200, 200, SCREEN_HEIGHT/2-200, GENGINE_STEP_SIZE, &guard1_direction, background_guard_cache_buffer, guard_sprite_buffer);
+    move_guard(guard1, 750, SCREEN_HEIGHT/2-200, 250, SCREEN_HEIGHT/2-200, GENGINE_STEP_SIZE, &guard1_direction, background_guard1_cache_buffer, guard1_sprite_buffer);
+    move_guard(guard2, 750, SCREEN_HEIGHT/2+200, 250, SCREEN_HEIGHT/2+200, GENGINE_STEP_SIZE, &guard2_direction, background_guard2_cache_buffer, guard2_sprite_buffer);
   } else {
     // Game over?
   }
@@ -287,29 +332,6 @@ void draw_player() {
   print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
 }
 
-void draw_guard() {
-  if (!guard)
-    return; // Ensure player object exists
-
-  long long prev_pixels = get_rendered_pixels();
-
-  // Copy the background to the player's position
-  copy_rect(guard->position.x, guard->position.y, 0, 0, SCREEN_WIDTH,
-            PLAYER_WIDTH, PLAYER_HEIGHT, game_map_1_bitmap,
-            background_guard_cache_buffer);
-  // copy_rect(0, 0, 0, 0, SCREEN_WIDTH,
-  //           PLAYER_WIDTH, PLAYER_HEIGHT, game_map_1_bitmap,
-  //           background_cache_buffer);
-  // Draw the player sprite
-  draw_rect_from_bitmap(guard->position.x, guard->position.y, PLAYER_WIDTH,
-                        PLAYER_HEIGHT, guard_sprite_buffer);
-
-  uart_puts("\nProcessed pixels: ");
-  print_rendered_pixels();
-  uart_puts(" | ");
-  print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
-
-}
 
 void draw_time() {
   game_time_str[0] = '0' + game_time / 60;
@@ -415,7 +437,9 @@ void toggle_collision_debugger() {
     print_pixel_diff(prev_pixels, "[DRAWN MAP]");
 
     draw_player();
-    draw_guard();
+    draw_guard(guard1, background_guard1_cache_buffer, guard1_sprite_buffer);
+    draw_guard(guard2, background_guard2_cache_buffer, guard2_sprite_buffer);
+
     draw_time();
     draw_inventory(selected_item);
 

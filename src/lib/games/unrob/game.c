@@ -27,20 +27,12 @@ unsigned long background_cache_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 unsigned long player_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 
 void initialize_game() {
-  //   TODO: Actually fix this
-  //   Probable cause: Unfinished unrob_objects initialization
   unrob_objects[unrob_numobjs].type = OBJ_PLAYER;
-  wait_msec(200);
   unrob_objects[unrob_numobjs].position.x = map1.spawn_point.x;
-  wait_msec(200);
   unrob_objects[unrob_numobjs].position.y = map1.spawn_point.y;
-  wait_msec(200);
   unrob_objects[unrob_numobjs].width = PLAYER_WIDTH;
-  wait_msec(200);
   unrob_objects[unrob_numobjs].height = PLAYER_HEIGHT;
-  wait_msec(200);
   unrob_objects[unrob_numobjs].alive = 1;
-  wait_msec(200);
   player = &unrob_objects[unrob_numobjs];
   unrob_numobjs++;
 }

@@ -6,10 +6,10 @@ enum { OBJ_NONE = 0, OBJ_PLAYER = 1 };
 
 struct Object {
   unsigned int type;
-  Position position;
   unsigned int width;
   unsigned int height;
-  unsigned int alive;
+  unsigned char alive;
+  Position position;
 };
 
 void start_unrob_game();

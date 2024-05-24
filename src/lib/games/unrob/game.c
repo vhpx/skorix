@@ -175,13 +175,20 @@ void move_items_to_final_position() {
       }
 
       // Erase the item at its previous position by applying the background
-      // cache
-      draw_rect_from_bitmap(current_position.x, current_position.y, size.width,
-                            size.height, background_cache);
+      // cache with 50% opacity
+      draw_rect_from_bitmap_alpha(current_position.x, current_position.y,
+                                  size.width, size.height, background_cache,
+                                  50);
 
-      // Copy the background to the item's new position
-      copy_rect(new_position.x, new_position.y, 0, 0, SCREEN_WIDTH, size.width,
-                size.height, map->bitmap, background_cache);
+      // Update the background cache to the current background
+      copy_rect_alpha(current_position.x, current_position.y, 0, 0,
+                      SCREEN_WIDTH, size.width, size.height, map->bitmap,
+                      background_cache, 100);
+
+      // Copy the background to the item's new position with 50% opacity
+      copy_rect_alpha(new_position.x, new_position.y, 0, 0, SCREEN_WIDTH,
+                      size.width, size.height, map->bitmap, background_cache,
+                      50);
 
       // Draw the item sprite
       draw_transparent_image(new_position.x, new_position.y, size.width,

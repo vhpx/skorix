@@ -25,6 +25,10 @@ void move_rect(int x, int y, int width, int height, int xoff, int yoff,
 void copy_rect(int srcX, int srcY, int destX, int destY, int srcWidth,
                int destWidth, int destHeight, const unsigned long *srcBitmap,
                unsigned long *dest);
+void copy_rect_alpha(int srcX, int srcY, int destX, int destY, int srcWidth,
+                     int destWidth, int destHeight,
+                     const unsigned long *srcBitmap, unsigned long *dest,
+                     unsigned int attr);
 void draw_rect_from_bitmap(int x, int y, int width, int height,
                            const unsigned long *bitmap);
 void draw_rect_from_bitmap_alpha(int x, int y, int width, int height,

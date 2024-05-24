@@ -304,6 +304,41 @@ void copy_rect(int srcX, int srcY, int destX, int destY, int srcWidth,
   }
 }
 
+void copy_rect_alpha(int srcX, int srcY, int destX, int destY, int srcWidth,
+                     int destWidth, int destHeight,
+                     const unsigned long *srcBitmap, unsigned long *dest,
+                     unsigned int attr) {
+  // Clamp attr to valid range (0-255)
+  if (attr > 255) {
+    attr = 255;
+  }
+
+  for (int j = 0; j < destHeight; j++) {
+    for (int i = 0; i < destWidth; i++) {
+      int srcOffs = ((srcY + j) * srcWidth) + (srcX + i);
+      unsigned long srcPixel = srcBitmap[srcOffs];
+
+      // Extract RGB components from the source pixel
+      unsigned char srcRed = (srcPixel >> 16) & 0xFF;
+      unsigned char srcGreen = (srcPixel >> 8) & 0xFF;
+      unsigned char srcBlue = srcPixel & 0xFF;
+
+      // Apply the alpha blending to the source pixel
+      srcRed = (srcRed * attr) / 255;
+      srcGreen = (srcGreen * attr) / 255;
+      srcBlue = (srcBlue * attr) / 255;
+
+      // Combine the new RGB components with full opacity
+      unsigned int newPixel =
+          (255 << 24) | (srcRed << 16) | (srcGreen << 8) | srcBlue;
+
+      // Copy the blended pixel to the destination
+      int destOffs = ((destY + j) * destWidth) + (destX + i);
+      dest[destOffs] = newPixel;
+    }
+  }
+}
+
 void draw_rect_from_bitmap(int x, int y, int width, int height,
                            const unsigned long *bitmap) {
   for (int j = 0; j < height; j++) {

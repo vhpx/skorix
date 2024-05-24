@@ -140,6 +140,7 @@ void uart_init(int restart) {
 
   // Enable UART0 RX interrupts
   UART0_IMSC |= UART0_IMSC_RX;
+  UART0_IMSC |= UART0_IMSC_RT;
 
   // Display restart message
   if (restart == 1) {
@@ -282,7 +283,7 @@ void uart_loadOutputFifo() {
 }
 
 void handle_uart0(void) {
-    if (UART0_MIS & UART0_IMSC_RX) {
+    if ((UART0_MIS & UART0_MIS_RX) || (UART0_MIS & UART0_MIS_RT)) {
         unsigned char c = (unsigned char)(UART0_DR);
         c = (c == '\r' ? '\n' : c);
 

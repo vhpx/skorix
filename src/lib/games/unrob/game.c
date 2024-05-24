@@ -22,23 +22,50 @@ GameMap *map = &map1;
 unsigned int unrob_numobjs = 0;
 struct Object unrob_objects[MAX_GENGINE_ENTITIES];
 struct Object *player;
+struct Object *guard1;
+struct Object *guard2;
 
 Bitmap background_cache_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 Bitmap player_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 
+Bitmap background_guard_1_cache_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
+Bitmap guard_1_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
+
+Bitmap background_guard_2_cache_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
+Bitmap guard_2_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
+
 void initialize_game() {
-  unrob_objects[unrob_numobjs].type = OBJ_PLAYER;
-  unrob_objects[unrob_numobjs].position.x = map1.spawn_point.x;
-  unrob_objects[unrob_numobjs].position.y = map1.spawn_point.y;
+  unrob_objects[unrob_numobjs].position.x = map->spawn_point.x;
+  unrob_objects[unrob_numobjs].position.y = map->spawn_point.y;
   unrob_objects[unrob_numobjs].width = PLAYER_WIDTH;
   unrob_objects[unrob_numobjs].height = PLAYER_HEIGHT;
-  unrob_objects[unrob_numobjs].alive = 1;
   player = &unrob_objects[unrob_numobjs];
+  unrob_numobjs++;
+
+  unrob_objects[unrob_numobjs].position.x = map->guards[0].spawn_point.x;
+  unrob_objects[unrob_numobjs].position.y = map->guards[0].spawn_point.y;
+  unrob_objects[unrob_numobjs].width = PLAYER_WIDTH;
+  unrob_objects[unrob_numobjs].height = PLAYER_HEIGHT;
+  guard1 = &unrob_objects[unrob_numobjs];
+  unrob_numobjs++;
+
+  unrob_objects[unrob_numobjs].position.x = map->guards[1].spawn_point.x;
+  unrob_objects[unrob_numobjs].position.y = map->guards[1].spawn_point.y;
+  unrob_objects[unrob_numobjs].width = PLAYER_WIDTH;
+  unrob_objects[unrob_numobjs].height = PLAYER_HEIGHT;
+  guard2 = &unrob_objects[unrob_numobjs];
   unrob_numobjs++;
 
   for (int i = 0; i < map->num_items; i++) {
     map->items[i].entity.position = map->spawn_point;
   }
+
+  copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
+            get_player_sprite(), player_sprite_buffer);
+
+  // TODO: Replace with actual guard sprite
+  copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
+            get_player_sprite(), guard_1_sprite_buffer);
 }
 
 int selected_item = 0;
@@ -90,10 +117,81 @@ void initialize_buffers() {
   }
 
   // Copy the initial portion of the background to the cache buffer
-  copy_rect(map1.spawn_point.x, map1.spawn_point.y, 0, 0, SCREEN_WIDTH,
+  copy_rect(map->spawn_point.x, map->spawn_point.y, 0, 0, SCREEN_WIDTH,
             PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap, background_cache_buffer);
 
-  prev_pixels = get_rendered_pixels();
+  copy_rect(map->guards[0].spawn_point.x, map->guards[0].spawn_point.y, 0, 0,
+            SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
+            background_guard_1_cache_buffer);
+
+  copy_rect(map->guards[1].spawn_point.x, map->guards[1].spawn_point.y, 0, 0,
+            SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
+            background_guard_2_cache_buffer);
+}
+
+void draw_guard(Guard *guard, Bitmap *guard_bg_cache_buffer,
+                Bitmap *guard_sprite_buffer) {
+  if (!guard)
+    return; // Ensure guard object exists
+
+  long long prev_pixels = get_rendered_pixels();
+
+  // Copy the background to the guard's position
+  copy_rect(guard->entity.position.x, guard->entity.position.y, 0, 0,
+            SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
+            guard_bg_cache_buffer);
+
+  // Draw the guard sprite
+  draw_rect_from_bitmap(guard->entity.position.x, guard->entity.position.y,
+                        PLAYER_WIDTH, PLAYER_HEIGHT, guard_sprite_buffer);
+
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" | ");
+  print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
+}
+
+void move_guard(Guard *guard, Bitmap *guard_sprite_buffer,
+                Bitmap *guard_bg_cache_buffer) {
+  int force_redraw = false;
+
+  switch (guard->direction) {
+  case UP:
+    if (guard->direction != UP) {
+      guard->direction = UP;
+      force_redraw = true;
+    }
+    break;
+  case DOWN:
+    if (guard->direction != DOWN) {
+      guard->direction = DOWN;
+      force_redraw = true;
+    }
+    break;
+  case LEFT:
+    if (guard->direction != LEFT) {
+      guard->direction = LEFT;
+      force_redraw = true;
+    }
+    break;
+  case RIGHT:
+    if (guard->direction != RIGHT) {
+      guard->direction = RIGHT;
+      force_redraw = true;
+    }
+    break;
+
+  default:
+    return; // Do nothing if another key is pressed
+  }
+
+  // if (force_redraw)
+  // copy_rect(0, 0, 0, 0, GUARD_WIDTH, GUARD_WIDTH, GUARD_HEIGHT,
+  //           get_guard_sprite(), guard_sprite_buffer);
+
+  move_in_boundaries(map->boundaries, map->num_boundaries, guard->direction,
+                     &guard->entity.position, map->bitmap,
+                     guard_bg_cache_buffer, guard_sprite_buffer, force_redraw);
 }
 
 void start_unrob_game() {
@@ -105,6 +203,11 @@ void start_unrob_game() {
   initialize_buffers();
 
   draw_player();
+  draw_guard(&map->guards[0], background_guard_1_cache_buffer,
+             guard_1_sprite_buffer);
+  draw_guard(&map->guards[1], background_guard_2_cache_buffer,
+             guard_2_sprite_buffer);
+
   draw_inventory(selected_item);
   draw_placement_boxes(map->items, map->num_items, EMPTY_BOX);
 
@@ -120,12 +223,16 @@ void countdown(void) {
   if (game_time) {
     game_time--;
     draw_time();
+
+    move_guard(&map->guards[0], guard_1_sprite_buffer,
+               background_guard_1_cache_buffer);
+    move_guard(&map->guards[1], guard_2_sprite_buffer,
+               background_guard_2_cache_buffer);
   } else {
     // Game over?
   }
 }
 
-enum { UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3 };
 static int player_direction = UP;
 
 const Bitmap *get_player_sprite() {
@@ -307,9 +414,6 @@ void draw_player() {
   copy_rect(player->position.x, player->position.y, 0, 0, SCREEN_WIDTH,
             PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap, background_cache_buffer);
 
-  copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
-            get_player_sprite(), player_sprite_buffer);
-
   // Draw the player sprite
   // draw_rect_from_bitmap(player->position.x, player->position.y,
   // PLAYER_WIDTH,
@@ -401,11 +505,18 @@ void move_player(char key) {
     return; // Do nothing if another key is pressed
   }
 
+  // Display position change
+  uart_puts("\n\nReceived key: ");
+  uart_puts(COLOR.TEXT.BLUE);
+  char2upper(&key);
+  uart_sendc(key);
+  uart_puts(COLOR.RESET);
+
   if (force_redraw)
     copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
               get_player_sprite(), player_sprite_buffer);
 
-  move_in_boundaries(map->boundaries, map->num_boundaries, key,
+  move_in_boundaries(map->boundaries, map->num_boundaries, player_direction,
                      &player->position, map->bitmap, background_cache_buffer,
                      player_sprite_buffer, force_redraw);
   update_placement_boxes(player->position, map->items, map->num_items);
@@ -497,6 +608,11 @@ void toggle_collision_debugger() {
     print_pixel_diff(prev_pixels, "[DRAWN MAP]");
 
     draw_player();
+    draw_guard(&map->guards[0], background_guard_1_cache_buffer,
+               guard_1_sprite_buffer);
+    draw_guard(&map->guards[1], background_guard_2_cache_buffer,
+               guard_2_sprite_buffer);
+
     draw_time();
     draw_inventory(selected_item);
     draw_placement_boxes(map->items, map->num_items, EMPTY_BOX);

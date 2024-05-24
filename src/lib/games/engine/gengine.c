@@ -78,23 +78,23 @@ int is_intersect(const Position *p1, const Position *q1, const Position *p2,
 }
 
 void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
-                        char key, Position *current_pos,
+                        enum Direction direction, Position *current_pos,
                         const unsigned long *game_map_bitmap,
                         unsigned long *background_cache_buffer,
                         unsigned long *player_sprite_buffer, int force_redraw) {
   int offsetX = 0, offsetY = 0;
 
-  switch (key) {
-  case 'w':
+  switch (direction) {
+  case UP:
     offsetY = -GENGINE_STEP_SIZE;
     break;
-  case 's':
+  case DOWN:
     offsetY = GENGINE_STEP_SIZE;
     break;
-  case 'a':
+  case LEFT:
     offsetX = -GENGINE_STEP_SIZE;
     break;
-  case 'd':
+  case RIGHT:
     offsetX = GENGINE_STEP_SIZE;
     break;
   default:
@@ -111,13 +111,6 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
       {.x = next_pos.x + PLAYER_WIDTH, .y = next_pos.y},
       {.x = next_pos.x, .y = next_pos.y + PLAYER_HEIGHT},
       {.x = next_pos.x + PLAYER_WIDTH, .y = next_pos.y + PLAYER_HEIGHT}};
-
-  // Display position change
-  uart_puts("\n\nReceived key: ");
-  uart_puts(COLOR.TEXT.BLUE);
-  char2upper(&key);
-  uart_sendc(key);
-  uart_puts(COLOR.RESET);
 
   uart_puts("\nPlayer position: ");
   uart_puts("(");

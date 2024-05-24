@@ -5,6 +5,16 @@ const Position spawn_point = {
     .y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT) - 40,
 };
 
+const Position guard_1_spawn_point = {
+    .x = 250,
+    .y = (SCREEN_HEIGHT) / 2 - 200,
+};
+
+const Position guard_2_spawn_point = {
+    .x = 750,
+    .y = (SCREEN_HEIGHT) / 2 + 100,
+};
+
 const Size map_size = {
     .width = SCREEN_WIDTH,
     .height = SCREEN_HEIGHT,
@@ -153,12 +163,47 @@ const Boundary map_boundaries[] = {
      .num_positions = sizeof(map_fountain_boundaries) / sizeof(Position)},
 };
 
+Guard guards[] = {
+    {
+        .spawn_point = guard_1_spawn_point,
+        .entity =
+            {
+                .position = guard_1_spawn_point,
+                .size =
+                    {
+                        .width = PLAYER_WIDTH,
+                        .height = PLAYER_HEIGHT,
+                    },
+            },
+        .step = GENGINE_STEP_SIZE,
+        .direction = RIGHT,
+        // .boundaries = map_boundaries,
+    },
+    {
+        .spawn_point = guard_2_spawn_point,
+        .entity =
+            {
+                .position = guard_2_spawn_point,
+                .size =
+                    {
+                        .width = PLAYER_WIDTH,
+                        .height = PLAYER_HEIGHT,
+                    },
+            },
+        .step = GENGINE_STEP_SIZE,
+        .direction = LEFT,
+        // .boundaries = map_boundaries,
+    },
+};
+
 GameMap map1 = {
     .spawn_point = spawn_point,
+    .boundaries = map_boundaries,
     .bitmap = game_map_1_bitmap,
     .size = map_size,
     .items = map_items,
-    .num_items = sizeof(map_items) / sizeof(Item),
-    .boundaries = map_boundaries,
+    .guards = guards,
     .num_boundaries = sizeof(map_boundaries) / sizeof(Boundary),
+    .num_guards = sizeof(guards) / sizeof(Guard),
+    .num_items = sizeof(map_items) / sizeof(Item),
 };

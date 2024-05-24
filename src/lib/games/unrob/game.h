@@ -2,22 +2,20 @@
 #include "../../headers/gengine-core.h"
 #include "maps.h"
 
-enum { OBJ_NONE = 0, OBJ_PLAYER = 1 };
 enum { EMPTY_BOX = 0, INCORRECT_BOX = 1, CORRECT_BOX = 2, IN_RANGE_BOX = 3 };
 
 static int collision_debugger = 0;
 
 struct Object {
-  unsigned int type;
   unsigned int width;
   unsigned int height;
-  unsigned char alive;
   Position position;
 };
 
 void start_unrob_game();
 void move_player(char key);
 void rotate_inventory(char key);
+const Bitmap *get_player_sprite();
 void draw_player();
 void draw_items();
 void draw_placement_boxes(Item *items, int num_items, int status);

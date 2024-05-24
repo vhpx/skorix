@@ -5,6 +5,8 @@
 #ifndef __GENGINE_CORE_H__
 #define __GENGINE_CORE_H__
 
+enum Direction { UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3 };
+
 typedef unsigned long Bitmap;
 
 typedef struct {
@@ -38,12 +40,22 @@ typedef struct {
 
 typedef struct {
   const Position spawn_point;
+  Entity entity;
+  const int step;
+  enum Direction direction;
+  const Boundary *boundaries;
+} Guard;
+
+typedef struct {
+  const Position spawn_point;
+  const Boundary *boundaries;
   const Bitmap *bitmap;
   const Size size;
   Item *items;
-  const Boundary *boundaries;
-  const int num_items;
+  Guard *guards;
   const int num_boundaries;
+  const int num_items;
+  const int num_guards;
 } GameMap;
 
 struct Game {

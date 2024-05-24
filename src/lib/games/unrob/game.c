@@ -24,11 +24,7 @@ struct Object unrob_objects[MAX_GENGINE_ENTITIES];
 struct Object *player;
 struct Object *guard1;
 struct Object *guard2;
-unsigned long pre_player_movement_cache[2000];
 
-const Position PLAYER_SPAWN = {.x = (SCREEN_WIDTH - PLAYER_WIDTH) / 2,
-                               .y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT) -
-                                    20};
 const Position GUARD1_SPAWN = {.x = 250,
                               .y = (SCREEN_HEIGHT)/2-200};       
                                                            
@@ -50,42 +46,6 @@ unsigned long guard2_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 //4: left
 static int guard1_direction = 2;
 static int guard2_direction = 4;
-
-
-Position map_wall_boundaries[] = {
-    {.x = 105, .y = 145}, {.x = 105, .y = 305}, {.x = 155, .y = 305},
-    {.x = 155, .y = 415}, {.x = 95, .y = 415},  {.x = 95, .y = 635},
-    {.x = 155, .y = 635}, {.x = 155, .y = 735}, {.x = 105, .y = 735},
-    {.x = 105, .y = 865}, {.x = 215, .y = 865}, {.x = 215, .y = 795},
-    {.x = 275, .y = 795}, {.x = 275, .y = 865}, {.x = 435, .y = 865},
-    {.x = 435, .y = 745}, {.x = 455, .y = 745}, {.x = 455, .y = 805},
-    {.x = 465, .y = 805}, {.x = 465, .y = 805}, {.x = 465, .y = 995},
-    {.x = 535, .y = 995}, {.x = 535, .y = 935}, {.x = 545, .y = 935},
-    {.x = 545, .y = 805}, {.x = 555, .y = 805}, {.x = 555, .y = 745},
-    {.x = 575, .y = 745}, {.x = 575, .y = 865}, {.x = 905, .y = 865},
-    {.x = 905, .y = 745}, {.x = 855, .y = 745}, {.x = 855, .y = 635},
-    {.x = 915, .y = 635}, {.x = 915, .y = 425}, {.x = 855, .y = 425},
-    {.x = 855, .y = 305}, {.x = 905, .y = 305}, {.x = 905, .y = 145},
-    {.x = 805, .y = 145}, {.x = 805, .y = 205}, {.x = 755, .y = 205},
-    {.x = 755, .y = 145}, {.x = 675, .y = 145}, {.x = 675, .y = 205},
-    {.x = 555, .y = 205}, {.x = 555, .y = 215}, {.x = 455, .y = 215},
-    {.x = 455, .y = 205}, {.x = 375, .y = 205}, {.x = 375, .y = 145},
-    {.x = 305, .y = 145}, {.x = 305, .y = 215}, {.x = 205, .y = 215},
-    {.x = 205, .y = 145}, {.x = 105, .y = 145},
-};
-
-Position map_fountain_boundaries[] = {
-    {.x = 445, .y = 480}, {.x = 445, .y = 550}, {.x = 470, .y = 575},
-    {.x = 530, .y = 575}, {.x = 555, .y = 550}, {.x = 555, .y = 480},
-    {.x = 530, .y = 455}, {.x = 470, .y = 455},
-};
-
-Boundary map_boundaries[] = {
-    {.positions = map_wall_boundaries,
-     .num_positions = sizeof(map_wall_boundaries) / sizeof(Position)},
-    {.positions = map_fountain_boundaries,
-     .num_positions = sizeof(map_fountain_boundaries) / sizeof(Position)},
-};
 
 void initialize_game() {
   unrob_objects[unrob_numobjs].type = OBJ_PLAYER;
@@ -146,52 +106,37 @@ char *game_score_str = "Score: 000";
 
 void initialize_buffers() {
   long long prev_pixels = get_rendered_pixels();
-
+ 
   uart_puts("\n\nProcessed pixels: ");
   print_rendered_pixels();
   uart_puts(" | ");
   print_pixel_diff(prev_pixels, "[RESET RENDERED PIXELS]");
-
+ 
   // Display the map
   draw_rect_from_bitmap_alpha(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, map->bitmap,
                               50);
-    // wait_msec(5000);
-
-  for (int i = 50; i < 100; i += 5) {
-    draw_rect_from_bitmap_alpha(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
-                                game_map_1_bitmap, i);
-    wait_msec(100);
-  }
-
-  // Copy the initial portion of the background to the cache buffer
-  copy_rect(PLAYER_SPAWN.x, PLAYER_SPAWN.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
-            PLAYER_HEIGHT, game_map_1_bitmap, background_cache_buffer);
-  copy_rect(GUARD1_SPAWN.x, GUARD1_SPAWN.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
-          PLAYER_HEIGHT, game_map_1_bitmap, background_guard1_cache_buffer);
-  copy_rect(GUARD2_SPAWN.x, GUARD2_SPAWN.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
-        PLAYER_HEIGHT, game_map_1_bitmap, background_guard2_cache_buffer);   
-
+ 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
   uart_puts(" | ");
   print_pixel_diff(prev_pixels, "[DRAWN INITIAL MAP] ALPHA: 50");
-
+ 
   move_items_to_final_position();
-
+ 
   wait_msec(1000);
-
+ 
   for (int i = 50; i <= 100; i += 5) {
     prev_pixels = get_rendered_pixels();
     char msg[MAX_STR_LENGTH];
     char alpha[4];
-
+ 
     clrstr(msg);
     clrstr(alpha);
-
+ 
     append_str(msg, "[DRAWN MAP] ALPHA: ");
     int2str(i, alpha);
     append_str(msg, alpha);
-
+ 
     draw_rect_from_bitmap_alpha(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, map->bitmap,
                                 i);
     uart_puts("\nProcessed pixels: ");
@@ -200,12 +145,14 @@ void initialize_buffers() {
     print_pixel_diff(prev_pixels, msg);
     wait_msec(100);
   }
-
+  
   // Copy the initial portion of the background to the cache buffer
-  copy_rect(map1.spawn_point.x, map1.spawn_point.y, 0, 0, SCREEN_WIDTH,
-            PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap, background_cache_buffer);
-
-  prev_pixels = get_rendered_pixels();
+  copy_rect(map->spawn_point.x, map->spawn_point.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
+            PLAYER_HEIGHT, game_map_1_bitmap, background_cache_buffer);
+  copy_rect(GUARD1_SPAWN.x, GUARD1_SPAWN.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
+          PLAYER_HEIGHT, game_map_1_bitmap, background_guard1_cache_buffer);
+  copy_rect(GUARD2_SPAWN.x, GUARD2_SPAWN.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
+        PLAYER_HEIGHT, game_map_1_bitmap, background_guard2_cache_buffer);   
 }
 
 void draw_guard(struct Object *guard, unsigned long *background_cache_buffer, unsigned long *guard_sprite_buffer) {
@@ -269,21 +216,21 @@ void move_guard(struct Object *guard, int max_x, int max_y, int min_x, int min_y
   
   //draw guard
     if(*guard_direction == 1){
-      move_in_boundaries(map_boundaries, sizeof(map_boundaries) / sizeof(Boundary),
+      move_in_boundaries(map->boundaries, map->num_boundaries,
                         'w', &guard->position, game_map_1_bitmap,
-                        background_cache_buffer, guard_sprite_buffer);
+                        background_cache_buffer, guard_sprite_buffer,1);
     }else if(*guard_direction == 2){
-      move_in_boundaries(map_boundaries, sizeof(map_boundaries) / sizeof(Boundary),
+      move_in_boundaries(map->boundaries, map->num_boundaries,
                         'd', &guard->position, game_map_1_bitmap,
-                        background_cache_buffer, guard_sprite_buffer);
+                        background_cache_buffer, guard_sprite_buffer,1);
     }else if(*guard_direction == 3){
-      move_in_boundaries(map_boundaries, sizeof(map_boundaries) / sizeof(Boundary),
+      move_in_boundaries(map->boundaries, map->num_boundaries,
                         's', &guard->position, game_map_1_bitmap,
-                        background_cache_buffer, guard_sprite_buffer);
+                        background_cache_buffer, guard_sprite_buffer,1);
     }else if(*guard_direction == 4){
-      move_in_boundaries(map_boundaries, sizeof(map_boundaries) / sizeof(Boundary),
+      move_in_boundaries(map->boundaries, map->num_boundaries,
                         'a', &guard->position, game_map_1_bitmap,
-                        background_cache_buffer, guard_sprite_buffer);
+                        background_cache_buffer, guard_sprite_buffer,1);
     }
 }
 

@@ -499,6 +499,7 @@ void toggle_collision_debugger() {
     draw_player();
     draw_time();
     draw_inventory(selected_item);
+    draw_placement_boxes(map->items, map->num_items, EMPTY_BOX);
     update_placement_boxes(player->position, map->items, map->num_items);
   }
 }

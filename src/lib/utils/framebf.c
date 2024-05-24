@@ -24,7 +24,7 @@ void reset_rendered_pixels() { rendered_pixels = 0; }
 void print_rendered_pixels() {
   char buffer[20];
   format_num(rendered_pixels, buffer);
-  pad_str(buffer, 10, ' ');
+  pad_str(buffer, 12, ' ');
   uart_puts(COLOR.TEXT.BLUE);
   uart_puts(buffer);
   uart_puts(COLOR.RESET);
@@ -33,7 +33,7 @@ void print_rendered_pixels() {
 void print_pixel_diff(unsigned long long start, char *message) {
   char buffer[20];
   format_num(rendered_pixels - start, buffer);
-  pad_str(buffer, 10, ' ');
+  pad_str(buffer, 12, ' ');
   uart_puts(COLOR.TEXT.GREEN);
   uart_puts("+");
   uart_puts(buffer);

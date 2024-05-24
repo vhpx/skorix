@@ -11,6 +11,7 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
                         enum Direction direction, Position *current_pos,
                         const unsigned long *game_map_bitmap,
                         unsigned long *background_cache_buffer,
-                        unsigned long *player_sprite_buffer, int force_redraw);
+                        unsigned long *player_sprite_buffer, int force_redraw,
+                        int is_guard);
 
 #endif

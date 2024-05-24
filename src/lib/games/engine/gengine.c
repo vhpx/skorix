@@ -81,7 +81,8 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
                         enum Direction direction, Position *current_pos,
                         const unsigned long *game_map_bitmap,
                         unsigned long *background_cache_buffer,
-                        unsigned long *player_sprite_buffer, int force_redraw) {
+                        unsigned long *player_sprite_buffer, int force_redraw,
+                        int is_guard) {
   int offsetX = 0, offsetY = 0;
 
   switch (direction) {
@@ -112,24 +113,26 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
       {.x = next_pos.x, .y = next_pos.y + PLAYER_HEIGHT},
       {.x = next_pos.x + PLAYER_WIDTH, .y = next_pos.y + PLAYER_HEIGHT}};
 
-  uart_puts("\nPlayer position: ");
-  uart_puts("(");
-  uart_puts(COLOR.TEXT.YELLOW);
-  uart_dec(current_pos->x);
-  uart_puts(COLOR.RESET);
-  uart_puts(", ");
-  uart_puts(COLOR.TEXT.YELLOW);
-  uart_dec(current_pos->y);
-  uart_puts(COLOR.RESET);
-  uart_puts(") -> (");
-  uart_puts(COLOR.TEXT.YELLOW);
-  uart_dec(next_pos.x);
-  uart_puts(COLOR.RESET);
-  uart_puts(", ");
-  uart_puts(COLOR.TEXT.YELLOW);
-  uart_dec(next_pos.y);
-  uart_puts(COLOR.RESET);
-  uart_puts(")\n");
+  if (is_guard == false) {
+    uart_puts("\nPlayer position: ");
+    uart_puts("(");
+    uart_puts(COLOR.TEXT.YELLOW);
+    uart_dec(current_pos->x);
+    uart_puts(COLOR.RESET);
+    uart_puts(", ");
+    uart_puts(COLOR.TEXT.YELLOW);
+    uart_dec(current_pos->y);
+    uart_puts(COLOR.RESET);
+    uart_puts(") -> (");
+    uart_puts(COLOR.TEXT.YELLOW);
+    uart_dec(next_pos.x);
+    uart_puts(COLOR.RESET);
+    uart_puts(", ");
+    uart_puts(COLOR.TEXT.YELLOW);
+    uart_dec(next_pos.y);
+    uart_puts(COLOR.RESET);
+    uart_puts(")\n");
+  }
 
   // Calculate rectangular regions that need to be updated
   int erase_x = current_pos->x;
@@ -149,26 +152,28 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
       for (int k = 0; k < 4; k++) {
         if (is_intersect(current_pos, &next_corners[k], boundary_start,
                          boundary_end)) {
-          uart_puts(COLOR.TEXT.RED);
-          uart_puts("Intersection detected with boundary");
-          uart_puts(COLOR.RESET);
-          uart_puts(": (");
-          uart_puts(COLOR.TEXT.YELLOW);
-          uart_dec(boundary_start->x);
-          uart_puts(COLOR.RESET);
-          uart_puts(", ");
-          uart_puts(COLOR.TEXT.YELLOW);
-          uart_dec(boundary_start->y);
-          uart_puts(COLOR.RESET);
-          uart_puts(") -> (");
-          uart_puts(COLOR.TEXT.YELLOW);
-          uart_dec(boundary_end->x);
-          uart_puts(COLOR.RESET);
-          uart_puts(", ");
-          uart_puts(COLOR.TEXT.YELLOW);
-          uart_dec(boundary_end->y);
-          uart_puts(COLOR.RESET);
-          uart_puts(")\n");
+          if (is_guard == false) {
+            uart_puts(COLOR.TEXT.RED);
+            uart_puts("Intersection detected with boundary");
+            uart_puts(COLOR.RESET);
+            uart_puts(": (");
+            uart_puts(COLOR.TEXT.YELLOW);
+            uart_dec(boundary_start->x);
+            uart_puts(COLOR.RESET);
+            uart_puts(", ");
+            uart_puts(COLOR.TEXT.YELLOW);
+            uart_dec(boundary_start->y);
+            uart_puts(COLOR.RESET);
+            uart_puts(") -> (");
+            uart_puts(COLOR.TEXT.YELLOW);
+            uart_dec(boundary_end->x);
+            uart_puts(COLOR.RESET);
+            uart_puts(", ");
+            uart_puts(COLOR.TEXT.YELLOW);
+            uart_dec(boundary_end->y);
+            uart_puts(COLOR.RESET);
+            uart_puts(")\n");
+          }
 
           if (force_redraw == false)
             return; // Intersection detected
@@ -185,7 +190,11 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
           uart_puts("\nProcessed pixels: ");
           print_rendered_pixels();
           uart_puts(" | ");
-          print_pixel_diff(prev_pixels, "[ERASED PLAYER]");
+
+          if (is_guard == false)
+            print_pixel_diff(prev_pixels, "[ERASED PLAYER]");
+          else
+            print_pixel_diff(prev_pixels, "[ERASED GUARD]");
 
           prev_pixels = get_rendered_pixels();
 
@@ -197,7 +206,11 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
           uart_puts("\nProcessed pixels: ");
           print_rendered_pixels();
           uart_puts(" | ");
-          print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
+
+          if (is_guard == false)
+            print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
+          else
+            print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
 
           return; // Intersection detected
         }
@@ -232,7 +245,11 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
   uart_puts(" | ");
-  print_pixel_diff(prev_pixels, "[ERASED PLAYER]");
+
+  if (is_guard == false)
+    print_pixel_diff(prev_pixels, "[ERASED PLAYER]");
+  else
+    print_pixel_diff(prev_pixels, "[ERASED GUARD]");
 
   prev_pixels = get_rendered_pixels();
 
@@ -244,7 +261,11 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
   uart_puts(" | ");
-  print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
+
+  if (is_guard == false)
+    print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
+  else
+    print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
 
   // Update player's current position
   current_pos->x = next_pos.x;

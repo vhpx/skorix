@@ -16,7 +16,7 @@ void start_unrob_game();
 void move_player(char key);
 void rotate_inventory(char key);
 const Bitmap *get_player_sprite();
-const Bitmap *get_guard_sprite();
+const Bitmap *get_guard_sprite(enum Direction direction);
 void draw_player();
 void draw_items();
 void draw_placement_boxes(Item *items, int num_items, int status);

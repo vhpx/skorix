@@ -12,10 +12,10 @@
 #include "../../headers/timer.h"
 #include "../../headers/uart0.h"
 #include "../../headers/utils.h"
+#include "../engine/guard.h"
 #include "../engine/item.h"
 #include "../engine/map-bitmap.h"
 #include "../engine/player.h"
-#include "../engine/guard.h"
 #include "maps.h"
 
 GameMap *map = &map1;
@@ -65,9 +65,9 @@ void initialize_game() {
             get_player_sprite(), player_sprite_buffer);
 
   copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
-            get_guard_sprite(), guard_1_sprite_buffer);
+            get_guard_sprite(map->guards[0].direction), guard_1_sprite_buffer);
   copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
-            get_guard_sprite(), guard_2_sprite_buffer);            
+            get_guard_sprite(map->guards[1].direction), guard_2_sprite_buffer);
 }
 
 int selected_item = 0;
@@ -144,8 +144,8 @@ void draw_guard(Guard *guard, Bitmap *guard_bg_cache_buffer,
             guard_bg_cache_buffer);
 
   // Draw the guard sprite
-  draw_rect_from_bitmap(guard->entity.position.x, guard->entity.position.y,
-                        PLAYER_WIDTH, PLAYER_HEIGHT, guard_sprite_buffer);
+  draw_transparent_image(guard->entity.position.x, guard->entity.position.y,
+                         PLAYER_WIDTH, PLAYER_HEIGHT, guard_sprite_buffer);
 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
@@ -193,7 +193,8 @@ void move_guard(Guard *guard, Bitmap *guard_sprite_buffer,
 
   move_in_boundaries(map->boundaries, map->num_boundaries, guard->direction,
                      &guard->entity.position, map->bitmap,
-                     guard_bg_cache_buffer, guard_sprite_buffer, force_redraw);
+                     guard_bg_cache_buffer, guard_sprite_buffer, force_redraw,
+                     true);
 }
 
 void start_unrob_game() {
@@ -252,8 +253,8 @@ const Bitmap *get_player_sprite() {
   }
 }
 
-const Bitmap *get_guard_sprite() {
-  switch (player_direction) {
+const Bitmap *get_guard_sprite(enum Direction direction) {
+  switch (direction) {
   case UP:
     return guard_up;
   case DOWN:
@@ -432,9 +433,6 @@ void draw_player() {
             PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap, background_cache_buffer);
 
   // Draw the player sprite
-  // draw_rect_from_bitmap(player->position.x, player->position.y,
-  // PLAYER_WIDTH,
-  //                       PLAYER_HEIGHT, player_sprite_buffer);
   draw_transparent_image(player->position.x, player->position.y, PLAYER_WIDTH,
                          PLAYER_HEIGHT, player_sprite_buffer);
 
@@ -535,7 +533,7 @@ void move_player(char key) {
 
   move_in_boundaries(map->boundaries, map->num_boundaries, player_direction,
                      &player->position, map->bitmap, background_cache_buffer,
-                     player_sprite_buffer, force_redraw);
+                     player_sprite_buffer, force_redraw, false);
   update_placement_boxes(player->position, map->items, map->num_items);
 }
 

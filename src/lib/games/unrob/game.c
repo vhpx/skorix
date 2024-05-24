@@ -15,6 +15,7 @@
 #include "../engine/item.h"
 #include "../engine/map-bitmap.h"
 #include "../engine/player.h"
+#include "../engine/guard.h"
 #include "maps.h"
 
 GameMap *map = &map1;
@@ -63,11 +64,10 @@ void initialize_game() {
   copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
             get_player_sprite(), player_sprite_buffer);
 
-  // TODO: Replace with actual guard sprite
   copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
-            get_player_sprite(), guard_1_sprite_buffer);
+            get_guard_sprite(), guard_1_sprite_buffer);
   copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
-            get_player_sprite(), guard_2_sprite_buffer);            
+            get_guard_sprite(), guard_2_sprite_buffer);            
 }
 
 int selected_item = 0;
@@ -249,6 +249,21 @@ const Bitmap *get_player_sprite() {
     return player_right;
   default:
     return player_up;
+  }
+}
+
+const Bitmap *get_guard_sprite() {
+  switch (player_direction) {
+  case UP:
+    return guard_up;
+  case DOWN:
+    return guard_down;
+  case LEFT:
+    return guard_left;
+  case RIGHT:
+    return guard_right;
+  default:
+    return guard_up;
   }
 }
 

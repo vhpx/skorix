@@ -2,7 +2,7 @@
 
 const Position spawn_point = {
     .x = (SCREEN_WIDTH - PLAYER_WIDTH) / 2,
-    .y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT) - 20,
+    .y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT) - 40,
 };
 
 const Size map_size = {

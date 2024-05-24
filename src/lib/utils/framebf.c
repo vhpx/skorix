@@ -136,10 +136,12 @@ void draw_pixel_ARGB_32(int x, int y, unsigned int attr) {
 }
 
 void draw_rect_ARGB_32(int x1, int y1, int x2, int y2, unsigned int attr,
-                       int fill) {
+                       int fill, int line_width) {
   for (int y = y1; y <= y2; y++) {
     for (int x = x1; x <= x2; x++) {
-      if ((x == x1 || x == x2) || (y == y1 || y == y2))
+      if ((x >= x1 && x < x1 + line_width) ||
+          (x <= x2 && x > x2 - line_width) ||
+          (y >= y1 && y < y1 + line_width) || (y <= y2 && y > y2 - line_width))
         draw_pixel_ARGB_32(x, y, attr);
       else if (fill)
         draw_pixel_ARGB_32(x, y, attr);
@@ -186,7 +188,7 @@ void draw_transparent_image(int x, int y, int width, int height,
 }
 
 void draw_rect(int x1, int y1, int x2, int y2, unsigned int attr, int fill) {
-  draw_rect_ARGB_32(x1, y1, x2, y2, attr, fill);
+  draw_rect_ARGB_32(x1, y1, x2, y2, attr, fill, 4);
 }
 
 void draw_line(int x1, int y1, int x2, int y2, unsigned int attr,

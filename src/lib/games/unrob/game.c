@@ -93,12 +93,16 @@ void initialize_buffers() {
 }
 
 void start_unrob_game() {
+  // turn off debugger upon game start
+  collision_debugger = 0;
+
   reset_rendered_pixels();
   initialize_buffers();
   initialize_game();
 
   draw_player();
   draw_inventory(selected_item);
+  draw_place_down_boxes(EMPTY_BOX);
 
   game_time = 61;
   draw_time();
@@ -219,6 +223,49 @@ void draw_items() {
   move_items_to_final_position();
 }
 
+void draw_place_down_boxes(int status) {
+  unsigned int color;
+  switch (status) {
+  case EMPTY_BOX:
+    color = 0xFFFFFF; // White
+    break;
+  case INCORRECT_BOX:
+    color = 0xFF0000; // Red
+    break;
+  case CORRECT_BOX:
+    color = 0x00FF00; // Green
+    break;
+  default:
+    color = 0xFFFFFF; // Default to white
+    break;
+  }
+
+  for (int i = 0; i < map->num_items; i++) {
+    long long prev_pixels = get_rendered_pixels();
+    char msg[MAX_STR_LENGTH];
+    clrstr(msg);
+
+    append_str(msg, "[DRAWN PLACE DOWN BOX] Name: ");
+    append_str(msg, map->items[i].name);
+
+    int x = map->items[i].final_position.x;
+    int y = map->items[i].final_position.y;
+    int width = GENGINE_ITEM_SIZE;
+    int height = GENGINE_ITEM_SIZE; // Ensure the box is a square
+
+    // Draw the box using lines
+    draw_line(x, y + 2, x + width, y + 2, color, 4);           // Top line
+    draw_line(x + 2, y, x + 2, y + height, color, 4);          // Left line
+    draw_line(x + width, y, x + width, y + height, color, 4);  // Right line
+    draw_line(x, y + height, x + width, y + height, color, 4); // Bottom line
+
+    uart_puts("\nProcessed pixels: ");
+    print_rendered_pixels();
+    uart_puts(" | ");
+    print_pixel_diff(prev_pixels, msg);
+  }
+}
+
 void draw_player() {
   if (!player)
     return; // Ensure player object exists
@@ -233,7 +280,8 @@ void draw_player() {
             get_player_sprite(), player_sprite_buffer);
 
   // Draw the player sprite
-  // draw_rect_from_bitmap(player->position.x, player->position.y, PLAYER_WIDTH,
+  // draw_rect_from_bitmap(player->position.x, player->position.y,
+  // PLAYER_WIDTH,
   //                       PLAYER_HEIGHT, player_sprite_buffer);
   draw_transparent_image(player->position.x, player->position.y, PLAYER_WIDTH,
                          PLAYER_HEIGHT, player_sprite_buffer);
@@ -251,9 +299,9 @@ void draw_time() {
 
   long long prev_pixels = get_rendered_pixels();
 
-  draw_rect_ARGB_32(
-      SCREEN_WIDTH - strlen(game_time_str) * FONT_WIDTH * GENGINE_TIME_ZOOM - 1,
-      0, SCREEN_WIDTH, FONT_HEIGHT * GENGINE_TIME_ZOOM, 0x00000000, 1);
+  draw_rect(SCREEN_WIDTH -
+                strlen(game_time_str) * FONT_WIDTH * GENGINE_TIME_ZOOM - 1,
+            0, SCREEN_WIDTH, FONT_HEIGHT * GENGINE_TIME_ZOOM, 0x00000000, 1);
   draw_string(SCREEN_WIDTH -
                   strlen(game_time_str) * FONT_WIDTH * GENGINE_TIME_ZOOM,
               0, game_time_str, 0x00FFFFFF, GENGINE_TIME_ZOOM);
@@ -271,11 +319,10 @@ void draw_score() {
 
   long long prev_pixels = get_rendered_pixels();
 
-  draw_rect_ARGB_32(
-      SCREEN_WIDTH - strlen(game_score_str) * FONT_WIDTH * GENGINE_TIME_ZOOM -
-          1,
-      FONT_HEIGHT * GENGINE_TIME_ZOOM, SCREEN_WIDTH,
-      (FONT_HEIGHT * GENGINE_TIME_ZOOM) * 2, 0x00000000, 1);
+  draw_rect(SCREEN_WIDTH -
+                strlen(game_score_str) * FONT_WIDTH * GENGINE_TIME_ZOOM - 1,
+            FONT_HEIGHT * GENGINE_TIME_ZOOM, SCREEN_WIDTH,
+            (FONT_HEIGHT * GENGINE_TIME_ZOOM) * 2, 0x00000000, 1);
   draw_string(SCREEN_WIDTH -
                   strlen(game_score_str) * FONT_WIDTH * GENGINE_TIME_ZOOM,
               FONT_HEIGHT * GENGINE_TIME_ZOOM, game_score_str, 0x00FFFFFF,
@@ -385,8 +432,6 @@ void draw_inventory(int selected_item) {
   //  item_m1_allArray[selected_item]);
 }
 
-static int collision_debugger = 0;
-
 void toggle_collision_debugger() {
   collision_debugger = !collision_debugger;
 
@@ -405,6 +450,7 @@ void toggle_collision_debugger() {
       print_rendered_pixels();
       uart_puts(" | ");
       print_pixel_diff(prev_pixels, "[DRAWN ITEM]");
+      draw_place_down_boxes(CORRECT_BOX);
     }
   } else {
     long long prev_pixels = get_rendered_pixels();
@@ -418,6 +464,7 @@ void toggle_collision_debugger() {
     draw_player();
     draw_time();
     draw_inventory(selected_item);
+    draw_place_down_boxes(EMPTY_BOX);
   }
 }
 

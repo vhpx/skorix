@@ -392,6 +392,20 @@ void toggle_collision_debugger() {
 
   if (collision_debugger) {
     render_boundaries(map->boundaries, map->num_boundaries);
+    long long prev_pixels = get_rendered_pixels();
+
+    // draw items in debug mode
+    for (int i = 0; i < map->num_items; i++) {
+      prev_pixels = get_rendered_pixels();
+
+      draw_transparent_image(map->items[i].final_position.x,
+                             map->items[i].final_position.y, GENGINE_ITEM_SIZE,
+                             GENGINE_ITEM_SIZE, map->items[i].entity.bitmap);
+      uart_puts("\nProcessed pixels: ");
+      print_rendered_pixels();
+      uart_puts(" | ");
+      print_pixel_diff(prev_pixels, "[DRAWN ITEM]");
+    }
   } else {
     long long prev_pixels = get_rendered_pixels();
 
@@ -404,19 +418,6 @@ void toggle_collision_debugger() {
     draw_player();
     draw_time();
     draw_inventory(selected_item);
-
-    for (int i = 0; i < item_m1_allArray_LEN; i++) { // item map 1
-      prev_pixels = get_rendered_pixels();
-
-      draw_transparent_image(SCREEN_WIDTH / 2 - (7 * GENGINE_ITEM_SIZE) / 2 +
-                                 (i * GENGINE_ITEM_SIZE),
-                             SCREEN_HEIGHT / 2 - 200, GENGINE_ITEM_SIZE,
-                             GENGINE_ITEM_SIZE, item_m1_allArray[i]);
-      uart_puts("\nProcessed pixels: ");
-      print_rendered_pixels();
-      uart_puts(" | ");
-      print_pixel_diff(prev_pixels, "[DRAWN ITEM]");
-    }
   }
 }
 

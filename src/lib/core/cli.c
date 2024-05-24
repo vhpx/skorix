@@ -3,6 +3,7 @@
 
 #include "../../img/img.h"
 #include "../../img/img_src.h"
+#include "../../img/welcome_img.h"
 #include "../../video/video.h"
 #include "../games/unrob/game.h"
 #include "../headers/color.h"
@@ -16,8 +17,9 @@
 #include "../headers/timer.h"
 #include "../headers/uart0.h"
 
+
 // TODO: Reset to CLI after the game is done
-int mode = GAME;
+int mode = CLI;
 
 int cli(char c) {
   static char cli_buffer[MAX_CMD_SIZE];
@@ -62,9 +64,10 @@ int run_cli() {
   // Initialize the frame buffer
   initialize_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH,
                           SCREEN_HEIGHT);
+  display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
 
   // TODO: Remove this after the game is done
-  start_unrob_game();
+  // start_unrob_game();
 
   // Start the CLI
   //   int status = 0;
@@ -100,6 +103,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       // exit all the modes
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       mode = CLI;
+      display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
     }
   } else if (mode == VIDEO) {
     if (c == 'r') {
@@ -117,12 +121,14 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
     } else if (c == 27) { // escape key
       video_exit = 1;
       mode = CLI;
+      display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
     }
 
   } else if (mode == FONT) {
     if (c == 27) { // escape key
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       mode = CLI;
+      display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
     }
 
   } else if (mode == GAME) {
@@ -149,6 +155,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       sys_timer3_irq_disable();
       mode = CLI;
+      display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
     } else {
       // Display position change
       uart_puts(COLOR.TEXT.RED);

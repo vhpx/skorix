@@ -64,3 +64,4 @@ void scroll_image(char key, int image_width, int image_height,
   // redraw image
   display_image(image_width, image_height, image_data);
 }
+

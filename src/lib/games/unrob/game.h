@@ -3,7 +3,7 @@
 #include "maps.h"
 
 enum { OBJ_NONE = 0, OBJ_PLAYER = 1 };
-enum { EMPTY_BOX = 0, INCORRECT_BOX = 1, CORRECT_BOX = 2 };
+enum { EMPTY_BOX = 0, INCORRECT_BOX = 1, CORRECT_BOX = 2, IN_RANGE_BOX = 3 };
 
 static int collision_debugger = 0;
 
@@ -20,10 +20,13 @@ void move_player(char key);
 void rotate_inventory(char key);
 void draw_player();
 void draw_items();
-void draw_place_down_boxes(int status);
+void draw_placement_boxes(Item *items, int num_items, int status);
 void draw_inventory(int selected_item);
-void toggle_collision_debugger();
+void update_placement_boxes(Position player_position, Item *items,
+                            int num_items);
+void move_items_to_final_position();
 int get_collision_debugger_status();
+void toggle_collision_debugger();
 
 void countdown(void);
 void draw_time(void);

@@ -35,6 +35,10 @@ void initialize_game() {
   unrob_objects[unrob_numobjs].alive = 1;
   player = &unrob_objects[unrob_numobjs];
   unrob_numobjs++;
+
+  for (int i = 0; i < map->num_items; i++) {
+    map->items[i].entity.position = map->spawn_point;
+  }
 }
 
 int selected_item = 0;
@@ -60,7 +64,7 @@ void initialize_buffers() {
   uart_puts(" | ");
   print_pixel_diff(prev_pixels, "[DRAWN INITIAL MAP] ALPHA: 50");
 
-  draw_items();
+  move_items_to_final_position();
 
   wait_msec(1000);
 
@@ -95,14 +99,14 @@ void initialize_buffers() {
 void start_unrob_game() {
   // turn off debugger upon game start
   collision_debugger = 0;
-
   reset_rendered_pixels();
-  initialize_buffers();
+
   initialize_game();
+  initialize_buffers();
 
   draw_player();
   draw_inventory(selected_item);
-  draw_place_down_boxes(EMPTY_BOX);
+  draw_placement_boxes(map->items, map->num_items, EMPTY_BOX);
 
   game_time = 61;
   draw_time();
@@ -215,16 +219,40 @@ void move_items_to_final_position() {
   }
 }
 
-void draw_items() {
-  for (int i = 0; i < map->num_items; i++) {
-    map->items[i].entity.position = map->spawn_point;
-  }
+void update_placement_boxes(Position player_position, Item *items,
+                            int num_items) {
+  if (collision_debugger)
+    return; // Do not update placement boxes if the collision debugger is on
 
-  move_items_to_final_position();
+  static int last_item_in_range_index = -1;
+
+  for (int i = 0; i < num_items; i++) {
+    float dx = (player_position.x + PLAYER_WIDTH / 2.0) -
+               (items[i].final_position.x + GENGINE_ITEM_SIZE / 2.0);
+    float dy = (player_position.y + PLAYER_HEIGHT / 2.0) -
+               (items[i].final_position.y + GENGINE_ITEM_SIZE / 2.0);
+    float distance = sqrt(dx * dx + dy * dy);
+
+    if (distance <= GENGINE_PLACEMENT_RANGE) {
+      draw_placement_boxes(
+          &items[i], 1,
+          IN_RANGE_BOX); // Draw the box in yellow for this item only
+      last_item_in_range_index = i;
+    } else if (i == last_item_in_range_index) {
+      if (items[i].placement_position.x != items[i].final_position.x ||
+          items[i].placement_position.y != items[i].final_position.y) {
+        draw_placement_boxes(
+            &items[i], 1,
+            EMPTY_BOX); // Draw the box in white for this item only
+      }
+      last_item_in_range_index = -1; // Reset the last item in range index
+    }
+  }
 }
 
-void draw_place_down_boxes(int status) {
+void draw_placement_boxes(Item *items, int num_items, int status) {
   unsigned int color;
+
   switch (status) {
   case EMPTY_BOX:
     color = 0xFFFFFF; // White
@@ -235,21 +263,24 @@ void draw_place_down_boxes(int status) {
   case CORRECT_BOX:
     color = 0x00FF00; // Green
     break;
+  case IN_RANGE_BOX:
+    color = 0xFFFF00; // Yellow
+    break;
   default:
     color = 0xFFFFFF; // Default to white
     break;
   }
 
-  for (int i = 0; i < map->num_items; i++) {
+  for (int i = 0; i < num_items; i++) {
     long long prev_pixels = get_rendered_pixels();
     char msg[MAX_STR_LENGTH];
     clrstr(msg);
 
     append_str(msg, "[DRAWN PLACE DOWN BOX] Name: ");
-    append_str(msg, map->items[i].name);
+    append_str(msg, items[i].name);
 
-    int x = map->items[i].final_position.x;
-    int y = map->items[i].final_position.y;
+    int x = items[i].final_position.x;
+    int y = items[i].final_position.y;
     int width = GENGINE_ITEM_SIZE;
     int height = GENGINE_ITEM_SIZE; // Ensure the box is a square
 
@@ -377,6 +408,7 @@ void move_player(char key) {
   move_in_boundaries(map->boundaries, map->num_boundaries, key,
                      &player->position, map->bitmap, background_cache_buffer,
                      player_sprite_buffer, force_redraw);
+  update_placement_boxes(player->position, map->items, map->num_items);
 }
 
 void rotate_inventory(char key) {
@@ -432,26 +464,29 @@ void draw_inventory(int selected_item) {
   //  item_m1_allArray[selected_item]);
 }
 
+void draw_items() {
+  long long prev_pixels;
+
+  for (int i = 0; i < map->num_items; i++) {
+    prev_pixels = get_rendered_pixels();
+
+    draw_transparent_image(map->items[i].final_position.x,
+                           map->items[i].final_position.y, GENGINE_ITEM_SIZE,
+                           GENGINE_ITEM_SIZE, map->items[i].entity.bitmap);
+    uart_puts("\nProcessed pixels: ");
+    print_rendered_pixels();
+    uart_puts(" | ");
+    print_pixel_diff(prev_pixels, "[DRAWN ITEM]");
+    draw_placement_boxes(map->items, map->num_items, CORRECT_BOX);
+  }
+}
+
 void toggle_collision_debugger() {
   collision_debugger = !collision_debugger;
 
   if (collision_debugger) {
     render_boundaries(map->boundaries, map->num_boundaries);
-    long long prev_pixels = get_rendered_pixels();
-
-    // draw items in debug mode
-    for (int i = 0; i < map->num_items; i++) {
-      prev_pixels = get_rendered_pixels();
-
-      draw_transparent_image(map->items[i].final_position.x,
-                             map->items[i].final_position.y, GENGINE_ITEM_SIZE,
-                             GENGINE_ITEM_SIZE, map->items[i].entity.bitmap);
-      uart_puts("\nProcessed pixels: ");
-      print_rendered_pixels();
-      uart_puts(" | ");
-      print_pixel_diff(prev_pixels, "[DRAWN ITEM]");
-      draw_place_down_boxes(CORRECT_BOX);
-    }
+    draw_items();
   } else {
     long long prev_pixels = get_rendered_pixels();
 
@@ -464,7 +499,7 @@ void toggle_collision_debugger() {
     draw_player();
     draw_time();
     draw_inventory(selected_item);
-    draw_place_down_boxes(EMPTY_BOX);
+    update_placement_boxes(player->position, map->items, map->num_items);
   }
 }
 

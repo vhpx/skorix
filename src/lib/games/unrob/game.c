@@ -175,10 +175,9 @@ void move_items_to_final_position() {
       }
 
       // Erase the item at its previous position by applying the background
-      // cache with 50% opacity
-      draw_rect_from_bitmap_alpha(current_position.x, current_position.y,
-                                  size.width, size.height, background_cache,
-                                  50);
+      // cache
+      draw_rect_from_bitmap(current_position.x, current_position.y, size.width,
+                            size.height, background_cache);
 
       // Update the background cache to the current background
       copy_rect_alpha(current_position.x, current_position.y, 0, 0,

@@ -14,72 +14,26 @@
 #include "../engine/item.h"
 #include "../engine/map-bitmap.h"
 #include "../engine/player.h"
+#include "maps.h"
 
-struct Object {
-  unsigned int type;
-  Position position;
-  unsigned int width;
-  unsigned int height;
-  unsigned int alive;
-};
-
-enum { OBJ_NONE = 0, OBJ_PLAYER = 1 };
+const GameMap *map = &map1;
 
 unsigned int unrob_numobjs = 0;
 struct Object unrob_objects[MAX_GENGINE_ENTITIES];
 struct Object *player;
 unsigned long pre_player_movement_cache[2000];
 
-const Position PLAYER_SPAWN = {.x = (SCREEN_WIDTH - PLAYER_WIDTH) / 2,
-                               .y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT) -
-                                    20};
-
 unsigned long background_cache_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 unsigned long player_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
-
-Position map_wall_boundaries[] = {
-    {.x = 105, .y = 145}, {.x = 105, .y = 305}, {.x = 155, .y = 305},
-    {.x = 155, .y = 415}, {.x = 95, .y = 415},  {.x = 95, .y = 635},
-    {.x = 155, .y = 635}, {.x = 155, .y = 735}, {.x = 105, .y = 735},
-    {.x = 105, .y = 865}, {.x = 215, .y = 865}, {.x = 215, .y = 795},
-    {.x = 275, .y = 795}, {.x = 275, .y = 865}, {.x = 435, .y = 865},
-    {.x = 435, .y = 745}, {.x = 455, .y = 745}, {.x = 455, .y = 805},
-    {.x = 465, .y = 805}, {.x = 465, .y = 805}, {.x = 465, .y = 995},
-    {.x = 535, .y = 995}, {.x = 535, .y = 935}, {.x = 545, .y = 935},
-    {.x = 545, .y = 805}, {.x = 555, .y = 805}, {.x = 555, .y = 745},
-    {.x = 575, .y = 745}, {.x = 575, .y = 865}, {.x = 905, .y = 865},
-    {.x = 905, .y = 745}, {.x = 855, .y = 745}, {.x = 855, .y = 635},
-    {.x = 915, .y = 635}, {.x = 915, .y = 425}, {.x = 855, .y = 425},
-    {.x = 855, .y = 305}, {.x = 905, .y = 305}, {.x = 905, .y = 145},
-    {.x = 805, .y = 145}, {.x = 805, .y = 205}, {.x = 755, .y = 205},
-    {.x = 755, .y = 145}, {.x = 675, .y = 145}, {.x = 675, .y = 205},
-    {.x = 555, .y = 205}, {.x = 555, .y = 215}, {.x = 455, .y = 215},
-    {.x = 455, .y = 205}, {.x = 375, .y = 205}, {.x = 375, .y = 145},
-    {.x = 305, .y = 145}, {.x = 305, .y = 215}, {.x = 205, .y = 215},
-    {.x = 205, .y = 145}, {.x = 105, .y = 145},
-};
-
-Position map_fountain_boundaries[] = {
-    {.x = 445, .y = 480}, {.x = 445, .y = 550}, {.x = 470, .y = 575},
-    {.x = 530, .y = 575}, {.x = 555, .y = 550}, {.x = 555, .y = 480},
-    {.x = 530, .y = 455}, {.x = 470, .y = 455},
-};
-
-Boundary map_boundaries[] = {
-    {.positions = map_wall_boundaries,
-     .num_positions = sizeof(map_wall_boundaries) / sizeof(Position)},
-    {.positions = map_fountain_boundaries,
-     .num_positions = sizeof(map_fountain_boundaries) / sizeof(Position)},
-};
 
 void initialize_game() {
   //   TODO: Actually fix this
   //   Probable cause: Unfinished unrob_objects initialization
   unrob_objects[unrob_numobjs].type = OBJ_PLAYER;
   wait_msec(200);
-  unrob_objects[unrob_numobjs].position.x = PLAYER_SPAWN.x;
+  unrob_objects[unrob_numobjs].position.x = map1.spawn_point.x;
   wait_msec(200);
-  unrob_objects[unrob_numobjs].position.y = PLAYER_SPAWN.y;
+  unrob_objects[unrob_numobjs].position.y = map1.spawn_point.y;
   wait_msec(200);
   unrob_objects[unrob_numobjs].width = PLAYER_WIDTH;
   wait_msec(200);
@@ -89,29 +43,6 @@ void initialize_game() {
   wait_msec(200);
   player = &unrob_objects[unrob_numobjs];
   unrob_numobjs++;
-
-  for (int i = 0; i < item_m1_allArray_LEN; i++) { // item map 1
-    long long prev_pixels = get_rendered_pixels();
-
-    draw_transparent_image(
-        SCREEN_WIDTH / 2 - (7 * ITEM_SIZE) / 2 + (i * ITEM_SIZE),
-        SCREEN_HEIGHT / 2 - 200, ITEM_SIZE, ITEM_SIZE, item_m1_allArray[i]);
-    uart_puts("\nProcessed pixels: ");
-    print_rendered_pixels();
-    uart_puts(" | ");
-    print_pixel_diff(prev_pixels, "[DRAWN ITEM]");
-  }
-
-  // for(int i = 0; i < item_m2_allArray_LEN; i++) {//map 2
-  //   draw_transparent_image(WIDTH/2 - (7*ITEM_SIZE)/2 + (i*ITEM_SIZE),
-  //   HEIGHT/2 -150, ITEM_SIZE,
-  //                          ITEM_SIZE, item_m2_allArray[i]);
-  // }
-  //   for(int i = 0; i < item_m3_allArray_LEN; i++) {//map 3
-  //   draw_transparent_image(WIDTH/2 - (8*ITEM_SIZE)/2 + (i*ITEM_SIZE),
-  //   HEIGHT/2 -100, ITEM_SIZE,
-  //                          ITEM_SIZE, item_m3_allArray[i]);
-  // }
 }
 
 int selected_item = 0;
@@ -137,7 +68,9 @@ void initialize_buffers() {
   uart_puts(" | ");
   print_pixel_diff(prev_pixels, "[DRAWN INITIAL MAP] ALPHA: 50");
 
-  // wait_msec(5000);
+  draw_items();
+
+  wait_msec(2000);
 
   for (int i = 50; i <= 100; i += 5) {
     prev_pixels = get_rendered_pixels();
@@ -161,8 +94,9 @@ void initialize_buffers() {
   }
 
   // Copy the initial portion of the background to the cache buffer
-  copy_rect(PLAYER_SPAWN.x, PLAYER_SPAWN.y, 0, 0, SCREEN_WIDTH, PLAYER_WIDTH,
-            PLAYER_HEIGHT, game_map_1_bitmap, background_cache_buffer);
+  copy_rect(map1.spawn_point.x, map1.spawn_point.y, 0, 0, SCREEN_WIDTH,
+            PLAYER_WIDTH, PLAYER_HEIGHT, game_map_1_bitmap,
+            background_cache_buffer);
 
   prev_pixels = get_rendered_pixels();
 }
@@ -210,6 +144,35 @@ const unsigned long *get_player_sprite() {
   }
 }
 
+void draw_items() {
+  for (int i = 0; i < item_m1_allArray_LEN; i++) { // item map 1
+    long long prev_pixels = get_rendered_pixels();
+
+    draw_transparent_image(SCREEN_WIDTH / 2 - (7 * GENGINE_ITEM_SIZE) / 2 +
+                               (i * GENGINE_ITEM_SIZE),
+                           SCREEN_HEIGHT / 2 - 200, GENGINE_ITEM_SIZE,
+                           GENGINE_ITEM_SIZE, item_m1_allArray[i]);
+    uart_puts("\nProcessed pixels: ");
+    print_rendered_pixels();
+    uart_puts(" | ");
+    print_pixel_diff(prev_pixels, "[DRAWN ITEM]");
+  }
+
+  // for (int i = 0; i < item_m2_allArray_LEN; i++) { // map 2
+  //   draw_transparent_image(WIDTH / 2 - (7 * GENGINE_ITEM_SIZE) / 2 + (i *
+  //   GENGINE_ITEM_SIZE),
+  //                          HEIGHT / 2 - 150, GENGINE_ITEM_SIZE,
+  //                          GENGINE_ITEM_SIZE, item_m2_allArray[i]);
+  // }
+
+  // for (int i = 0; i < item_m3_allArray_LEN; i++) { // map 3
+  //   draw_transparent_image(WIDTH / 2 - (8 * GENGINE_ITEM_SIZE) / 2 + (i *
+  //   GENGINE_ITEM_SIZE),
+  //                          HEIGHT / 2 - 100, GENGINE_ITEM_SIZE,
+  //                          GENGINE_ITEM_SIZE, item_m3_allArray[i]);
+  // }
+}
+
 void draw_player() {
   if (!player)
     return; // Ensure player object exists
@@ -244,11 +207,11 @@ void draw_time() {
   long long prev_pixels = get_rendered_pixels();
 
   draw_rect_ARGB_32(
-      SCREEN_WIDTH - strlen(game_time_str) * FONT_WIDTH * GAME_TIME_ZOOM - 1, 0,
-      SCREEN_WIDTH, FONT_HEIGHT * GAME_TIME_ZOOM, 0x00000000, 1);
+      SCREEN_WIDTH - strlen(game_time_str) * FONT_WIDTH * GENGINE_TIME_ZOOM - 1,
+      0, SCREEN_WIDTH, FONT_HEIGHT * GENGINE_TIME_ZOOM, 0x00000000, 1);
   draw_string(SCREEN_WIDTH -
-                  strlen(game_time_str) * FONT_WIDTH * GAME_TIME_ZOOM,
-              0, game_time_str, 0x00FFFFFF, GAME_TIME_ZOOM);
+                  strlen(game_time_str) * FONT_WIDTH * GENGINE_TIME_ZOOM,
+              0, game_time_str, 0x00FFFFFF, GENGINE_TIME_ZOOM);
 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
@@ -264,12 +227,14 @@ void draw_score() {
   long long prev_pixels = get_rendered_pixels();
 
   draw_rect_ARGB_32(
-      SCREEN_WIDTH - strlen(game_score_str) * FONT_WIDTH * GAME_TIME_ZOOM - 1,
-      FONT_HEIGHT * GAME_TIME_ZOOM, SCREEN_WIDTH,
-      (FONT_HEIGHT * GAME_TIME_ZOOM) * 2, 0x00000000, 1);
-  draw_string(
-      SCREEN_WIDTH - strlen(game_score_str) * FONT_WIDTH * GAME_TIME_ZOOM,
-      FONT_HEIGHT * GAME_TIME_ZOOM, game_score_str, 0x00FFFFFF, GAME_TIME_ZOOM);
+      SCREEN_WIDTH - strlen(game_score_str) * FONT_WIDTH * GENGINE_TIME_ZOOM -
+          1,
+      FONT_HEIGHT * GENGINE_TIME_ZOOM, SCREEN_WIDTH,
+      (FONT_HEIGHT * GENGINE_TIME_ZOOM) * 2, 0x00000000, 1);
+  draw_string(SCREEN_WIDTH -
+                  strlen(game_score_str) * FONT_WIDTH * GENGINE_TIME_ZOOM,
+              FONT_HEIGHT * GENGINE_TIME_ZOOM, game_score_str, 0x00FFFFFF,
+              GENGINE_TIME_ZOOM);
 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
@@ -317,8 +282,8 @@ void move_player(char key) {
     copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
               get_player_sprite(), player_sprite_buffer);
 
-  move_in_boundaries(map_boundaries, sizeof(map_boundaries) / sizeof(Boundary),
-                     key, &player->position, game_map_1_bitmap,
+  move_in_boundaries(map->boundaries, map->num_boundaries, key,
+                     &player->position, game_map_1_bitmap,
                      background_cache_buffer, player_sprite_buffer,
                      force_redraw);
 }
@@ -362,7 +327,7 @@ void draw_inventory(int selected_item) {
 
   // display top right corner
   draw_rect(0, 0, 110, 110, 0x00ffffff, 1);
-  draw_transparent_image(35, 35, ITEM_SIZE, ITEM_SIZE,
+  draw_transparent_image(35, 35, GENGINE_ITEM_SIZE, GENGINE_ITEM_SIZE,
                          item_m1_allArray[selected_item]);
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
@@ -372,7 +337,7 @@ void draw_inventory(int selected_item) {
   // dispay on top of the player
   //  draw_rect(player->position.x-10, player->position.y-50, 110,110,
   //  0x00ffffff, 1); draw_transparent_image(player->position.x,
-  //  player->position.y - 50, ITEM_SIZE, ITEM_SIZE,
+  //  player->position.y - 50, GENGINE_ITEM_SIZE, GENGINE_ITEM_SIZE,
   //  item_m1_allArray[selected_item]);
 }
 
@@ -382,10 +347,7 @@ void toggle_collision_debugger() {
   collision_debugger = !collision_debugger;
 
   if (collision_debugger) {
-    render_boundary(map_wall_boundaries,
-                    sizeof(map_wall_boundaries) / sizeof(Position));
-    render_boundary(map_fountain_boundaries,
-                    sizeof(map_fountain_boundaries) / sizeof(Position));
+    render_boundaries(map->boundaries, map->num_boundaries);
   } else {
     long long prev_pixels = get_rendered_pixels();
 
@@ -402,9 +364,10 @@ void toggle_collision_debugger() {
     for (int i = 0; i < item_m1_allArray_LEN; i++) { // item map 1
       prev_pixels = get_rendered_pixels();
 
-      draw_transparent_image(
-          SCREEN_WIDTH / 2 - (7 * ITEM_SIZE) / 2 + (i * ITEM_SIZE),
-          SCREEN_HEIGHT / 2 - 200, ITEM_SIZE, ITEM_SIZE, item_m1_allArray[i]);
+      draw_transparent_image(SCREEN_WIDTH / 2 - (7 * GENGINE_ITEM_SIZE) / 2 +
+                                 (i * GENGINE_ITEM_SIZE),
+                             SCREEN_HEIGHT / 2 - 200, GENGINE_ITEM_SIZE,
+                             GENGINE_ITEM_SIZE, item_m1_allArray[i]);
       uart_puts("\nProcessed pixels: ");
       print_rendered_pixels();
       uart_puts(" | ");

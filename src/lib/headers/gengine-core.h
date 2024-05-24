@@ -11,38 +11,41 @@ typedef struct {
 } Position;
 
 typedef struct {
-  Position *positions;
-  int num_positions;
+  const Position *positions;
+  const int num_positions;
 } Boundary;
 
 typedef struct {
-  int width;
-  int height;
+  const int width;
+  const int height;
 } Size;
 
 typedef struct {
   Position position;
-  Size size;
+  const Size size;
+  const unsigned long *bitmap;
 } Entity;
 
 typedef struct {
-  int id;
-  char name[MAX_GENGINE_ITEM_NAME_LENGTH];
-  Position position;
-  Size size;
+  const int id;
+  const char name[MAX_GENGINE_ITEM_NAME_LENGTH];
+  Entity entity;
 } Item;
 
 typedef struct {
-  int rows;
-  int columns;
-  int map[SCREEN_WIDTH][SCREEN_WIDTH];
+  const Position spawn_point;
+  const unsigned long *bitmap;
+  const Size size;
+  const Item *items;
+  const Boundary *boundaries;
+  const int num_boundaries;
 } GameMap;
 
 struct Game {
   Entity entities[MAX_GENGINE_ENTITIES];
-  GameMap maps[MAX_GENGINE_MAPS];
+  GameMap *maps;
   int num_entities;
-  int num_maps;
+  const int num_maps;
 };
 
 #endif

@@ -7,19 +7,30 @@
 #include "../../headers/string.h"
 #include "../../headers/uart0.h"
 
-void render_boundary(Position *boundaries, int num_boundaries) {
+void render_boundary(Position *position, int num_positions) {
+  for (int i = 0; i < num_positions; i++) {
+    draw_line(position[i].x, position[i].y, position[(i + 1) % num_positions].x,
+              position[(i + 1) % num_positions].y, 0xFF0000, 4);
+  }
+}
+
+void render_boundaries(const Boundary *boundaries, int num_boundaries) {
   long long prev_pixels = get_rendered_pixels();
 
   for (int i = 0; i < num_boundaries; i++) {
-    draw_line(boundaries[i].x, boundaries[i].y,
-              boundaries[(i + 1) % num_boundaries].x,
-              boundaries[(i + 1) % num_boundaries].y, 0xFF0000, 4);
+    for (int j = 0; j < boundaries[i].num_positions; j++) {
+      draw_line(
+          boundaries[i].positions[j].x, boundaries[i].positions[j].y,
+          boundaries[i].positions[(j + 1) % boundaries[i].num_positions].x,
+          boundaries[i].positions[(j + 1) % boundaries[i].num_positions].y,
+          0xFF0000, 4);
+    }
   }
 
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
   uart_puts(" | ");
-  print_pixel_diff(prev_pixels, "[DRAWN COLLISION BOUNDARY]");
+  print_pixel_diff(prev_pixels, "[DRAWN COLLISION BOUNDARIES]");
 }
 
 // Function to find the orientation of ordered triplet (p, q, r).
@@ -66,8 +77,8 @@ int is_intersect(const Position *p1, const Position *q1, const Position *p2,
   return false;
 }
 
-void move_in_boundaries(Boundary *boundaries, int num_boundaries, char key,
-                        Position *current_pos,
+void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
+                        char key, Position *current_pos,
                         const unsigned long *game_map_bitmap,
                         unsigned long *background_cache_buffer,
                         unsigned long *player_sprite_buffer, int force_redraw) {
@@ -138,8 +149,8 @@ void move_in_boundaries(Boundary *boundaries, int num_boundaries, char key,
   // Check intersections with boundaries
   for (int i = 0; i < num_boundaries; i++) {
     for (int j = 0; j < boundaries[i].num_positions; j++) {
-      Position *boundary_start = &boundaries[i].positions[j];
-      Position *boundary_end =
+      const Position *boundary_start = &boundaries[i].positions[j];
+      const Position *boundary_end =
           &boundaries[i].positions[(j + 1) % boundaries[i].num_positions];
 
       for (int k = 0; k < 4; k++) {

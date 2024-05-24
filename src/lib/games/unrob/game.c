@@ -66,6 +66,8 @@ void initialize_game() {
 
   copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
             get_guard_sprite(), guard_1_sprite_buffer);
+  copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
+            get_guard_sprite(), guard_2_sprite_buffer);            
 }
 
 int selected_item = 0;

@@ -19,6 +19,8 @@
 #include "maps.h"
 
 GameMap *map = &map1;
+int is_game_over = 0;
+int timer_counter = 0;
 
 unsigned int unrob_numobjs = 0;
 struct Object unrob_objects[MAX_GENGINE_ENTITIES];
@@ -197,9 +199,24 @@ void move_guard(Guard *guard, Bitmap *guard_sprite_buffer,
   move_in_boundaries_guard(map->boundaries, map->num_boundaries, &guard->direction,
                      &guard->entity.position, map->bitmap,
                      guard_bg_cache_buffer, guard_sprite_buffer, force_redraw);
+
+  Position player_bottom_right = {
+      .x = player->position.x + PLAYER_WIDTH,
+      .y = player->position.y + PLAYER_HEIGHT,
+  };
+
+  Position guard_bottom_right = {
+      .x = guard->entity.position.x + PLAYER_WIDTH,
+      .y = guard->entity.position.y + PLAYER_HEIGHT,
+  };
+  if(is_intersect_guard( &guard->entity.position, &guard_bottom_right, &player->position, &player_bottom_right)){
+    game_over();
+  }
 }
 
 void start_unrob_game() {
+  is_game_over = 0;
+  timer_counter = 0;
   // turn off debugger upon game start
   collision_debugger = 0;
   reset_rendered_pixels();
@@ -225,10 +242,17 @@ void start_unrob_game() {
 }
 
 void countdown(void) {
+  timer_counter++;
+  uart_puts("\n\nTimer Counter: ");
+  uart_dec(timer_counter);
+  uart_puts("\n");
   if (game_time) {
-    game_time--;
-    draw_time();
+    if(timer_counter >= 2){
+      timer_counter = 0;
+      game_time--;
+      draw_time();
 
+    }
     move_guard(&map->guards[0], guard_1_sprite_buffer,
                background_guard_1_cache_buffer);
     move_guard(&map->guards[1], guard_2_sprite_buffer,
@@ -245,6 +269,7 @@ void game_over(){
                 SCREEN_HEIGHT / 2 - FONT_HEIGHT * GENGINE_TIME_ZOOM, "GAME OVER",
                 0x00FF0000, GENGINE_TIME_ZOOM);
     sys_timer3_irq_disable();
+    is_game_over = 1;
 }
 
 static int player_direction = UP;
@@ -495,43 +520,10 @@ void draw_score() {
   print_pixel_diff(prev_pixels, "[DRAWN SCORE]");
 }
 
-//write me a function to check if player intersect with a guard
-//the parameter are Position a, Position b, Position c, Position d
-//a is the top right of the player, b is the bottom right of the player
-//c is the top right of the guard, d is the bottom right of the guard
-//return 1 if intersect, 0 if not
-int is_intersect_guard(const Position *a, const Position *b, const Position *c,
-                 const Position *d) {
-//check if any point of the player is inside the guard
-  if((a->x >= c->x && a->x <= d->x) && (a->y >= c->y && a->y <= d->y)){
-    return 1;
-  }
-  if((b->x >= c->x && b->x <= d->x) && (b->y >= c->y && b->y <= d->y)){
-    return 1;
-  }
-  if((a->x >= c->x && a->x <= d->x) && (b->y >= c->y && b->y <= d->y)){
-    return 1;
-  }
-  if((b->x >= c->x && b->x <= d->x) && (a->y >= c->y && a->y <= d->y)){
-    return 1;
-  }
-  //check if any point of the guard is inside the player
-  if((c->x >= a->x && c->x <= b->x) && (c->y >= a->y && c->y <= b->y)){
-    return 1;
-  }
-  if((d->x >= a->x && d->x <= b->x) && (d->y >= a->y && d->y <= b->y)){
-    return 1;
-  }
-  if((c->x >= a->x && c->x <= b->x) && (d->y >= a->y && d->y <= b->y)){
-    return 1;
-  }
-  if((d->x >= a->x && d->x <= b->x) && (c->y >= a->y && c->y <= b->y)){
-    return 1;
-  }
-  return 0;
-}
-
 void move_player(char key) {
+  if(is_game_over){
+    return;
+  }
   if (!player)
     return; // Ensure player object exists
 
@@ -704,3 +696,39 @@ void toggle_collision_debugger() {
 }
 
 int get_collision_debugger_status() { return collision_debugger; }
+
+//write me a function to check if player intersect with a guard
+//the parameter are Position a, Position b, Position c, Position d
+//a is the top right of the player, b is the bottom right of the player
+//c is the top right of the guard, d is the bottom right of the guard
+//return 1 if intersect, 0 if not
+int is_intersect_guard(const Position *a, const Position *b, const Position *c,
+                 const Position *d) {
+//check if any point of the player is inside the guard
+  if((a->x >= c->x && a->x <= d->x) && (a->y >= c->y && a->y <= d->y)){
+    return 1;
+  }
+  if((b->x >= c->x && b->x <= d->x) && (b->y >= c->y && b->y <= d->y)){
+    return 1;
+  }
+  if((a->x >= c->x && a->x <= d->x) && (b->y >= c->y && b->y <= d->y)){
+    return 1;
+  }
+  if((b->x >= c->x && b->x <= d->x) && (a->y >= c->y && a->y <= d->y)){
+    return 1;
+  }
+  //check if any point of the guard is inside the player
+  if((c->x >= a->x && c->x <= b->x) && (c->y >= a->y && c->y <= b->y)){
+    return 1;
+  }
+  if((d->x >= a->x && d->x <= b->x) && (d->y >= a->y && d->y <= b->y)){
+    return 1;
+  }
+  if((c->x >= a->x && c->x <= b->x) && (d->y >= a->y && d->y <= b->y)){
+    return 1;
+  }
+  if((d->x >= a->x && d->x <= b->x) && (c->y >= a->y && c->y <= b->y)){
+    return 1;
+  }
+  return 0;
+}

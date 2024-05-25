@@ -6,7 +6,7 @@
 unsigned int timer1_cmp = 0;
 unsigned int timer1_period = TIMER_CLOCK / 2;
 unsigned int timer3_cmp = 0;
-unsigned int timer3_period = TIMER_CLOCK;
+unsigned int timer3_period = TIMER_CLOCK / 2;
 
 void sys_timer1_init(void) {
     // Set GPIO3 as output

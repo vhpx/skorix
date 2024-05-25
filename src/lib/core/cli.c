@@ -17,7 +17,6 @@
 #include "../headers/timer.h"
 #include "../headers/uart0.h"
 
-
 // TODO: Reset to CLI after the game is done
 int mode = GAME;
 
@@ -64,10 +63,12 @@ int run_cli() {
   // Initialize the frame buffer
   initialize_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH,
                           SCREEN_HEIGHT);
-  display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
 
   // TODO: Remove this after the game is done
-  start_unrob_game();
+  if (mode == GAME)
+    start_unrob_game();
+  else
+    display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
 
   // Start the CLI
   //   int status = 0;

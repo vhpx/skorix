@@ -30,3 +30,4 @@ void toggle_collision_debugger();
 void countdown(void);
 void draw_time(void);
 void draw_score(void);
+void game_over(void);

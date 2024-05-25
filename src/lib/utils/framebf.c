@@ -24,7 +24,7 @@ void reset_rendered_pixels() { rendered_pixels = 0; }
 void print_rendered_pixels() {
   char buffer[20];
   format_num(rendered_pixels, buffer);
-  pad_str(buffer, 10, ' ');
+  pad_str(buffer, 12, ' ');
   uart_puts(COLOR.TEXT.BLUE);
   uart_puts(buffer);
   uart_puts(COLOR.RESET);
@@ -33,7 +33,7 @@ void print_rendered_pixels() {
 void print_pixel_diff(unsigned long long start, char *message) {
   char buffer[20];
   format_num(rendered_pixels - start, buffer);
-  pad_str(buffer, 10, ' ');
+  pad_str(buffer, 12, ' ');
   uart_puts(COLOR.TEXT.GREEN);
   uart_puts("+");
   uart_puts(buffer);
@@ -136,10 +136,12 @@ void draw_pixel_ARGB_32(int x, int y, unsigned int attr) {
 }
 
 void draw_rect_ARGB_32(int x1, int y1, int x2, int y2, unsigned int attr,
-                       int fill) {
+                       int fill, int line_width) {
   for (int y = y1; y <= y2; y++) {
     for (int x = x1; x <= x2; x++) {
-      if ((x == x1 || x == x2) || (y == y1 || y == y2))
+      if ((x >= x1 && x < x1 + line_width) ||
+          (x <= x2 && x > x2 - line_width) ||
+          (y >= y1 && y < y1 + line_width) || (y <= y2 && y > y2 - line_width))
         draw_pixel_ARGB_32(x, y, attr);
       else if (fill)
         draw_pixel_ARGB_32(x, y, attr);
@@ -186,7 +188,7 @@ void draw_transparent_image(int x, int y, int width, int height,
 }
 
 void draw_rect(int x1, int y1, int x2, int y2, unsigned int attr, int fill) {
-  draw_rect_ARGB_32(x1, y1, x2, y2, attr, fill);
+  draw_rect_ARGB_32(x1, y1, x2, y2, attr, fill, 4);
 }
 
 void draw_line(int x1, int y1, int x2, int y2, unsigned int attr,
@@ -304,6 +306,41 @@ void copy_rect(int srcX, int srcY, int destX, int destY, int srcWidth,
   }
 }
 
+void copy_rect_alpha(int srcX, int srcY, int destX, int destY, int srcWidth,
+                     int destWidth, int destHeight,
+                     const unsigned long *srcBitmap, unsigned long *dest,
+                     unsigned int attr) {
+  // Clamp attr to valid range (0-255)
+  if (attr > 255) {
+    attr = 255;
+  }
+
+  for (int j = 0; j < destHeight; j++) {
+    for (int i = 0; i < destWidth; i++) {
+      int srcOffs = ((srcY + j) * srcWidth) + (srcX + i);
+      unsigned long srcPixel = srcBitmap[srcOffs];
+
+      // Extract RGB components from the source pixel
+      unsigned char srcRed = (srcPixel >> 16) & 0xFF;
+      unsigned char srcGreen = (srcPixel >> 8) & 0xFF;
+      unsigned char srcBlue = srcPixel & 0xFF;
+
+      // Apply the alpha blending to the source pixel
+      srcRed = (srcRed * attr) / 255;
+      srcGreen = (srcGreen * attr) / 255;
+      srcBlue = (srcBlue * attr) / 255;
+
+      // Combine the new RGB components with full opacity
+      unsigned int newPixel =
+          (255 << 24) | (srcRed << 16) | (srcGreen << 8) | srcBlue;
+
+      // Copy the blended pixel to the destination
+      int destOffs = ((destY + j) * destWidth) + (destX + i);
+      dest[destOffs] = newPixel;
+    }
+  }
+}
+
 void draw_rect_from_bitmap(int x, int y, int width, int height,
                            const unsigned long *bitmap) {
   for (int j = 0; j < height; j++) {
@@ -355,6 +392,14 @@ void draw_rect_from_bitmap_alpha(int x, int y, int width, int height,
 
       // Draw the blended pixel
       draw_pixel(x + i, y + j, newPixel);
+    }
+  }
+}
+
+void clear_frame_buffer(int width, int height) {
+  for (int y = 0; y < height; ++y) {
+    for (int x = 0; x < width; ++x) {
+      draw_pixel(x, y, 0x00000000); // Draw black or 0xFFFFFFFF for white
     }
   }
 }

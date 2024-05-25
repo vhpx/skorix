@@ -77,6 +77,9 @@ char *game_time_str = "Time: 0:00";
 char *game_score_str = "Score: 000";
 
 void initialize_buffers() {
+  // reset the rendered pixels
+  clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+
   long long prev_pixels = get_rendered_pixels();
 
   uart_puts("\n\nProcessed pixels: ");

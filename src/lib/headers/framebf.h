@@ -36,5 +36,5 @@ void draw_rect_from_bitmap_alpha(int x, int y, int width, int height,
                                  unsigned int attr);
 void draw_transparent_image(int x, int y, int width, int height,
                             const unsigned long *bitmap);
-
+void clear_frame_buffer(int width, int height);
 #endif

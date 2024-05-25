@@ -9,14 +9,6 @@ int x_offset = 0;
 int y_offset = 0;
 const int scroll_step = 20; // step size
 
-void clear_frame_buffer(int width, int height) {
-  for (int y = 0; y < height; ++y) {
-    for (int x = 0; x < width; ++x) {
-      draw_pixel(x, y, 0x00000000); // Draw black or 0xFFFFFFFF for white
-    }
-  }
-}
-
 void display_image(int image_width, int image_height,
                    const unsigned long *image_data) {
   // Clear the screen or framebuffer here
@@ -64,4 +56,3 @@ void scroll_image(char key, int image_width, int image_height,
   // redraw image
   display_image(image_width, image_height, image_data);
 }
-

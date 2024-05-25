@@ -395,3 +395,11 @@ void draw_rect_from_bitmap_alpha(int x, int y, int width, int height,
     }
   }
 }
+
+void clear_frame_buffer(int width, int height) {
+  for (int y = 0; y < height; ++y) {
+    for (int x = 0; x < width; ++x) {
+      draw_pixel(x, y, 0x00000000); // Draw black or 0xFFFFFFFF for white
+    }
+  }
+}

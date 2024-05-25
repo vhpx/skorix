@@ -159,7 +159,8 @@ void draw_guard(Guard *guard, Bitmap *guard_bg_cache_buffer,
 void move_guard(Guard *guard, Bitmap *guard_sprite_buffer,
                 Bitmap *guard_bg_cache_buffer) {
   int force_redraw = false;
-
+  // Bitmap *guard_sprite = get_guard_sprite(guard->direction);
+  guard_sprite_buffer = get_guard_sprite(guard->direction);
   switch (guard->direction) {
   case UP:
     if (guard->direction != UP) {
@@ -185,7 +186,6 @@ void move_guard(Guard *guard, Bitmap *guard_sprite_buffer,
       force_redraw = true;
     }
     break;
-
   default:
     return; // Do nothing if another key is pressed
   }
@@ -194,10 +194,9 @@ void move_guard(Guard *guard, Bitmap *guard_sprite_buffer,
   // copy_rect(0, 0, 0, 0, GUARD_WIDTH, GUARD_WIDTH, GUARD_HEIGHT,
   //           get_guard_sprite(), guard_sprite_buffer);
 
-  move_in_boundaries(map->boundaries, map->num_boundaries, guard->direction,
+  move_in_boundaries_guard(map->boundaries, map->num_boundaries, &guard->direction,
                      &guard->entity.position, map->bitmap,
-                     guard_bg_cache_buffer, guard_sprite_buffer, force_redraw,
-                     true);
+                     guard_bg_cache_buffer, guard_sprite_buffer, force_redraw);
 }
 
 void start_unrob_game() {

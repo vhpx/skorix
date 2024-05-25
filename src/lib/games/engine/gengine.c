@@ -6,6 +6,7 @@
 #include "../../headers/print.h"
 #include "../../headers/string.h"
 #include "../../headers/uart0.h"
+#include "guard.h"
 
 void render_boundary(Position *position, int num_positions) {
   for (int i = 0; i < num_positions; i++) {
@@ -65,17 +66,47 @@ int is_intersect(const Position *p1, const Position *q1, const Position *p2,
   if (o1 != o2 && o3 != o4)
     return true;
 
+  // Check if any of the segments intersect with the X lower end
   if (o1 == 0 && on_segment(p1, p2, q1))
     return true;
+  // Check if any of the segments intersect with the Y lower end
   if (o2 == 0 && on_segment(p1, q2, q1))
     return true;
+  // Check if any of the segments intersect with the X upper end
   if (o3 == 0 && on_segment(p2, p1, q2))
     return true;
+  // Check if any of the segments intersect with the Y upper end
   if (o4 == 0 && on_segment(p2, q1, q2))
     return true;
 
   return false;
 }
+
+// int intersect_end(const Position *p1, const Position *q1, const Position *p2,
+//                  const Position *q2) {
+//   int o1 = orientation(p1, q1, p2);
+//   int o2 = orientation(p1, q1, q2);
+//   int o3 = orientation(p2, q2, p1);
+//   int o4 = orientation(p2, q2, q1);
+
+//   if (o1 != o2 && o3 != o4)
+//     return true;
+
+//   // Check if any of the segments intersect with the X lower end
+//   if (o1 == 0 && on_segment(p1, p2, q1))
+//     return 1;
+//   // Check if any of the segments intersect with the Y lower end
+//   if (o2 == 0 && on_segment(p1, q2, q1))
+//     return 2;
+//   // Check if any of the segments intersect with the X upper end
+//   if (o3 == 0 && on_segment(p2, p1, q2))
+//     return 3;
+//   // Check if any of the segments intersect with the Y upper end
+//   if (o4 == 0 && on_segment(p2, q1, q2))
+//     return 4;
+
+//   return false;
+// }
 
 void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
                         enum Direction direction, Position *current_pos,
@@ -265,6 +296,182 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
   if (is_guard == false)
     print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
   else
+    print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
+
+  // Update player's current position
+  current_pos->x = next_pos.x;
+  current_pos->y = next_pos.y;
+}
+
+//up: 0, down: 1, left: 2, right: 3
+void move_in_boundaries_guard(const Boundary *boundaries, int num_boundaries,
+                        enum Direction *direction, Position *current_pos,
+                        const unsigned long *game_map_bitmap,
+                        unsigned long *background_cache_buffer,
+                        unsigned long *player_sprite_buffer, int force_redraw) {
+  int offsetX = 0, offsetY = 0;
+
+  switch (*direction) {
+  case UP:
+    offsetY = -GENGINE_STEP_SIZE*3;
+    break;
+  case DOWN:
+    offsetY = GENGINE_STEP_SIZE*3;
+    break;
+  case LEFT:
+    offsetX = -GENGINE_STEP_SIZE*3;
+    break;
+  case RIGHT:
+    offsetX = GENGINE_STEP_SIZE*3;
+    break;
+  default:
+    uart_puts("\nInvalid key.");
+    return; // Invalid key
+  }
+
+  Position next_pos = {.x = current_pos->x + offsetX,
+                       .y = current_pos->y + offsetY};
+
+  // Define the four corners of the player's next position
+  Position next_corners[4] = {
+      {.x = next_pos.x, .y = next_pos.y},
+      {.x = next_pos.x + PLAYER_WIDTH, .y = next_pos.y},
+      {.x = next_pos.x, .y = next_pos.y + PLAYER_HEIGHT},
+      {.x = next_pos.x + PLAYER_WIDTH, .y = next_pos.y + PLAYER_HEIGHT}};
+
+    // uart_puts("\nGuard position: ");
+    // uart_puts("(");
+    // uart_puts(COLOR.TEXT.YELLOW);
+    // uart_dec(current_pos->x);
+    // uart_puts(COLOR.RESET);
+    // uart_puts(", ");
+    // uart_puts(COLOR.TEXT.YELLOW);
+    // uart_dec(current_pos->y);
+    // uart_puts(COLOR.RESET);
+    // uart_puts(") -> (");
+    // uart_puts(COLOR.TEXT.YELLOW);
+    // uart_dec(next_pos.x);
+    // uart_puts(COLOR.RESET);
+    // uart_puts(", ");
+    // uart_puts(COLOR.TEXT.YELLOW);
+    // uart_dec(next_pos.y);
+    // uart_puts(COLOR.RESET);
+    // uart_puts(")\n");
+
+  // Calculate rectangular regions that need to be updated
+  int erase_x = current_pos->x;
+  int erase_y = current_pos->y;
+  int redraw_x = next_pos.x;
+  int redraw_y = next_pos.y;
+  int update_width = PLAYER_WIDTH;
+  int update_height = PLAYER_HEIGHT;
+
+  // Check intersections with boundaries
+  for (int i = 0; i < num_boundaries; i++) {
+    for (int j = 0; j < boundaries[i].num_positions; j++) {
+      const Position *boundary_start = &boundaries[i].positions[j];
+      const Position *boundary_end =
+          &boundaries[i].positions[(j + 1) % boundaries[i].num_positions];
+
+      for (int k = 0; k < 4; k++) {
+        //check if the guard intersects with the boundaries
+        if (is_intersect(current_pos, &next_corners[k], boundary_start,
+             boundary_end)) {
+            // Intersection detected with boundary
+            // Change direction to opposite
+            switch (*direction) {
+          case UP:
+              *direction = DOWN;
+              break;
+          case DOWN:
+              *direction = UP;
+              break;
+          case LEFT:
+              *direction = RIGHT;
+              break;
+          case RIGHT:
+              *direction = LEFT;
+              break;
+          default:
+              break;
+            }
+            
+            // Adjust redraw region to the intersection point
+            redraw_x = current_pos->x;
+            redraw_y = current_pos->y;
+
+            long long prev_pixels = get_rendered_pixels();
+
+            // Update only the necessary portions of the background and sprite
+            draw_rect_from_bitmap(erase_x, erase_y, update_width, update_height,
+              background_cache_buffer);
+            uart_puts("\nProcessed pixels: ");
+            print_rendered_pixels();
+            uart_puts(" | ");
+
+            print_pixel_diff(prev_pixels, "[ERASED GUARD]");
+
+            prev_pixels = get_rendered_pixels();
+
+            copy_rect(redraw_x, redraw_y, 0, 0, SCREEN_WIDTH, update_width,
+              update_height, game_map_bitmap, background_cache_buffer);
+            draw_transparent_image(redraw_x, redraw_y, update_width,
+              update_height, player_sprite_buffer);
+
+            uart_puts("\nProcessed pixels: ");
+            print_rendered_pixels();
+            uart_puts(" | ");
+
+            print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
+
+            return ; // Intersection detected
+        }
+      }
+    }
+  }
+
+  // Adjust regions if the player moved partially off-screen
+  if (erase_x < 0) {
+    erase_x = 0;
+    update_width += current_pos->x;
+  }
+
+  if (erase_y < 0) {
+    erase_y = 0;
+    update_height += current_pos->y;
+  }
+
+  if (redraw_x + PLAYER_WIDTH > SCREEN_WIDTH) {
+    update_width = SCREEN_WIDTH - redraw_x;
+  }
+
+  if (redraw_y + PLAYER_HEIGHT > SCREEN_HEIGHT) {
+    update_height = SCREEN_HEIGHT - redraw_y;
+  }
+
+  long long prev_pixels = get_rendered_pixels();
+
+  // Update only the necessary portions of the background and sprite
+  draw_rect_from_bitmap(erase_x, erase_y, update_width, update_height,
+                        background_cache_buffer);
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" | ");
+
+
+    print_pixel_diff(prev_pixels, "[ERASED GUARD]");
+
+  prev_pixels = get_rendered_pixels();
+
+  copy_rect(redraw_x, redraw_y, 0, 0, SCREEN_WIDTH, update_width, update_height,
+            game_map_bitmap, background_cache_buffer);
+  draw_transparent_image(redraw_x, redraw_y, update_width, update_height,
+                         player_sprite_buffer);
+
+  uart_puts("\nProcessed pixels: ");
+  print_rendered_pixels();
+  uart_puts(" | ");
+
     print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
 
   // Update player's current position

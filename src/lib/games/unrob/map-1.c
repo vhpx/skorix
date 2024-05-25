@@ -6,12 +6,12 @@ const Position spawn_point = {
 };
 
 const Position guard_1_spawn_point = {
-    .x = 250,
+    .x = 750,
     .y = (SCREEN_HEIGHT) / 2 - 200,
 };
 
 const Position guard_2_spawn_point = {
-    .x = 750,
+    .x = 250,
     .y = (SCREEN_HEIGHT) / 2 + 100,
 };
 

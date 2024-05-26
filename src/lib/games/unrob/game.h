@@ -4,8 +4,6 @@
 
 enum { EMPTY_BOX = 0, INCORRECT_BOX = 1, CORRECT_BOX = 2, IN_RANGE_BOX = 3 };
 
-static int collision_debugger = 0;
-
 struct Object {
   unsigned int width;
   unsigned int height;
@@ -24,10 +22,10 @@ void draw_inventory(int selected_item);
 void update_placement_boxes(Position player_position, Item *items,
                             int num_items);
 void move_items_to_final_position();
-int get_collision_debugger_status();
-void toggle_collision_debugger();
+int get_game_debugger_status();
+void toggle_game_debugger();
 int is_intersect_guard(const Position *a, const Position *b, const Position *c,
-                 const Position *d);
+                       const Position *d);
 
 void countdown(void);
 void draw_time(void);

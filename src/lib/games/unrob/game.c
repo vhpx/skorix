@@ -522,9 +522,6 @@ void draw_score() {
 }
 
 void move_player(char key) {
-  if (is_game_over) {
-    return;
-  }
   if (!player)
     return; // Ensure player object exists
 
@@ -553,6 +550,10 @@ void move_player(char key) {
                          &map->guards[1].entity.position,
                          &guard2_bottom_right)) {
     game_over();
+  }
+
+  if (is_game_over) {
+    return;
   }
 
   switch (key) {

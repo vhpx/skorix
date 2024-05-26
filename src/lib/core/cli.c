@@ -174,8 +174,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
         uart_sendc(c);
         uart_puts(COLOR.RESET);
         uart_puts("\nDebug Mode: ");
-        // uart_puts(get_collision_debugger_status() ? COLOR.TEXT.RED
-        //                                           : COLOR.TEXT.GREEN);
+        // uart_puts(get_collision_debugger_status() ? COLOR.TEXT.RED: COLOR.TEXT.GREEN);
         // uart_puts(get_collision_debugger_status() ? "OFF" : "ON");
         uart_puts(COLOR.RESET);
         uart_puts("\n");

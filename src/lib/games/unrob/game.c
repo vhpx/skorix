@@ -136,13 +136,16 @@ void initialize_buffers() {
   copy_rect(map->spawn_point.x, map->spawn_point.y, 0, 0, SCREEN_WIDTH,
             PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap, background_cache_buffer);
 
-  copy_rect(map->guards[0].spawn_point.x, map->guards[0].spawn_point.y, 0, 0,
-            SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
-            background_guard_1_cache_buffer);
+  if(map == &map1){
+    copy_rect(map->guards[0].spawn_point.x, map->guards[0].spawn_point.y, 0, 0,
+          SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
+          background_guard_1_cache_buffer);
 
-  copy_rect(map->guards[1].spawn_point.x, map->guards[1].spawn_point.y, 0, 0,
-            SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
-            background_guard_2_cache_buffer);
+    copy_rect(map->guards[1].spawn_point.x, map->guards[1].spawn_point.y, 0, 0,
+              SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
+              background_guard_2_cache_buffer);
+  }
+
 }
 
 void draw_guard(Guard *guard, Bitmap *guard_bg_cache_buffer,
@@ -225,11 +228,9 @@ void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
   }
 }
 
-// Bitmap game_home_screen_buffer[290 * 360];
 // function to start the game
 void game_start_selector() {
   draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_menu);
-  // copy_rect(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 180, SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 180, 290, 290, 360, game_menu, game_home_screen_buffer);
   draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 250, 220, 70, button_start);
   draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 150, 220, 70, button_exit);
 }
@@ -240,7 +241,6 @@ void select_game_start_exit(char key) {
   switch (key) {
   case 'w':
     //draw the game_home_screen_buffer
-    // draw_rect_from_bitmap(0, 0, 290, 360, game_home_screen_buffer);
     draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 150, 220, 70, button_exit);
     draw_transparent_image(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 280 , 290, 100, button_start_selected);
     select_game_option = 1;
@@ -379,10 +379,12 @@ void countdown(void) {
       game_time--;
       draw_time();
     }
-    move_guard(&map->guards[0], guard_1_sprite_buffer,
-               background_guard_1_cache_buffer);
-    move_guard(&map->guards[1], guard_2_sprite_buffer,
-               background_guard_2_cache_buffer);
+    if(map == &map1){
+      move_guard(&map->guards[0], guard_1_sprite_buffer,
+                  background_guard_1_cache_buffer);
+      move_guard(&map->guards[1], guard_2_sprite_buffer,
+                  background_guard_2_cache_buffer);
+    }
   } else {
     game_over();
   }

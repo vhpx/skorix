@@ -225,24 +225,28 @@ void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
   }
 }
 
+// Bitmap game_home_screen_buffer[290 * 360];
 // function to start the game
-void game_start_seletor() {
+void game_start_selector() {
   draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_menu);
+  // copy_rect(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 180, SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 180, 290, 290, 360, game_menu, game_home_screen_buffer);
   draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 250, 220, 70, button_start);
   draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 150, 220, 70, button_exit);
 }
 
 //function to start or exit game
 void select_game_start_exit(char key) {
+  draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_menu);
   switch (key) {
   case 'w':
-    draw_rect_from_bitmap(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 180, 290, 100, game_menu);
+    //draw the game_home_screen_buffer
+    // draw_rect_from_bitmap(0, 0, 290, 360, game_home_screen_buffer);
     draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 150, 220, 70, button_exit);
     draw_transparent_image(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 280 , 290, 100, button_start_selected);
     select_game_option = 1;
     break;
   case 's':
-    draw_rect_from_bitmap(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 280, 290, 100, game_menu);
+    // draw_rect_from_bitmap(0, 0, 290, 360, game_home_screen_buffer);
     draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 250, 220, 70, button_start);
     draw_transparent_image(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 180, 290, 100, button_exit_selected);
     select_game_option = 0;

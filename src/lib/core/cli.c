@@ -69,9 +69,7 @@ int run_cli() {
 
   // TODO: Remove this after the game is done
   if (mode == GAME)
-    // start_unrob_game();
-    game_start_seletor();
-    // level_selector();
+    game_start_selector();
   else
     display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
 
@@ -255,6 +253,8 @@ void exit_game(){
   mode = CLI;
   reset_console();
   display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
+  is_game_start = 0;
+  is_level_selected = 0;
 }
 
 void handle_backspace(char *cli_buffer, int *index, char *pre_autofilled_cmd,

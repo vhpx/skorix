@@ -549,7 +549,8 @@ void play_game(Tag tags[MAX_CMD_ARGS]) {
     if (strcmp(tags[i].tag, "g") == 0) {
       if (strcmp(tags[i].value, "unrob") == 0 ||
           strcmp(tags[i].value, "ur") == 0) {
-        start_unrob_game();
+        // start_unrob_game();
+        game_start_selector();
       } else {
         uart_puts("\nInvalid game.\n");
         uart_puts("Available games: unrob (ur).\n\n");

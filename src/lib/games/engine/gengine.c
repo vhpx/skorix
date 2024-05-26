@@ -82,33 +82,6 @@ int is_intersect(const Position *p1, const Position *q1, const Position *p2,
   return false;
 }
 
-// int intersect_end(const Position *p1, const Position *q1, const Position *p2,
-//                  const Position *q2) {
-//   int o1 = orientation(p1, q1, p2);
-//   int o2 = orientation(p1, q1, q2);
-//   int o3 = orientation(p2, q2, p1);
-//   int o4 = orientation(p2, q2, q1);
-
-//   if (o1 != o2 && o3 != o4)
-//     return true;
-
-//   // Check if any of the segments intersect with the X lower end
-//   if (o1 == 0 && on_segment(p1, p2, q1))
-//     return 1;
-//   // Check if any of the segments intersect with the Y lower end
-//   if (o2 == 0 && on_segment(p1, q2, q1))
-//     return 2;
-//   // Check if any of the segments intersect with the X upper end
-//   if (o3 == 0 && on_segment(p2, p1, q2))
-//     return 3;
-//   // Check if any of the segments intersect with the Y upper end
-//   if (o4 == 0 && on_segment(p2, q1, q2))
-//     return 4;
-
-//   return false;
-// }
-
-
 void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
                         enum Direction direction, Position *current_pos,
                         const unsigned long *game_map_bitmap,
@@ -304,12 +277,12 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
   current_pos->y = next_pos.y;
 }
 
-//up: 0, down: 1, left: 2, right: 3
 void move_in_boundaries_guard(const Boundary *boundaries, int num_boundaries,
-                        enum Direction *direction, Position *current_pos,
-                        const unsigned long *game_map_bitmap,
-                        unsigned long *background_cache_buffer,
-                        unsigned long *player_sprite_buffer, int force_redraw) {
+                              enum Direction *direction, Position *current_pos,
+                              const Bitmap *game_map_bitmap,
+                              const Bitmap *background_cache_buffer,
+                              const Bitmap *player_sprite_buffer,
+                              int force_redraw) {
   int offsetX = 0, offsetY = 0;
 
   switch (*direction) {
@@ -340,24 +313,24 @@ void move_in_boundaries_guard(const Boundary *boundaries, int num_boundaries,
       {.x = next_pos.x, .y = next_pos.y + PLAYER_HEIGHT},
       {.x = next_pos.x + PLAYER_WIDTH, .y = next_pos.y + PLAYER_HEIGHT}};
 
-    // uart_puts("\nGuard position: ");
-    // uart_puts("(");
-    // uart_puts(COLOR.TEXT.YELLOW);
-    // uart_dec(current_pos->x);
-    // uart_puts(COLOR.RESET);
-    // uart_puts(", ");
-    // uart_puts(COLOR.TEXT.YELLOW);
-    // uart_dec(current_pos->y);
-    // uart_puts(COLOR.RESET);
-    // uart_puts(") -> (");
-    // uart_puts(COLOR.TEXT.YELLOW);
-    // uart_dec(next_pos.x);
-    // uart_puts(COLOR.RESET);
-    // uart_puts(", ");
-    // uart_puts(COLOR.TEXT.YELLOW);
-    // uart_dec(next_pos.y);
-    // uart_puts(COLOR.RESET);
-    // uart_puts(")\n");
+  // uart_puts("\nGuard position: ");
+  // uart_puts("(");
+  // uart_puts(COLOR.TEXT.YELLOW);
+  // uart_dec(current_pos->x);
+  // uart_puts(COLOR.RESET);
+  // uart_puts(", ");
+  // uart_puts(COLOR.TEXT.YELLOW);
+  // uart_dec(current_pos->y);
+  // uart_puts(COLOR.RESET);
+  // uart_puts(") -> (");
+  // uart_puts(COLOR.TEXT.YELLOW);
+  // uart_dec(next_pos.x);
+  // uart_puts(COLOR.RESET);
+  // uart_puts(", ");
+  // uart_puts(COLOR.TEXT.YELLOW);
+  // uart_dec(next_pos.y);
+  // uart_puts(COLOR.RESET);
+  // uart_puts(")\n");
 
   // Calculate rectangular regions that need to be updated
   int erase_x = current_pos->x;
@@ -375,57 +348,57 @@ void move_in_boundaries_guard(const Boundary *boundaries, int num_boundaries,
           &boundaries[i].positions[(j + 1) % boundaries[i].num_positions];
 
       for (int k = 0; k < 4; k++) {
-        //check if the guard intersects with the boundaries
+        // check if the guard intersects with the boundaries
         if (is_intersect(current_pos, &next_corners[k], boundary_start,
-             boundary_end)) {
-            // Intersection detected with boundary
-            // Change direction to opposite
-            switch (*direction) {
+                         boundary_end)) {
+          // Intersection detected with boundary
+          // Change direction to opposite
+          switch (*direction) {
           case UP:
-              *direction = DOWN;
-              break;
+            *direction = DOWN;
+            break;
           case DOWN:
-              *direction = UP;
-              break;
+            *direction = UP;
+            break;
           case LEFT:
-              *direction = RIGHT;
-              break;
+            *direction = RIGHT;
+            break;
           case RIGHT:
-              *direction = LEFT;
-              break;
+            *direction = LEFT;
+            break;
           default:
-              break;
-            }
-            
-            // Adjust redraw region to the intersection point
-            redraw_x = current_pos->x;
-            redraw_y = current_pos->y;
+            break;
+          }
 
-            long long prev_pixels = get_rendered_pixels();
+          // Adjust redraw region to the intersection point
+          redraw_x = current_pos->x;
+          redraw_y = current_pos->y;
 
-            // Update only the necessary portions of the background and sprite
-            draw_rect_from_bitmap(erase_x, erase_y, update_width, update_height,
-              background_cache_buffer);
-            uart_puts("\nProcessed pixels: ");
-            print_rendered_pixels();
-            uart_puts(" | ");
+          long long prev_pixels = get_rendered_pixels();
 
-            print_pixel_diff(prev_pixels, "[ERASED GUARD]");
+          // Update only the necessary portions of the background and sprite
+          draw_rect_from_bitmap(erase_x, erase_y, update_width, update_height,
+                                background_cache_buffer);
+          uart_puts("\nProcessed pixels: ");
+          print_rendered_pixels();
+          uart_puts(" | ");
 
-            prev_pixels = get_rendered_pixels();
+          print_pixel_diff(prev_pixels, "[ERASED GUARD]");
 
-            copy_rect(redraw_x, redraw_y, 0, 0, SCREEN_WIDTH, update_width,
-              update_height, game_map_bitmap, background_cache_buffer);
-            draw_transparent_image(redraw_x, redraw_y, update_width,
-              update_height, player_sprite_buffer);
+          prev_pixels = get_rendered_pixels();
 
-            uart_puts("\nProcessed pixels: ");
-            print_rendered_pixels();
-            uart_puts(" | ");
+          copy_rect(redraw_x, redraw_y, 0, 0, SCREEN_WIDTH, update_width,
+                    update_height, game_map_bitmap, background_cache_buffer);
+          draw_transparent_image(redraw_x, redraw_y, update_width,
+                                 update_height, player_sprite_buffer);
 
-            print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
+          uart_puts("\nProcessed pixels: ");
+          print_rendered_pixels();
+          uart_puts(" | ");
 
-            return ; // Intersection detected
+          print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
+
+          return; // Intersection detected
         }
       }
     }
@@ -459,8 +432,7 @@ void move_in_boundaries_guard(const Boundary *boundaries, int num_boundaries,
   print_rendered_pixels();
   uart_puts(" | ");
 
-
-    print_pixel_diff(prev_pixels, "[ERASED GUARD]");
+  print_pixel_diff(prev_pixels, "[ERASED GUARD]");
 
   prev_pixels = get_rendered_pixels();
 
@@ -473,7 +445,7 @@ void move_in_boundaries_guard(const Boundary *boundaries, int num_boundaries,
   print_rendered_pixels();
   uart_puts(" | ");
 
-    print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
+  print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
 
   // Update player's current position
   current_pos->x = next_pos.x;

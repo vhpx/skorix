@@ -1,13 +1,12 @@
 // gengine-core.h
 
 #include "constants.h"
+#include "framebf.h"
 
 #ifndef __GENGINE_CORE_H__
 #define __GENGINE_CORE_H__
 
 enum Direction { UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3 };
-
-typedef unsigned long Bitmap;
 
 typedef struct {
   int x;

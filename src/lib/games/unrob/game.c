@@ -19,6 +19,9 @@
 #include "maps.h"
 
 GameMap *map = &map1;
+
+static int enable_game_debugger = false;
+
 int is_game_over = 0;
 int timer_counter = 0;
 int is_game_start = 0;
@@ -160,8 +163,8 @@ void draw_guard(Guard *guard, Bitmap *guard_bg_cache_buffer,
   print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
 }
 
-void move_guard(Guard *guard, Bitmap *guard_sprite_buffer,
-                Bitmap *guard_bg_cache_buffer) {
+void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
+                const Bitmap *guard_bg_cache_buffer) {
   int force_redraw = false;
   // Bitmap *guard_sprite = get_guard_sprite(guard->direction);
   guard_sprite_buffer = get_guard_sprite(guard->direction);
@@ -218,12 +221,9 @@ void move_guard(Guard *guard, Bitmap *guard_sprite_buffer,
   }
 }
 
+void level_selector() { draw_level_selection_base(1); }
 
-void level_selector() {
-  draw_level_selection_base(1);
-}
-
-//write me a function that I can call to select the level
+// write me a function that I can call to select the level
 void select_level(char key) {
   switch (key) {
   case 'w':
@@ -250,14 +250,13 @@ void select_level(char key) {
     return;
   }
   draw_level_selection_base(selected_level);
-
 }
 
 void draw_level_selection_base(int selected_level) {
-  //black screen
+  // black screen
   draw_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0x00000000, 1);
-  
-  //LEVELS
+
+  // LEVELS
   draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM,
               SCREEN_HEIGHT / 2 - FONT_HEIGHT * GENGINE_TIME_ZOOM, "LEVELS",
               0x00FF0000, GENGINE_TIME_ZOOM);
@@ -271,19 +270,19 @@ void draw_level_selection_base(int selected_level) {
               SCREEN_HEIGHT / 2 + 3 * FONT_HEIGHT * GENGINE_TIME_ZOOM,
               "3. Level 3", 0x00FF00FF, GENGINE_TIME_ZOOM);
 
-  //draw_rect at level selected
-  if(selected_level == 1){
-      draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
-              SCREEN_HEIGHT / 2 + FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
-              0x00FF0000, GENGINE_TIME_ZOOM);
-  } else if(selected_level == 2){
-      draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
-              SCREEN_HEIGHT / 2 + 2 * FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
-              0x00FF0000, GENGINE_TIME_ZOOM);
-  } else if(selected_level == 3){
-      draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
-              SCREEN_HEIGHT / 2 + 3 * FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
-              0x00FF0000, GENGINE_TIME_ZOOM);
+  // draw_rect at level selected
+  if (selected_level == 1) {
+    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
+                SCREEN_HEIGHT / 2 + FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
+                0x00FF0000, GENGINE_TIME_ZOOM);
+  } else if (selected_level == 2) {
+    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
+                SCREEN_HEIGHT / 2 + 2 * FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
+                0x00FF0000, GENGINE_TIME_ZOOM);
+  } else if (selected_level == 3) {
+    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
+                SCREEN_HEIGHT / 2 + 3 * FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
+                0x00FF0000, GENGINE_TIME_ZOOM);
   }
 }
 
@@ -308,7 +307,7 @@ void start_unrob_game() {
   is_game_over = 0;
   timer_counter = 0;
   // turn off debugger upon game start
-  collision_debugger = 0;
+  enable_game_debugger = false;
   reset_rendered_pixels();
 
   initialize_game();
@@ -400,9 +399,9 @@ void move_items_to_final_position() {
 
     const Item item = map->items[i];
     const Position final_position = item.final_position;
-    Position current_position = item.entity.position;
-    const Bitmap *bitmap = item.entity.bitmap;
     const Size size = item.entity.size;
+
+    Position current_position = item.entity.position;
 
     // Create a background cache buffer for this item
     Bitmap background_cache[size.width * size.height];
@@ -471,7 +470,7 @@ void move_items_to_final_position() {
 
 void update_placement_boxes(Position player_position, Item *items,
                             int num_items) {
-  if (collision_debugger)
+  if (enable_game_debugger)
     return; // Do not update placement boxes if the collision debugger is on
 
   static int last_item_in_range_index = -1;
@@ -761,10 +760,10 @@ void draw_items() {
   }
 }
 
-void toggle_collision_debugger() {
-  collision_debugger = !collision_debugger;
+void toggle_game_debugger() {
+  enable_game_debugger = !enable_game_debugger;
 
-  if (collision_debugger) {
+  if (enable_game_debugger) {
     render_boundaries(map->boundaries, map->num_boundaries);
     draw_items();
   } else {
@@ -789,7 +788,7 @@ void toggle_collision_debugger() {
   }
 }
 
-int get_collision_debugger_status() { return collision_debugger; }
+int get_game_debugger_status() { return enable_game_debugger; }
 
 // check if player intersect with a guard
 // the parameter are Position a, Position b, Position c, Position d
@@ -798,31 +797,22 @@ int get_collision_debugger_status() { return collision_debugger; }
 // return 1 if intersect, 0 if not
 int is_intersect_guard(const Position *a, const Position *b, const Position *c,
                        const Position *d) {
-  // check if any point of the player is inside the guard
-  if ((a->x >= c->x && a->x <= d->x) && (a->y >= c->y && a->y <= d->y)) {
+  // Define the player's coordinates explicitly for clarity.
+  Position player_top_left = {min(a->x, b->x), max(a->y, b->y)};
+  Position player_bottom_right = {max(a->x, b->x), min(a->y, b->y)};
+
+  // Define the guard's coordinates explicitly for clarity.
+  Position guard_top_left = {min(c->x, d->x), max(c->y, d->y)};
+  Position guard_bottom_right = {max(c->x, d->x), min(c->y, d->y)};
+
+  // Check for direct overlap:
+  if (player_top_left.x <= guard_bottom_right.x &&
+      player_bottom_right.x >= guard_top_left.x &&
+      player_top_left.y >= guard_bottom_right.y &&
+      player_bottom_right.y <= guard_top_left.y) {
     return 1;
   }
-  if ((b->x >= c->x && b->x <= d->x) && (b->y >= c->y && b->y <= d->y)) {
-    return 1;
-  }
-  if ((a->x >= c->x && a->x <= d->x) && (b->y >= c->y && b->y <= d->y)) {
-    return 1;
-  }
-  if ((b->x >= c->x && b->x <= d->x) && (a->y >= c->y && a->y <= d->y)) {
-    return 1;
-  }
-  // check if any point of the guard is inside the player
-  if ((c->x >= a->x && c->x <= b->x) && (c->y >= a->y && c->y <= b->y)) {
-    return 1;
-  }
-  if ((d->x >= a->x && d->x <= b->x) && (d->y >= a->y && d->y <= b->y)) {
-    return 1;
-  }
-  if ((c->x >= a->x && c->x <= b->x) && (d->y >= a->y && d->y <= b->y)) {
-    return 1;
-  }
-  if ((d->x >= a->x && d->x <= b->x) && (c->y >= a->y && c->y <= b->y)) {
-    return 1;
-  }
-  return 0;
+
+  // Check for edge intersections:
+  return is_intersect(a, b, c, d) ? 1 : 0;
 }

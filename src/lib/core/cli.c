@@ -16,9 +16,12 @@
 #include "../headers/string.h"
 #include "../headers/timer.h"
 #include "../headers/uart0.h"
+#include "../games/engine/game-menu.h"
 
 // TODO: Reset to CLI after the game is done
 int mode = GAME;
+
+int is_game_start = 0;
 
 int cli(char c) {
   static char cli_buffer[MAX_CMD_SIZE];
@@ -198,7 +201,6 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       }
     }
     
-
   } else if (c == '\b' || c == 0x7F) {
     handle_backspace(cli_buffer, index, pre_autofilled_cmd,
                      post_autofilled_cmd);

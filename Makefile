@@ -54,11 +54,13 @@ ifeq ($(OS), Windows_NT)
 	RMVIDEO = if exist .\build\video_src.o del .\build\video_src.o
 	RMMAP = if exist .\build\map-bitmap.o del .\build\map-bitmap.o
 	RMWELCOME = if exist .\build\welcome_img.o del .\build\welcome_img.o
+	RMGAMEMENU = if exist .\build\game-menu.o del .\build\game-menu.o
 else
 	RMIMG = rm -f ./build/img_src.o
 	RMVIDEO = rm -f ./build/video_src.o
 	RMMAP = rm -f ./build/map-bitmap.o
 	RMWELCOME = rm -f ./build/welcome_img.o
+	RMGAMEMENU = rm -f ./build/game-menu.o
 endif
 
 #----------------------------------------
@@ -104,7 +106,7 @@ clean:
 	if exist .\src\build rmdir .\src\build /s /q
 
 #   Remove new build files (.\build)
-	for %%f in (.\build\*.o) do if not %%~nxf == video_src.o (if not %%~nxf == img_src.o (if not %%~nxf == map-bitmap.o (if not %%~nxf == welcome_img.o del %%~f)))
+	for %%f in (.\build\*.o) do if not %%~nxf == video_src.o (if not %%~nxf == img_src.o (if not %%~nxf == map-bitmap.o (if not %%~nxf == welcome_img.o (if not %%~nxf == game-menu.o del %%~f))))
 	if exist .\build\kernel\*.elf del .\build\kernel\*.elf
 	if exist .\build\images\*.img del .\build\images\*.img
 
@@ -113,7 +115,7 @@ clean_mac:
 	rm -rf ./src/build
 	
 #   Remove new build files (./build)
-	find ./build -path '*.o' -not -iname 'video_src.o' -not -iname 'img_src.o' -not -iname 'map-bitmap.o' -not -iname 'welcome_img.o' -exec rm {} \;
+	find ./build -path '*.o' -not -iname 'video_src.o' -not -iname 'img_src.o' -not -iname 'map-bitmap.o' -not -iname 'welcome_img.o' -not -iname 'game-menu.o' -exec rm {} \;
 	rm -f ./build/kernel/*.elf
 	rm -f ./build/images/*.img
 
@@ -128,6 +130,9 @@ clean_map:
 
 clean_welcome:
 	$(RMWELCOME)
+
+clean_gamemenu:
+	$(RMGAMEMENU)
 
 #----------------------------------------
 # Compilation & Linking

@@ -15,9 +15,12 @@
 #include "../headers/string.h"
 #include "../headers/timer.h"
 #include "../headers/uart0.h"
+#include "../games/engine/game-menu.h"
 
 // TODO: Reset to CLI after the game is done
 int mode = GAME;
+
+int is_game_start = 0;
 
 int cli(char c) {
   static char cli_buffer[MAX_CMD_SIZE];
@@ -64,7 +67,7 @@ int run_cli() {
                           SCREEN_HEIGHT);
 
   // TODO: Remove this after the game is done
-  start_unrob_game();
+  // start_unrob_game();
 
   // Start the CLI
   //   int status = 0;
@@ -126,39 +129,74 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
     }
 
   } else if (mode == GAME) {
-    if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
-      move_player(c);
-    } else if (c == 'q' || c == 'e') {
-      rotate_inventory(c);
-    } else if (c == 'c') {
-      // Display position change
-      uart_puts("\n\nReceived key: ");
-      uart_puts(COLOR.TEXT.BLUE);
-      char2upper(&c);
-      uart_sendc(c);
-      uart_puts(COLOR.RESET);
-      uart_puts("\nCollision Debug Mode: ");
-      uart_puts(get_collision_debugger_status() ? COLOR.TEXT.RED
-                                                : COLOR.TEXT.GREEN);
-      uart_puts(get_collision_debugger_status() ? "OFF" : "ON");
-      uart_puts(COLOR.RESET);
-      uart_puts("\n");
-
-      toggle_collision_debugger();
-    } else if (c == 27) { // escape key
-      clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-      sys_timer3_irq_disable();
-      mode = CLI;
-    } else {
-      // Display position change
-      uart_puts(COLOR.TEXT.RED);
-      uart_puts("\n\nReceived invalid key: ");
-      uart_puts(COLOR.TEXT.BLUE);
-      char2upper(&c);
-      uart_sendc(c);
-      uart_puts(COLOR.RESET);
-      uart_puts("\n");
+    draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_menu);
+    draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 250, 220, 70, button_start);
+    draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 150, 220, 70, button_exit);
+    if (!is_game_start) {
+      while (1) {
+        c = uart_getc();
+        if (c == 'w') {
+          draw_rect_from_bitmap(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 180, 290, 100, game_menu);
+          draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 150, 220, 70, button_exit);
+          draw_transparent_image(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 280 , 290, 100, button_start_selected);
+          is_game_start = 1;
+        } else if (c == 's') {
+          draw_rect_from_bitmap(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 280, 290, 100, game_menu);
+          draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 250, 220, 70, button_start);
+          draw_transparent_image(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 180, 290, 100, button_exit_selected);
+          is_game_start = 0;
+        } else if (c == '\n') {
+          if (is_game_start) {
+            clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+            start_unrob_game();
+            mode = GAME;
+          } else {
+            clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+            mode = CLI;
+          }
+          break;
+        } else if (c == 27) { // escape key
+          clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+          sys_timer3_irq_disable();
+          mode = CLI;
+        }
+      }
     }
+    else {
+      if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
+      move_player(c);
+      } else if (c == 'q' || c == 'e') {
+        rotate_inventory(c);
+      } else if (c == 'c') {
+        // Display position change
+        uart_puts("\n\nReceived key: ");
+        uart_puts(COLOR.TEXT.BLUE);
+        char2upper(&c);
+        uart_sendc(c);
+        uart_puts(COLOR.RESET);
+        uart_puts("\nCollision Debug Mode: ");
+        uart_puts(get_collision_debugger_status() ? COLOR.TEXT.RED
+                                                  : COLOR.TEXT.GREEN);
+        uart_puts(get_collision_debugger_status() ? "OFF" : "ON");
+        uart_puts(COLOR.RESET);
+        uart_puts("\n");
+
+        toggle_collision_debugger();
+      } else if (c == 27) { // escape key
+        clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+        sys_timer3_irq_disable();
+        mode = CLI;
+      } else {
+        // Display position change
+        uart_puts(COLOR.TEXT.RED);
+        uart_puts("\n\nReceived invalid key: ");
+        uart_puts(COLOR.TEXT.BLUE);
+        char2upper(&c);
+        uart_sendc(c);
+        uart_puts(COLOR.RESET);
+        uart_puts("\n");
+      }
+  }
 
   } else if (c == '\b' || c == 0x7F) {
     handle_backspace(cli_buffer, index, pre_autofilled_cmd,

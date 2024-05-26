@@ -1,9 +1,12 @@
 // gengine-core.h
 
 #include "constants.h"
+#include "framebf.h"
 
 #ifndef __GENGINE_CORE_H__
 #define __GENGINE_CORE_H__
+
+enum Direction { UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3 };
 
 typedef struct {
   int x;
@@ -11,38 +14,54 @@ typedef struct {
 } Position;
 
 typedef struct {
-  Position *positions;
-  int num_positions;
+  const Position *positions;
+  const int num_positions;
 } Boundary;
 
 typedef struct {
-  int width;
-  int height;
+  const int width;
+  const int height;
 } Size;
 
 typedef struct {
   Position position;
-  Size size;
+  const Size size;
+  const Bitmap *bitmap;
 } Entity;
 
 typedef struct {
-  int id;
-  char name[MAX_GENGINE_ITEM_NAME_LENGTH];
-  Position position;
-  Size size;
+  const int id;
+  char *name;
+  Position final_position;
+  Position placement_position;
+  Entity entity;
 } Item;
 
 typedef struct {
-  int rows;
-  int columns;
-  int map[SCREEN_WIDTH][SCREEN_WIDTH];
+  const Position spawn_point;
+  Entity entity;
+  const int step;
+  enum Direction direction;
+  const Boundary *boundaries;
+} Guard;
+
+typedef struct {
+  const Position spawn_point;
+  const Boundary *boundaries;
+  const Bitmap *bitmap;
+  const Size size;
+  Item *items;
+  Guard *guards;
+  const int num_boundaries;
+  const int num_items;
+  const int num_guards;
 } GameMap;
 
 struct Game {
-  Entity entities[MAX_GENGINE_ENTITIES];
-  GameMap maps[MAX_GENGINE_MAPS];
+  Entity *entities;
+  GameMap *maps;
   int num_entities;
-  int num_maps;
+  const int num_maps;
 };
 
 #endif

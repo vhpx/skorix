@@ -5,6 +5,8 @@
 #ifndef __GENGINE_H__
 #define __GENGINE_H__
 
+int is_intersect(const Position *p1, const Position *q1, const Position *p2,
+                 const Position *q2);
 void render_boundary(Position *boundaries, int num_boundaries);
 void render_boundaries(const Boundary *boundaries, int num_boundaries);
 void move_in_boundaries(const Boundary *boundaries, int num_boundaries,

@@ -108,6 +108,7 @@ int is_intersect(const Position *p1, const Position *q1, const Position *p2,
 //   return false;
 // }
 
+
 void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
                         enum Direction direction, Position *current_pos,
                         const unsigned long *game_map_bitmap,
@@ -313,16 +314,16 @@ void move_in_boundaries_guard(const Boundary *boundaries, int num_boundaries,
 
   switch (*direction) {
   case UP:
-    offsetY = -GENGINE_STEP_SIZE*3;
+    offsetY = -GENGINE_STEP_SIZE;
     break;
   case DOWN:
-    offsetY = GENGINE_STEP_SIZE*3;
+    offsetY = GENGINE_STEP_SIZE;
     break;
   case LEFT:
-    offsetX = -GENGINE_STEP_SIZE*3;
+    offsetX = -GENGINE_STEP_SIZE;
     break;
   case RIGHT:
-    offsetX = GENGINE_STEP_SIZE*3;
+    offsetX = GENGINE_STEP_SIZE;
     break;
   default:
     uart_puts("\nInvalid key.");

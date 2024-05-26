@@ -31,3 +31,14 @@ void countdown(void);
 void draw_time(void);
 void draw_score(void);
 void game_over(void);
+void map_select(int map_num);
+void level_selector();
+void draw_level_selection_base(int selected_level);
+void select_level(char key);
+void game_start_selector();
+void select_game_start_exit(char key);
+
+extern int is_game_start;
+extern int select_game_option;
+extern int is_level_selected;
+extern int selected_level;

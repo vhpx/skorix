@@ -1,3 +1,4 @@
+//map-1.c
 #include "map-1.h"
 
 const Position spawn_point = {

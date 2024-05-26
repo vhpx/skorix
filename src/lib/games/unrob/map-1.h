@@ -1,6 +1,4 @@
-#include "../../headers/constants.h"
-#include "../../headers/gengine-core.h"
-#include "../engine/item.h"
-#include "../engine/map-bitmap.h"
+//map-1.h
+#include "map-constants.h"
 
 extern GameMap map1;

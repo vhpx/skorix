@@ -2,7 +2,7 @@
 extern const unsigned long game_map_1_bitmap[];
 
 // 'map2', 1000x1000px
-// extern const unsigned long game_map_2_bitmap [];
+extern const unsigned long game_map_2_bitmap [];
 
 // 'map3', 1000x1000px
 extern const unsigned long game_map_3_bitmap[];

@@ -25,3 +25,5 @@ void handle_regular_input(char c, char *cli_buffer, int *index,
                           char *pre_autofilled_cmd, char *post_autofilled_cmd);
 int handle_newline(char *cli_buffer, int *index, int *past_cmd_index,
                    CommandHistory *cmd_history);
+void exit_game()
+;

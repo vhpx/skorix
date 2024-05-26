@@ -17,6 +17,8 @@
 #include "../engine/map-bitmap.h"
 #include "../engine/player.h"
 #include "maps.h"
+#include "../engine/game-menu.h"
+
 
 GameMap *map = &map1;
 
@@ -24,6 +26,10 @@ static int enable_game_debugger = false;
 
 int is_game_over = 0;
 int timer_counter = 0;
+int is_game_start = 0;
+int select_game_option = 1;
+int is_level_selected = 0;
+int selected_level = 1;
 
 unsigned int unrob_numobjs = 0;
 struct Object unrob_objects[MAX_GENGINE_ENTITIES];
@@ -130,13 +136,16 @@ void initialize_buffers() {
   copy_rect(map->spawn_point.x, map->spawn_point.y, 0, 0, SCREEN_WIDTH,
             PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap, background_cache_buffer);
 
-  copy_rect(map->guards[0].spawn_point.x, map->guards[0].spawn_point.y, 0, 0,
-            SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
-            background_guard_1_cache_buffer);
+  if(map == &map1){
+    copy_rect(map->guards[0].spawn_point.x, map->guards[0].spawn_point.y, 0, 0,
+          SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
+          background_guard_1_cache_buffer);
 
-  copy_rect(map->guards[1].spawn_point.x, map->guards[1].spawn_point.y, 0, 0,
-            SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
-            background_guard_2_cache_buffer);
+    copy_rect(map->guards[1].spawn_point.x, map->guards[1].spawn_point.y, 0, 0,
+              SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
+              background_guard_2_cache_buffer);
+  }
+
 }
 
 void draw_guard(Guard *guard, Bitmap *guard_bg_cache_buffer,
@@ -219,6 +228,119 @@ void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
   }
 }
 
+// function to start the game
+void game_start_selector() {
+  draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_menu);
+  draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 250, 220, 70, button_start);
+  draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 150, 220, 70, button_exit);
+}
+
+//function to start or exit game
+void select_game_start_exit(char key) {
+  draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_menu);
+  switch (key) {
+  case 'w':
+    //draw the game_home_screen_buffer
+    draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 150, 220, 70, button_exit);
+    draw_transparent_image(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 280 , 290, 100, button_start_selected);
+    select_game_option = 1;
+    break;
+  case 's':
+    // draw_rect_from_bitmap(0, 0, 290, 360, game_home_screen_buffer);
+    draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 250, 220, 70, button_start);
+    draw_transparent_image(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 180, 290, 100, button_exit_selected);
+    select_game_option = 0;
+    break;
+  default:
+    return;
+  }
+}
+
+//default level selector
+void level_selector() { draw_level_selection_base(1); }
+
+// function to select the level
+void select_level(char key) {
+  switch (key) {
+  case 'w':
+    if (selected_level > 1) {
+      selected_level--;
+    }
+    draw_level_selection_base(selected_level);
+    break;
+  case 's':
+    if (selected_level < 3) {
+      selected_level++;
+    }
+    draw_level_selection_base(selected_level);
+    break;
+  case '\n':
+    uart_puts("\n\nSelected Level: ");
+    uart_dec(selected_level);
+    uart_puts("\n\n");
+
+    map_select(selected_level);
+
+    start_unrob_game();
+
+    break;
+  default:
+    return;
+  }
+}
+
+//draw the level selection base like pointing to level 1, level 2, level 3
+void draw_level_selection_base(int selected_level) {
+  // black screen
+  draw_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0x00000000, 1);
+
+  // LEVELS
+  draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM,
+              SCREEN_HEIGHT / 2 - FONT_HEIGHT * GENGINE_TIME_ZOOM, "LEVELS",
+              0x00FF0000, GENGINE_TIME_ZOOM);
+  draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM,
+              SCREEN_HEIGHT / 2 + FONT_HEIGHT * GENGINE_TIME_ZOOM, "1. Level 1",
+              0x0000FF00, GENGINE_TIME_ZOOM);
+  draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM,
+              SCREEN_HEIGHT / 2 + 2 * FONT_HEIGHT * GENGINE_TIME_ZOOM,
+              "2. Level 2", 0x00FFFF00, GENGINE_TIME_ZOOM);
+  draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM,
+              SCREEN_HEIGHT / 2 + 3 * FONT_HEIGHT * GENGINE_TIME_ZOOM,
+              "3. Level 3", 0x00FF00FF, GENGINE_TIME_ZOOM);
+
+  // draw_rect at level selected
+  if (selected_level == 1) {
+    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
+                SCREEN_HEIGHT / 2 + FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
+                0x00FF0000, GENGINE_TIME_ZOOM);
+  } else if (selected_level == 2) {
+    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
+                SCREEN_HEIGHT / 2 + 2 * FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
+                0x00FF0000, GENGINE_TIME_ZOOM);
+  } else if (selected_level == 3) {
+    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
+                SCREEN_HEIGHT / 2 + 3 * FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
+                0x00FF0000, GENGINE_TIME_ZOOM);
+  }
+}
+
+void map_select(int map_num) {
+  switch (map_num) {
+  case 1:
+    map = &map1;
+    break;
+  case 2:
+    map = &map2;
+    break;
+  case 3:
+    map = &map3;
+    break;
+  default:
+    map = &map1;
+    break;
+  }
+}
+
 void start_unrob_game() {
   is_game_over = 0;
   timer_counter = 0;
@@ -257,10 +379,12 @@ void countdown(void) {
       game_time--;
       draw_time();
     }
-    move_guard(&map->guards[0], guard_1_sprite_buffer,
-               background_guard_1_cache_buffer);
-    move_guard(&map->guards[1], guard_2_sprite_buffer,
-               background_guard_2_cache_buffer);
+    if(map == &map1){
+      move_guard(&map->guards[0], guard_1_sprite_buffer,
+                  background_guard_1_cache_buffer);
+      move_guard(&map->guards[1], guard_2_sprite_buffer,
+                  background_guard_2_cache_buffer);
+    }
   } else {
     game_over();
   }
@@ -706,6 +830,11 @@ void toggle_game_debugger() {
 
 int get_game_debugger_status() { return enable_game_debugger; }
 
+// check if player intersect with a guard
+// the parameter are Position a, Position b, Position c, Position d
+// a is the top right of the player, b is the bottom right of the player
+// c is the top right of the guard, d is the bottom right of the guard
+// return 1 if intersect, 0 if not
 int is_intersect_guard(const Position *a, const Position *b, const Position *c,
                        const Position *d) {
   // Define the player's coordinates explicitly for clarity.

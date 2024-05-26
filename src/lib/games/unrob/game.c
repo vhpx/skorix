@@ -17,6 +17,8 @@
 #include "../engine/map-bitmap.h"
 #include "../engine/player.h"
 #include "maps.h"
+#include "../engine/game-menu.h"
+
 
 GameMap *map = &map1;
 
@@ -25,6 +27,8 @@ static int enable_game_debugger = false;
 int is_game_over = 0;
 int timer_counter = 0;
 int is_game_start = 0;
+int select_game_option = 1;
+int is_level_selected = 0;
 int selected_level = 1;
 
 unsigned int unrob_numobjs = 0;
@@ -221,20 +225,50 @@ void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
   }
 }
 
+// function to start the game
+void game_start_seletor() {
+  draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_menu);
+  draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 250, 220, 70, button_start);
+  draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 150, 220, 70, button_exit);
+}
+
+//function to start or exit game
+void select_game_start_exit(char key) {
+  switch (key) {
+  case 'w':
+    draw_rect_from_bitmap(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 180, 290, 100, game_menu);
+    draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 150, 220, 70, button_exit);
+    draw_transparent_image(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 280 , 290, 100, button_start_selected);
+    select_game_option = 1;
+    break;
+  case 's':
+    draw_rect_from_bitmap(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 280, 290, 100, game_menu);
+    draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 250, 220, 70, button_start);
+    draw_transparent_image(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 180, 290, 100, button_exit_selected);
+    select_game_option = 0;
+    break;
+  default:
+    return;
+  }
+}
+
+//default level selector
 void level_selector() { draw_level_selection_base(1); }
 
-// write me a function that I can call to select the level
+// function to select the level
 void select_level(char key) {
   switch (key) {
   case 'w':
     if (selected_level > 1) {
       selected_level--;
     }
+    draw_level_selection_base(selected_level);
     break;
   case 's':
     if (selected_level < 3) {
       selected_level++;
     }
+    draw_level_selection_base(selected_level);
     break;
   case '\n':
     uart_puts("\n\nSelected Level: ");
@@ -249,9 +283,9 @@ void select_level(char key) {
   default:
     return;
   }
-  draw_level_selection_base(selected_level);
 }
 
+//draw the level selection base like pointing to level 1, level 2, level 3
 void draw_level_selection_base(int selected_level) {
   // black screen
   draw_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0x00000000, 1);

@@ -21,7 +21,7 @@
 // TODO: Reset to CLI after the game is done
 int mode = GAME;
 
-int is_game_start = 0;
+// int is_game_start = 0;
 
 int cli(char c) {
   static char cli_buffer[MAX_CMD_SIZE];
@@ -70,7 +70,8 @@ int run_cli() {
   // TODO: Remove this after the game is done
   if (mode == GAME)
     // start_unrob_game();
-    level_selector();
+    game_start_seletor();
+    // level_selector();
   else
     display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
 
@@ -145,10 +146,22 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
   } else if (mode == GAME) {
     if(!is_game_start){
       if(c == 'w' || c == 's'){
+        select_game_start_exit(c);
+      } else if(c == '\n'){
+        if(select_game_option){
+          is_game_start = 1;
+          level_selector();
+        }else{
+          exit_game();
+        }
+      }
+    }
+    else if(!is_level_selected){
+      if(c == 'w' || c == 's'){
         select_level(c);
       } else if(c == '\n'){
         select_level(c);
-        is_game_start = 1;
+        is_level_selected = 1;
       }
     }else{
       if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
@@ -163,13 +176,13 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
         uart_sendc(c);
         uart_puts(COLOR.RESET);
         uart_puts("\nDebug Mode: ");
-        uart_puts(get_collision_debugger_status() ? COLOR.TEXT.RED
-                                                  : COLOR.TEXT.GREEN);
-        uart_puts(get_collision_debugger_status() ? "OFF" : "ON");
+        // uart_puts(get_collision_debugger_status() ? COLOR.TEXT.RED
+        //                                           : COLOR.TEXT.GREEN);
+        // uart_puts(get_collision_debugger_status() ? "OFF" : "ON");
         uart_puts(COLOR.RESET);
         uart_puts("\n");
 
-        toggle_collision_debugger();
+        // toggle_collision_debugger();
       } else if (c == 'r') {
         // Display position change
         uart_puts("\n\nReceived key: ");
@@ -183,12 +196,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
         sys_timer3_irq_disable();
         start_unrob_game();
       } else if (c == 27) { // escape key
-        clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-        sys_timer3_irq_disable();
-        uart_puts("\n\nExiting game...\n\n");
-        mode = CLI;
-        reset_console();
-        display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
+        exit_game();
       } else {
         // Display position change
         uart_puts(COLOR.TEXT.RED);
@@ -238,6 +246,15 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
   }
 
   return 0;
+}
+
+void exit_game(){
+    clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+  sys_timer3_irq_disable();
+  uart_puts("\n\nExiting game...\n\n");
+  mode = CLI;
+  reset_console();
+  display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
 }
 
 void handle_backspace(char *cli_buffer, int *index, char *pre_autofilled_cmd,

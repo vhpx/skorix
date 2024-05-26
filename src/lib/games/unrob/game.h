@@ -36,5 +36,7 @@ void game_over(void);
 void map_select(int map_num);
 void level_selector();
 void draw_level_selection_base(int selected_level);
+void select_level(char key);
 
-extern int is_selected;
+extern int is_game_start;
+extern int selected_level;

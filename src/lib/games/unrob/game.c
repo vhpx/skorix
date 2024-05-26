@@ -21,7 +21,8 @@
 GameMap *map = &map1;
 int is_game_over = 0;
 int timer_counter = 0;
-int is_selected = 0;
+int is_game_start = 0;
+int selected_level = 1;
 
 unsigned int unrob_numobjs = 0;
 struct Object unrob_objects[MAX_GENGINE_ENTITIES];
@@ -217,14 +218,13 @@ void move_guard(Guard *guard, Bitmap *guard_sprite_buffer,
   }
 }
 
+
 void level_selector() {
   draw_level_selection_base(1);
-  while (!is_selected) {
-
-  }
 }
 
-int select_level_key_handler(char key, int selected_level) {
+//write me a function that I can call to select the level
+void select_level(char key) {
   switch (key) {
   case 'w':
     if (selected_level > 1) {
@@ -237,11 +237,20 @@ int select_level_key_handler(char key, int selected_level) {
     }
     break;
   case '\n':
-    return selected_level;
-  default:
+    uart_puts("\n\nSelected Level: ");
+    uart_dec(selected_level);
+    uart_puts("\n\n");
+
+    map_select(selected_level);
+
+    start_unrob_game();
+
     break;
+  default:
+    return;
   }
-  return selected_level;
+  draw_level_selection_base(selected_level);
+
 }
 
 void draw_level_selection_base(int selected_level) {
@@ -296,7 +305,6 @@ void map_select(int map_num) {
 }
 
 void start_unrob_game() {
-  level_selector();
   is_game_over = 0;
   timer_counter = 0;
   // turn off debugger upon game start

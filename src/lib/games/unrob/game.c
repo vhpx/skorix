@@ -491,7 +491,7 @@ void move_items_to_final_position() {
 
       // Draw the item sprite
       draw_transparent_image(new_position.x, new_position.y, size.width,
-                             size.height, item.entity.bitmap);
+                             size.height, item.entity.sprite);
 
       // Update the item's position
       current_position = new_position;
@@ -835,7 +835,7 @@ void draw_placed_items() {
     // Draw the item at the entity.position instead of final_position
     draw_transparent_image(map->items[i].entity.position.x,
                            map->items[i].entity.position.y, GENGINE_ITEM_SIZE,
-                           GENGINE_ITEM_SIZE, map->items[i].entity.bitmap);
+                           GENGINE_ITEM_SIZE, map->items[i].entity.sprite);
     uart_puts("\nProcessed pixels: ");
     print_rendered_pixels();
     uart_puts(" | ");
@@ -876,7 +876,7 @@ void draw_final_items() {
 
     draw_transparent_image(map->items[i].final_position.x,
                            map->items[i].final_position.y, GENGINE_ITEM_SIZE,
-                           GENGINE_ITEM_SIZE, map->items[i].entity.bitmap);
+                           GENGINE_ITEM_SIZE, map->items[i].entity.sprite);
     uart_puts("\nProcessed pixels: ");
     print_rendered_pixels();
     uart_puts(" | ");

@@ -26,7 +26,8 @@ typedef struct {
 typedef struct {
   Position position;
   const Size size;
-  const Bitmap *bitmap;
+  Bitmap *sprite;
+  Bitmap *background_cache;
 } Entity;
 
 typedef struct {

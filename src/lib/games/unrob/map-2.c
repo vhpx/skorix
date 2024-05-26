@@ -33,7 +33,7 @@ Item map_2_map_items[] = {
                         .width = GENGINE_ITEM_SIZE,
                         .height = GENGINE_ITEM_SIZE,
                     },
-                .bitmap = item_m1_1,
+                .sprite = item_m1_1,
             },
     },
     {
@@ -48,7 +48,7 @@ Item map_2_map_items[] = {
                         .width = GENGINE_ITEM_SIZE,
                         .height = GENGINE_ITEM_SIZE,
                     },
-                .bitmap = item_m1_2,
+                .sprite = item_m1_2,
             },
     },
     {
@@ -63,7 +63,7 @@ Item map_2_map_items[] = {
                         .width = GENGINE_ITEM_SIZE,
                         .height = GENGINE_ITEM_SIZE,
                     },
-                .bitmap = item_m1_3,
+                .sprite = item_m1_3,
             },
     },
     {
@@ -78,7 +78,7 @@ Item map_2_map_items[] = {
                         .width = GENGINE_ITEM_SIZE,
                         .height = GENGINE_ITEM_SIZE,
                     },
-                .bitmap = item_m1_4,
+                .sprite = item_m1_4,
             },
     },
     {
@@ -93,7 +93,7 @@ Item map_2_map_items[] = {
                         .width = GENGINE_ITEM_SIZE,
                         .height = GENGINE_ITEM_SIZE,
                     },
-                .bitmap = item_m1_5,
+                .sprite = item_m1_5,
             },
     },
     {
@@ -108,7 +108,7 @@ Item map_2_map_items[] = {
                         .width = GENGINE_ITEM_SIZE,
                         .height = GENGINE_ITEM_SIZE,
                     },
-                .bitmap = item_m1_6,
+                .sprite = item_m1_6,
             },
     },
     {
@@ -123,7 +123,7 @@ Item map_2_map_items[] = {
                         .width = GENGINE_ITEM_SIZE,
                         .height = GENGINE_ITEM_SIZE,
                     },
-                .bitmap = item_m1_7,
+                .sprite = item_m1_7,
             },
     },
 };

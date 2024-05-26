@@ -277,10 +277,10 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
   current_pos->y = next_pos.y;
 }
 
-void move_in_boundaries_guard(const Boundary *boundaries, int num_boundaries,
+void move_guard_in_boundaries(const Boundary *boundaries, int num_boundaries,
                               enum Direction *direction, Position *current_pos,
                               const Bitmap *game_map_bitmap,
-                              const Bitmap *background_cache_buffer,
+                              Bitmap *background_cache_buffer,
                               const Bitmap *player_sprite_buffer,
                               int force_redraw) {
   int offsetX = 0, offsetY = 0;

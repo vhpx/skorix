@@ -12,7 +12,7 @@ void initialize_frame_buffer(int physicalWidth, int physicalHeight,
                              int virtualWidth, int virtualHeight);
 void draw_pixel_ARGB_32(int x, int y, unsigned int attr);
 void draw_rect_ARGB_32(int x1, int y1, int x2, int y2, unsigned int attr,
-                       int fill);
+                       int fill, int line_width);
 void draw_pixel(int x, int y, unsigned int attr);
 void draw_image(int x, int y, int width, int height, const Bitmap *bitmap);
 void draw_rect(int x1, int y1, int x2, int y2, unsigned int attr, int fill);
@@ -25,14 +25,14 @@ void move_rect(int x, int y, int width, int height, int xoff, int yoff,
                unsigned char attr);
 void copy_rect(int srcX, int srcY, int destX, int destY, int srcWidth,
                int destWidth, int destHeight, const Bitmap *srcBitmap,
-               const Bitmap *dest);
+               Bitmap *dest);
 void copy_rect_alpha(int srcX, int srcY, int destX, int destY, int srcWidth,
                      int destWidth, int destHeight, const Bitmap *srcBitmap,
                      Bitmap *dest, unsigned int attr);
 void draw_rect_from_bitmap(int x, int y, int width, int height,
                            const Bitmap *bitmap);
 void draw_rect_from_bitmap_alpha(int x, int y, int width, int height,
-                                 const Bitmap *bitmap, unsigned int attr);
+                                 const Bitmap *bitmap, unsigned char opacity);
 void draw_transparent_image(int x, int y, int width, int height,
                             const Bitmap *bitmap);
 void clear_frame_buffer(int width, int height);

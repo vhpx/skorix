@@ -1,3 +1,4 @@
+#include "../headers/framebf.h"
 #include "../headers/color.h"
 #include "../headers/font.h"
 #include "../headers/math.h"
@@ -160,8 +161,8 @@ void draw_transparent_pixel(int x, int y, unsigned int attr) {
   draw_pixel_ARGB_32(x, y, attr);
 }
 
-void draw_base_image(int x, int y, int width, int height,
-                     const unsigned long *bitmap, int transparent) {
+void draw_base_image(int x, int y, int width, int height, const Bitmap *bitmap,
+                     int transparent) {
   for (int j = 0; j < height; j++) {
     for (int i = 0; i < width; i++) {
       // Calculate the offset for the bitmap pixel
@@ -177,13 +178,12 @@ void draw_base_image(int x, int y, int width, int height,
   }
 }
 
-void draw_image(int x, int y, int width, int height,
-                const unsigned long *bitmap) {
+void draw_image(int x, int y, int width, int height, const Bitmap *bitmap) {
   draw_base_image(x, y, width, height, bitmap, 0);
 }
 
 void draw_transparent_image(int x, int y, int width, int height,
-                            const unsigned long *bitmap) {
+                            const Bitmap *bitmap) {
   draw_base_image(x, y, width, height, bitmap, 1);
 }
 
@@ -290,8 +290,8 @@ void move_rect(int x, int y, int width, int height, int xoff, int yoff,
 }
 
 void copy_rect(int srcX, int srcY, int destX, int destY, int srcWidth,
-               int destWidth, int destHeight, const unsigned long *srcBitmap,
-               unsigned long *dest) {
+               int destWidth, int destHeight, const Bitmap *srcBitmap,
+               Bitmap *dest) {
   for (int y = 0; y < destHeight; y++) {
     for (int x = 0; x < destWidth; x++) {
       // Calculate the offset for the source bitmap pixel
@@ -307,9 +307,8 @@ void copy_rect(int srcX, int srcY, int destX, int destY, int srcWidth,
 }
 
 void copy_rect_alpha(int srcX, int srcY, int destX, int destY, int srcWidth,
-                     int destWidth, int destHeight,
-                     const unsigned long *srcBitmap, unsigned long *dest,
-                     unsigned int attr) {
+                     int destWidth, int destHeight, const Bitmap *srcBitmap,
+                     Bitmap *dest, unsigned int attr) {
   // Clamp attr to valid range (0-255)
   if (attr > 255) {
     attr = 255;
@@ -342,7 +341,7 @@ void copy_rect_alpha(int srcX, int srcY, int destX, int destY, int srcWidth,
 }
 
 void draw_rect_from_bitmap(int x, int y, int width, int height,
-                           const unsigned long *bitmap) {
+                           const Bitmap *bitmap) {
   for (int j = 0; j < height; j++) {
     for (int i = 0; i < width; i++) {
       // Calculate the offset for the bitmap pixel
@@ -354,8 +353,7 @@ void draw_rect_from_bitmap(int x, int y, int width, int height,
 }
 
 void draw_rect_from_bitmap_alpha(int x, int y, int width, int height,
-                                 const unsigned long *bitmap,
-                                 unsigned char opacity) {
+                                 const Bitmap *bitmap, unsigned char opacity) {
   // Clamp opacity to valid range (0-255)
   if (opacity > 255) {
     opacity = 255;

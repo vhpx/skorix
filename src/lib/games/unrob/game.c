@@ -21,6 +21,7 @@
 GameMap *map = &map1;
 int is_game_over = 0;
 int timer_counter = 0;
+int is_selected = 0;
 
 unsigned int unrob_numobjs = 0;
 struct Object unrob_objects[MAX_GENGINE_ENTITIES];
@@ -216,7 +217,86 @@ void move_guard(Guard *guard, Bitmap *guard_sprite_buffer,
   }
 }
 
+void level_selector() {
+  draw_level_selection_base(1);
+  while (!is_selected) {
+
+  }
+}
+
+int select_level_key_handler(char key, int selected_level) {
+  switch (key) {
+  case 'w':
+    if (selected_level > 1) {
+      selected_level--;
+    }
+    break;
+  case 's':
+    if (selected_level < 3) {
+      selected_level++;
+    }
+    break;
+  case '\n':
+    return selected_level;
+  default:
+    break;
+  }
+  return selected_level;
+}
+
+void draw_level_selection_base(int selected_level) {
+  //black screen
+  draw_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0x00000000, 1);
+  
+  //LEVELS
+  draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM,
+              SCREEN_HEIGHT / 2 - FONT_HEIGHT * GENGINE_TIME_ZOOM, "LEVELS",
+              0x00FF0000, GENGINE_TIME_ZOOM);
+  draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM,
+              SCREEN_HEIGHT / 2 + FONT_HEIGHT * GENGINE_TIME_ZOOM, "1. Level 1",
+              0x0000FF00, GENGINE_TIME_ZOOM);
+  draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM,
+              SCREEN_HEIGHT / 2 + 2 * FONT_HEIGHT * GENGINE_TIME_ZOOM,
+              "2. Level 2", 0x00FFFF00, GENGINE_TIME_ZOOM);
+  draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM,
+              SCREEN_HEIGHT / 2 + 3 * FONT_HEIGHT * GENGINE_TIME_ZOOM,
+              "3. Level 3", 0x00FF00FF, GENGINE_TIME_ZOOM);
+
+  //draw_rect at level selected
+  if(selected_level == 1){
+      draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
+              SCREEN_HEIGHT / 2 + FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
+              0x00FF0000, GENGINE_TIME_ZOOM);
+  } else if(selected_level == 2){
+      draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
+              SCREEN_HEIGHT / 2 + 2 * FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
+              0x00FF0000, GENGINE_TIME_ZOOM);
+  } else if(selected_level == 3){
+      draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
+              SCREEN_HEIGHT / 2 + 3 * FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
+              0x00FF0000, GENGINE_TIME_ZOOM);
+  }
+}
+
+void map_select(int map_num) {
+  switch (map_num) {
+  case 1:
+    map = &map1;
+    break;
+  case 2:
+    map = &map2;
+    break;
+  case 3:
+    map = &map3;
+    break;
+  default:
+    map = &map1;
+    break;
+  }
+}
+
 void start_unrob_game() {
+  level_selector();
   is_game_over = 0;
   timer_counter = 0;
   // turn off debugger upon game start
@@ -703,7 +783,7 @@ void toggle_collision_debugger() {
 
 int get_collision_debugger_status() { return collision_debugger; }
 
-// write me a function to check if player intersect with a guard
+// check if player intersect with a guard
 // the parameter are Position a, Position b, Position c, Position d
 // a is the top right of the player, b is the bottom right of the player
 // c is the top right of the guard, d is the bottom right of the guard

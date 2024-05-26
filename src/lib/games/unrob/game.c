@@ -12,13 +12,12 @@
 #include "../../headers/timer.h"
 #include "../../headers/uart0.h"
 #include "../../headers/utils.h"
+#include "../engine/game-menu.h"
 #include "../engine/guard.h"
 #include "../engine/item.h"
 #include "../engine/map-bitmap.h"
 #include "../engine/player.h"
 #include "maps.h"
-#include "../engine/game-menu.h"
-
 
 GameMap *map = &map1;
 
@@ -27,6 +26,7 @@ static int enable_game_debugger = false;
 int is_game_over = 0;
 int timer_counter = 0;
 int is_game_start = 0;
+
 int select_game_option = 1;
 int is_level_selected = 0;
 int selected_level = 1;
@@ -136,16 +136,15 @@ void initialize_buffers() {
   copy_rect(map->spawn_point.x, map->spawn_point.y, 0, 0, SCREEN_WIDTH,
             PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap, background_cache_buffer);
 
-  if(map == &map1){
+  if (map == &map1) {
     copy_rect(map->guards[0].spawn_point.x, map->guards[0].spawn_point.y, 0, 0,
-          SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
-          background_guard_1_cache_buffer);
+              SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
+              background_guard_1_cache_buffer);
 
     copy_rect(map->guards[1].spawn_point.x, map->guards[1].spawn_point.y, 0, 0,
               SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
               background_guard_2_cache_buffer);
   }
-
 }
 
 void draw_guard(Guard *guard, Bitmap *guard_bg_cache_buffer,
@@ -231,24 +230,30 @@ void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
 // function to start the game
 void game_start_selector() {
   draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_menu);
-  draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 250, 220, 70, button_start);
-  draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 150, 220, 70, button_exit);
+  draw_transparent_image(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT - 250, 220, 70,
+                         button_start);
+  draw_transparent_image(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT - 150, 220, 70,
+                         button_exit);
 }
 
-//function to start or exit game
+// function to start or exit game
 void select_game_start_exit(char key) {
   draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_menu);
   switch (key) {
   case 'w':
-    //draw the game_home_screen_buffer
-    draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 150, 220, 70, button_exit);
-    draw_transparent_image(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 280 , 290, 100, button_start_selected);
+    // draw the game_home_screen_buffer
+    draw_transparent_image(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT - 150, 220, 70,
+                           button_exit);
+    draw_transparent_image(SCREEN_WIDTH / 2 - 135, SCREEN_HEIGHT - 280, 290,
+                           100, button_start_selected);
     select_game_option = 1;
     break;
   case 's':
     // draw_rect_from_bitmap(0, 0, 290, 360, game_home_screen_buffer);
-    draw_transparent_image(SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 250, 220, 70, button_start);
-    draw_transparent_image(SCREEN_WIDTH/2 - 135, SCREEN_HEIGHT - 180, 290, 100, button_exit_selected);
+    draw_transparent_image(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT - 250, 220, 70,
+                           button_start);
+    draw_transparent_image(SCREEN_WIDTH / 2 - 135, SCREEN_HEIGHT - 180, 290,
+                           100, button_exit_selected);
     select_game_option = 0;
     break;
   default:
@@ -256,7 +261,7 @@ void select_game_start_exit(char key) {
   }
 }
 
-//default level selector
+// default level selector
 void level_selector() { draw_level_selection_base(1); }
 
 // function to select the level
@@ -289,7 +294,7 @@ void select_level(char key) {
   }
 }
 
-//draw the level selection base like pointing to level 1, level 2, level 3
+// draw the level selection base like pointing to level 1, level 2, level 3
 void draw_level_selection_base(int selected_level) {
   // black screen
   draw_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0x00000000, 1);
@@ -379,11 +384,11 @@ void countdown(void) {
       game_time--;
       draw_time();
     }
-    if(map == &map1){
+    if (map == &map1) {
       move_guard(&map->guards[0], guard_1_sprite_buffer,
-                  background_guard_1_cache_buffer);
+                 background_guard_1_cache_buffer);
       move_guard(&map->guards[1], guard_2_sprite_buffer,
-                  background_guard_2_cache_buffer);
+                 background_guard_2_cache_buffer);
     }
   } else {
     game_over();

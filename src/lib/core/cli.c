@@ -223,7 +223,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       uart_puts(COLOR.RESET);
       uart_puts("\n");
     }
-
+    }
   } else if (c == '\b' || c == 0x7F) {
     handle_backspace(cli_buffer, index, pre_autofilled_cmd,
                      post_autofilled_cmd);

@@ -168,7 +168,7 @@ Guard map_2_guards[] = {
 };
 
 GameMap map2 = {
-    .spawn_point = map_2_spawn_point,
+    .player_position = map_2_spawn_point,
     .boundaries = map_2_map_boundaries,
     .bitmap = game_map_2_bitmap,
     .size = map_2_map_size,

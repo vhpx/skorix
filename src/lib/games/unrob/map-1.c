@@ -1,4 +1,4 @@
-//map-1.c
+// map-1.c
 #include "map-1.h"
 
 const Position spawn_point = {
@@ -198,7 +198,7 @@ Guard guards[] = {
 };
 
 GameMap map1 = {
-    .spawn_point = spawn_point,
+    .player_position = spawn_point,
     .boundaries = map_boundaries,
     .bitmap = game_map_1_bitmap,
     .size = map_size,

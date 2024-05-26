@@ -4,12 +4,6 @@
 
 enum { EMPTY_BOX = 0, INCORRECT_BOX = 1, CORRECT_BOX = 2, IN_RANGE_BOX = 3 };
 
-struct Object {
-  unsigned int width;
-  unsigned int height;
-  Position position;
-};
-
 void start_unrob_game();
 void move_player(char key);
 void rotate_inventory(char key);

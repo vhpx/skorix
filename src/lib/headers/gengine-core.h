@@ -46,7 +46,7 @@ typedef struct {
 } Guard;
 
 typedef struct {
-  const Position spawn_point;
+  Position player_position;
   const Boundary *boundaries;
   const Bitmap *bitmap;
   const Size size;

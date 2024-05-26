@@ -27,6 +27,8 @@
 #define PLAYER_WIDTH 42
 #define PLAYER_HEIGHT 60
 
+#define FLOAT_MAX 1000000.0
+
 #ifndef __CONSTANTS_H__
 #define __CONSTANTS_H__
 

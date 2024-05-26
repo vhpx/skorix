@@ -22,4 +22,6 @@ void move_guard_in_boundaries(const Boundary *boundaries, int num_boundaries,
                               const Bitmap *player_sprite_buffer,
                               int force_redraw);
 
+int is_same_position(Position *pos1, Position *pos2);
+
 #endif

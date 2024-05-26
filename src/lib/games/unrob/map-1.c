@@ -144,9 +144,9 @@ const Position map_wall_boundaries[] = {
     {.x = 915, .y = 635}, {.x = 915, .y = 425}, {.x = 855, .y = 425},
     {.x = 855, .y = 305}, {.x = 905, .y = 305}, {.x = 905, .y = 145},
     {.x = 805, .y = 145}, {.x = 805, .y = 205}, {.x = 755, .y = 205},
-    {.x = 755, .y = 145}, {.x = 675, .y = 145}, {.x = 675, .y = 205},
-    {.x = 555, .y = 205}, {.x = 555, .y = 215}, {.x = 455, .y = 215},
-    {.x = 455, .y = 205}, {.x = 375, .y = 205}, {.x = 375, .y = 145},
+    {.x = 755, .y = 145}, {.x = 675, .y = 145}, {.x = 675, .y = 185},
+    {.x = 555, .y = 185}, {.x = 555, .y = 195}, {.x = 455, .y = 195},
+    {.x = 455, .y = 185}, {.x = 375, .y = 185}, {.x = 375, .y = 145},
     {.x = 305, .y = 145}, {.x = 305, .y = 205}, {.x = 205, .y = 205},
     {.x = 205, .y = 145}, {.x = 105, .y = 145},
 };
@@ -167,6 +167,7 @@ const Boundary map_boundaries[] = {
 Guard guards[] = {
     {
         .spawn_point = guard_1_spawn_point,
+        .position = guard_1_spawn_point,
         .entity =
             {
                 .position = guard_1_spawn_point,
@@ -182,6 +183,7 @@ Guard guards[] = {
     },
     {
         .spawn_point = guard_2_spawn_point,
+        .position = guard_2_spawn_point,
         .entity =
             {
                 .position = guard_2_spawn_point,
@@ -198,6 +200,7 @@ Guard guards[] = {
 };
 
 GameMap map1 = {
+    .spawn_point = spawn_point,
     .player_position = spawn_point,
     .boundaries = map_boundaries,
     .bitmap = game_map_1_bitmap,

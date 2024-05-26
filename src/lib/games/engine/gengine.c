@@ -451,3 +451,7 @@ void move_guard_in_boundaries(const Boundary *boundaries, int num_boundaries,
   current_pos->x = next_pos.x;
   current_pos->y = next_pos.y;
 }
+
+int is_same_position(Position *pos1, Position *pos2) {
+  return (pos1->x == pos2->x && pos1->y == pos2->y);
+}

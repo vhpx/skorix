@@ -32,13 +32,13 @@ typedef struct {
 typedef struct {
   const int id;
   char *name;
-  Position final_position;
-  Position placement_position;
+  const Position final_position;
   Entity entity;
 } Item;
 
 typedef struct {
   const Position spawn_point;
+  const Position position;
   Entity entity;
   const int step;
   enum Direction direction;
@@ -46,6 +46,7 @@ typedef struct {
 } Guard;
 
 typedef struct {
+  Position spawn_point;
   Position player_position;
   const Boundary *boundaries;
   const Bitmap *bitmap;

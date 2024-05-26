@@ -23,6 +23,7 @@ GameMap *map = &map1;
 Position *player_position;
 
 static int enable_game_debugger = false;
+const int SKIP_STAGE_ANIMATION = true;
 
 int is_game_over = 0;
 int timer_counter = 0;
@@ -74,50 +75,71 @@ void initialize_buffers() {
   uart_puts(" | ");
   print_pixel_diff(prev_pixels, "[RESET RENDERED PIXELS]");
 
-  // Display the map
-  draw_rect_from_bitmap_alpha(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, map->bitmap,
-                              50);
-
-  uart_puts("\nProcessed pixels: ");
-  print_rendered_pixels();
-  uart_puts(" | ");
-  print_pixel_diff(prev_pixels, "[DRAWN INITIAL MAP] ALPHA: 50");
-
-  move_items_to_final_position();
-
-  wait_msec(1000);
-
-  for (int i = 50; i <= 100; i += 5) {
-    prev_pixels = get_rendered_pixels();
-    char msg[MAX_STR_LENGTH];
-    char alpha[4];
-
-    clrstr(msg);
-    clrstr(alpha);
-
-    append_str(msg, "[DRAWN MAP] ALPHA: ");
-    int2str(i, alpha);
-    append_str(msg, alpha);
-
+  if (SKIP_STAGE_ANIMATION) {
+    draw_rect_from_bitmap(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, map->bitmap);
+  } else {
+    // Display the map
     draw_rect_from_bitmap_alpha(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, map->bitmap,
-                                i);
+                                50);
+
     uart_puts("\nProcessed pixels: ");
     print_rendered_pixels();
     uart_puts(" | ");
-    print_pixel_diff(prev_pixels, msg);
-    wait_msec(100);
+    print_pixel_diff(prev_pixels, "[DRAWN INITIAL MAP] ALPHA: 50");
+
+    move_items_to_final_position();
+
+    wait_msec(1000);
+
+    for (int i = 50; i <= 100; i += 5) {
+      prev_pixels = get_rendered_pixels();
+      char msg[MAX_STR_LENGTH];
+      char alpha[4];
+
+      clrstr(msg);
+      clrstr(alpha);
+
+      append_str(msg, "[DRAWN MAP] ALPHA: ");
+      int2str(i, alpha);
+      append_str(msg, alpha);
+
+      draw_rect_from_bitmap_alpha(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
+                                  map->bitmap, i);
+      uart_puts("\nProcessed pixels: ");
+      print_rendered_pixels();
+      uart_puts(" | ");
+      print_pixel_diff(prev_pixels, msg);
+      wait_msec(100);
+    }
   }
+
+  // Reset all item placement positions
+  for (int i = 0; i < map->num_items; i++) {
+    map->items[i].entity.position.x = -1;
+    map->items[i].entity.position.y = -1;
+
+    map->items[i].entity.position = *player_position;
+  }
+
+  // Reset all guard positions
+  for (int i = 0; i < map->num_guards; i++) {
+    map->guards[i].entity.position = map->guards[i].spawn_point;
+  }
+
+  // Reset the player position
+  player_position->x = map->spawn_point.x;
+  player_position->y = map->spawn_point.y;
 
   // Copy the initial portion of the background to the cache buffer
   copy_rect(player_position->x, player_position->y, 0, 0, SCREEN_WIDTH,
             PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap, background_cache_buffer);
 
   if (map == &map1) {
-    copy_rect(map->guards[0].spawn_point.x, map->guards[0].spawn_point.y, 0, 0,
+    copy_rect(map->guards[0].position.x, map->guards[0].position.y, 0, 0,
               SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
               background_guard_1_cache_buffer);
 
-    copy_rect(map->guards[1].spawn_point.x, map->guards[1].spawn_point.y, 0, 0,
+    copy_rect(map->guards[1].position.x, map->guards[1].position.y, 0, 0,
               SCREEN_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
               background_guard_2_cache_buffer);
   }
@@ -338,7 +360,7 @@ void start_unrob_game() {
   draw_guard(&map->guards[1], background_guard_2_cache_buffer,
              guard_2_sprite_buffer);
 
-  draw_inventory(selected_item);
+  display_selected_item(selected_item);
   draw_placement_boxes(map->items, map->num_items, EMPTY_BOX);
 
   game_time = 61;
@@ -489,6 +511,44 @@ void move_items_to_final_position() {
   }
 }
 
+void swap_placed_item() {
+  Item *items = map->items;
+  int num_items = map->num_items;
+
+  int nearest_box_index = -1;
+  float nearest_distance = FLOAT_MAX;
+
+  // Find the nearest activated box within GENGINE_PLACEMENT_RANGE
+  for (int i = 0; i < num_items; i++) {
+    float dx = (player_position->x + PLAYER_WIDTH / 2.0) -
+               (items[i].final_position.x + GENGINE_ITEM_SIZE / 2.0);
+    float dy = (player_position->y + PLAYER_HEIGHT / 2.0) -
+               (items[i].final_position.y + GENGINE_ITEM_SIZE / 2.0);
+    float distance = sqrt(dx * dx + dy * dy);
+
+    if (distance < nearest_distance && distance <= GENGINE_PLACEMENT_RANGE) {
+      nearest_distance = distance;
+      nearest_box_index = i;
+    }
+  }
+
+  // If no activated box is found within GENGINE_PLACEMENT_RANGE, return
+  if (nearest_box_index == -1) {
+    uart_puts(COLOR.TEXT.RED);
+    uart_puts("\n\nNo activated box found within placement range.");
+    uart_puts(COLOR.RESET);
+    return;
+  }
+
+  // Swap the entity.position of the selected item with the final_position of
+  // the nearest activated box
+  Position temp = items[selected_item].entity.position =
+      items[nearest_box_index].final_position;
+
+  // Redraw all items at their current placement positions
+  draw_placed_items();
+}
+
 void update_placement_boxes(Position position, Item *items, int num_items) {
   if (enable_game_debugger)
     return; // Do not update placement boxes if the collision debugger is on
@@ -508,8 +568,8 @@ void update_placement_boxes(Position position, Item *items, int num_items) {
           IN_RANGE_BOX); // Draw the box in yellow for this item only
       last_item_in_range_index = i;
     } else if (i == last_item_in_range_index) {
-      if (items[i].placement_position.x != items[i].final_position.x ||
-          items[i].placement_position.y != items[i].final_position.y) {
+      if (items[i].entity.position.x != items[i].final_position.x ||
+          items[i].entity.position.y != items[i].final_position.y) {
         draw_placement_boxes(
             &items[i], 1,
             EMPTY_BOX); // Draw the box in white for this item only
@@ -705,7 +765,7 @@ void move_player(char key) {
   update_placement_boxes(*player_position, map->items, map->num_items);
 }
 
-void rotate_inventory(char key) {
+void switch_inventory_item(char key) {
   switch (key) {
   case 'q': // Rotate left
     selected_item--;
@@ -736,16 +796,24 @@ void rotate_inventory(char key) {
   uart_puts(COLOR.RESET);
 
   // Display the selected item in the inventory
-  draw_inventory(selected_item);
+  display_selected_item(selected_item);
 }
 
-void draw_inventory(int selected_item) {
+void display_selected_item(int selected_item) {
   long long prev_pixels = get_rendered_pixels();
 
   // display top right corner
-  draw_rect(0, 0, 110, 110, 0x00ffffff, 1);
-  draw_transparent_image(35, 35, GENGINE_ITEM_SIZE, GENGINE_ITEM_SIZE,
+  // Draw a larger black rectangle
+  draw_rect(0, 0, 54, 54, 0x00000000, 1);
+
+  // Draw a smaller white rectangle inside the black one to create a border
+  // effect
+  draw_rect(5, 5, 50, 50, 0x00ffffff, 1);
+
+  // Draw the image centered within the box
+  draw_transparent_image(8, 8, GENGINE_ITEM_SIZE, GENGINE_ITEM_SIZE,
                          item_m1_allArray[selected_item]);
+
   uart_puts("\nProcessed pixels: ");
   print_rendered_pixels();
   uart_puts(" | ");
@@ -758,7 +826,49 @@ void draw_inventory(int selected_item) {
   //  item_m1_allArray[selected_item]);
 }
 
-void draw_items() {
+void draw_placed_items() {
+  long long prev_pixels;
+
+  for (int i = 0; i < map->num_items; i++) {
+    prev_pixels = get_rendered_pixels();
+
+    // Draw the item at the entity.position instead of final_position
+    draw_transparent_image(map->items[i].entity.position.x,
+                           map->items[i].entity.position.y, GENGINE_ITEM_SIZE,
+                           GENGINE_ITEM_SIZE, map->items[i].entity.bitmap);
+    uart_puts("\nProcessed pixels: ");
+    print_rendered_pixels();
+    uart_puts(" | ");
+    print_pixel_diff(prev_pixels, "[DRAWN ITEM]");
+
+    // Check the entity.position of the item and draw the appropriate box
+    if (map->items[i].entity.position.x == -1 ||
+        map->items[i].entity.position.y == -1) {
+      draw_placement_boxes(map->items, map->num_items, EMPTY_BOX);
+    } else if (map->items[i].entity.position.x ==
+                   map->items[i].final_position.x &&
+               map->items[i].entity.position.y ==
+                   map->items[i].final_position.y) {
+      draw_placement_boxes(map->items, map->num_items, CORRECT_BOX);
+    } else {
+      // Check if the nearest box (based on final_position) doesn't have any
+      // item and is within the GENGINE_PLACEMENT_RANGE
+      float dx = (player_position->x + PLAYER_WIDTH / 2.0) -
+                 (map->items[i].final_position.x + GENGINE_ITEM_SIZE / 2.0);
+      float dy = (player_position->y + PLAYER_HEIGHT / 2.0) -
+                 (map->items[i].final_position.y + GENGINE_ITEM_SIZE / 2.0);
+      float distance = sqrt(dx * dx + dy * dy);
+
+      if (distance <= GENGINE_PLACEMENT_RANGE) {
+        draw_placement_boxes(map->items, map->num_items, IN_RANGE_BOX);
+      } else {
+        draw_placement_boxes(map->items, map->num_items, INCORRECT_BOX);
+      }
+    }
+  }
+}
+
+void draw_final_items() {
   long long prev_pixels;
 
   for (int i = 0; i < map->num_items; i++) {
@@ -780,7 +890,7 @@ void toggle_game_debugger() {
 
   if (enable_game_debugger) {
     render_boundaries(map->boundaries, map->num_boundaries);
-    draw_items();
+    draw_final_items();
   } else {
     long long prev_pixels = get_rendered_pixels();
 
@@ -797,7 +907,7 @@ void toggle_game_debugger() {
                guard_2_sprite_buffer);
 
     draw_time();
-    draw_inventory(selected_item);
+    display_selected_item(selected_item);
     draw_placement_boxes(map->items, map->num_items, EMPTY_BOX);
     update_placement_boxes(*player_position, map->items, map->num_items);
   }

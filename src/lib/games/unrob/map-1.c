@@ -1,7 +1,7 @@
 // map-1.c
 #include "map-1.h"
 
-const Position spawn_point = {
+const Position map_1_spawn_point = {
     .x = (SCREEN_WIDTH - PLAYER_WIDTH) / 2,
     .y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT) - 40,
 };
@@ -214,8 +214,8 @@ Guard guards[] = {
 };
 
 GameMap map1 = {
-    .spawn_point = spawn_point,
-    .player_position = spawn_point,
+    .spawn_point = map_1_spawn_point,
+    .player_position = map_1_spawn_point,
     .boundaries = map_boundaries,
     .bitmap = game_map_1_bitmap,
     .size = map_size,

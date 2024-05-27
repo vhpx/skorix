@@ -183,6 +183,7 @@ Guard map_3_guards[] = {
 };
 
 GameMap map3 = {
+    .spawn_point = map_3_spawn_point,
     .player_position = map_3_spawn_point,
     .boundaries = map_3_map_boundaries,
     .bitmap = game_map_3_bitmap,

@@ -19,8 +19,7 @@
 #include "../engine/player.h"
 #include "maps.h"
 
-GameMap *map = &map1;
-Position *player_position;
+GameMap *map;
 
 int enable_game_debugger = false;
 
@@ -44,14 +43,14 @@ Bitmap background_guard_2_cache_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 Bitmap guard_2_sprite_buffer[PLAYER_WIDTH * PLAYER_HEIGHT];
 
 void initialize_game() {
-  player_position = &map->player_position;
+  map->player_position = map->spawn_point;
 
   for (int i = 0; i < map->num_items; i++) {
     if (map->items[i].final_position.x == -1 &&
         map->items[i].final_position.y == -1)
       continue; // Skip if the item has no final position
 
-    map->items[i].entity.position = *player_position;
+    map->items[i].entity.position = map->player_position;
     map->items[i].entity.background_cache = 0;
   }
 
@@ -91,9 +90,6 @@ void initialize_buffers() {
     print_pixel_diff(prev_pixels, "[DRAWN INITIAL MAP] ALPHA: 50");
 
     move_items_to_final_position();
-
-    wait_msec(1000);
-
     for (int i = 50; i <= 100; i += 5) {
       prev_pixels = get_rendered_pixels();
       char msg[MAX_STR_LENGTH];
@@ -110,7 +106,7 @@ void initialize_buffers() {
                                   map->bitmap, i);
       print_rendered_pixels(true);
       print_pixel_diff(prev_pixels, msg);
-      wait_msec(100);
+      wait_msec(200);
     }
   }
 
@@ -126,11 +122,11 @@ void initialize_buffers() {
   }
 
   // Reset the player position
-  player_position->x = map->spawn_point.x;
-  player_position->y = map->spawn_point.y;
+  map->player_position.x = map->spawn_point.x;
+  map->player_position.y = map->spawn_point.y;
 
   // Copy the initial portion of the background to the cache buffer
-  copy_rect(player_position->x, player_position->y, 0, 0, SCREEN_WIDTH,
+  copy_rect(map->player_position.x, map->player_position.y, 0, 0, SCREEN_WIDTH,
             PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap, background_cache_buffer);
 
   if (map == &map1) {
@@ -208,8 +204,8 @@ void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
                            guard_sprite_buffer, force_redraw);
 
   Position player_bottom_right = {
-      .x = player_position->x + PLAYER_WIDTH,
-      .y = player_position->y + PLAYER_HEIGHT,
+      .x = map->player_position.x + PLAYER_WIDTH,
+      .y = map->player_position.y + PLAYER_HEIGHT,
   };
 
   Position guard_bottom_right = {
@@ -217,7 +213,7 @@ void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
       .y = guard->entity.position.y + PLAYER_HEIGHT,
   };
   if (is_intersect_guard(&guard->entity.position, &guard_bottom_right,
-                         player_position, &player_bottom_right)) {
+                         &map->player_position, &player_bottom_right)) {
     game_over();
   }
 }
@@ -281,8 +277,7 @@ void select_level(char key) {
     if (enable_rendering_debugger)
       uart_puts("\n\n");
 
-    map_select(selected_level);
-
+    select_map(selected_level);
     start_unrob_game();
 
     break;
@@ -326,7 +321,7 @@ void draw_level_selection_base(int selected_level) {
   }
 }
 
-void map_select(int map_num) {
+void select_map(int map_num) {
   switch (map_num) {
   case 1:
     map = &map1;
@@ -348,6 +343,7 @@ void start_unrob_game() {
   timer_counter = 0;
   // turn off debugger upon game start
   enable_game_debugger = false;
+
   reset_rendered_pixels();
 
   initialize_game();
@@ -521,7 +517,7 @@ void execute_main_action() {
   int num_items = map->num_items;
 
   int nearest_box_index =
-      get_nearest_box_index(player_position, items, num_items);
+      get_nearest_box_index(&map->player_position, items, num_items);
 
   // If no activated box is found within GENGINE_PLACEMENT_RANGE, return
   if (nearest_box_index == -1) {
@@ -586,7 +582,7 @@ void execute_main_action() {
     break;
   }
 
-  update_placement_boxes(*player_position, items, num_items);
+  update_placement_boxes(map->player_position, items, num_items);
   display_selected_item(selected_item, map->items, map->num_items);
 }
 
@@ -683,12 +679,12 @@ void draw_player() {
   long long prev_pixels = get_rendered_pixels();
 
   // Copy the background to the player's position
-  copy_rect(player_position->x, player_position->y, 0, 0, SCREEN_WIDTH,
+  copy_rect(map->player_position.x, map->player_position.y, 0, 0, SCREEN_WIDTH,
             PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap, background_cache_buffer);
 
   // Draw the player sprite
-  draw_transparent_image(player_position->x, player_position->y, PLAYER_WIDTH,
-                         PLAYER_HEIGHT, player_sprite_buffer);
+  draw_transparent_image(map->player_position.x, map->player_position.y,
+                         PLAYER_WIDTH, PLAYER_HEIGHT, player_sprite_buffer);
 
   print_rendered_pixels(true);
   print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
@@ -741,8 +737,8 @@ void move_player(char key) {
   int force_redraw = false;
 
   Position player_bottom_right = {
-      .x = player_position->x + PLAYER_WIDTH,
-      .y = player_position->y + PLAYER_HEIGHT,
+      .x = map->player_position.x + PLAYER_WIDTH,
+      .y = map->player_position.y + PLAYER_HEIGHT,
   };
 
   Position guard1_bottom_right = {
@@ -755,12 +751,12 @@ void move_player(char key) {
       .y = map->guards[1].entity.position.y + PLAYER_HEIGHT,
   };
 
-  if (is_intersect_guard(player_position, &player_bottom_right,
+  if (is_intersect_guard(&map->player_position, &player_bottom_right,
                          &map->guards[0].entity.position,
                          &guard1_bottom_right)) {
     game_over();
   }
-  if (is_intersect_guard(player_position, &player_bottom_right,
+  if (is_intersect_guard(&map->player_position, &player_bottom_right,
                          &map->guards[1].entity.position,
                          &guard2_bottom_right)) {
     game_over();
@@ -823,9 +819,10 @@ void move_player(char key) {
               get_player_sprite(), player_sprite_buffer);
 
   move_in_boundaries(map->boundaries, map->num_boundaries, player_direction,
-                     player_position, map->bitmap, background_cache_buffer,
-                     player_sprite_buffer, force_redraw, false);
-  update_placement_boxes(*player_position, map->items, map->num_items);
+                     &map->player_position, map->bitmap,
+                     background_cache_buffer, player_sprite_buffer,
+                     force_redraw, false);
+  update_placement_boxes(map->player_position, map->items, map->num_items);
 }
 
 void switch_inventory_item(char key) {
@@ -891,9 +888,9 @@ void display_selected_item(int selected_item, Item *items, int num_items) {
   print_pixel_diff(prev_pixels, "[DRAWN INVENTORY]");
 
   // dispay on top of the player
-  //  draw_rect(player_position->x-10, player_position->y-50, 110,110,
-  //  0x00ffffff, 1); draw_transparent_image(player_position->x,
-  //  player_position->y - 50, GENGINE_ITEM_SIZE, GENGINE_ITEM_SIZE,
+  //  draw_rect(map->player_position.x-10, map->player_position.y-50, 110,110,
+  //  0x00ffffff, 1); draw_transparent_image(map->player_position.x,
+  //  map->player_position.y - 50, GENGINE_ITEM_SIZE, GENGINE_ITEM_SIZE,
   //  item_m1_allArray[selected_item]);
 }
 
@@ -938,7 +935,7 @@ void toggle_game_debugger() {
     draw_time();
     display_selected_item(selected_item, map->items, map->num_items);
     draw_placement_boxes(map->items, map->num_items, EMPTY_BOX);
-    update_placement_boxes(*player_position, map->items, map->num_items);
+    update_placement_boxes(map->player_position, map->items, map->num_items);
   }
 }
 

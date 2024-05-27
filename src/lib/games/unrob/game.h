@@ -35,7 +35,7 @@ void draw_score(void);
 void game_over(void);
 void draw_item_with_box(Item *item, enum Box box);
 void execute_main_action(void);
-void map_select(int map_num);
+void select_map(int map_num);
 void level_selector(void);
 void draw_level_selection_base(int selected_level);
 void select_level(char key);

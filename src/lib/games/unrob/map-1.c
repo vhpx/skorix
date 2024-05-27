@@ -7,16 +7,6 @@ const Position map_1_spawn_point = {
     .y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT) - 40,
 };
 
-const Position guard_1_spawn_point = {
-    .x = 750,
-    .y = (SCREEN_HEIGHT) / 2 - 200,
-};
-
-const Position guard_2_spawn_point = {
-    .x = 250,
-    .y = (SCREEN_HEIGHT) / 2 + 100,
-};
-
 const Size map_size = {
     .width = SCREEN_WIDTH,
     .height = SCREEN_HEIGHT,
@@ -182,25 +172,13 @@ const Boundary map_boundaries[] = {
 
 Guard guards[] = {
     {
-        .spawn_point = guard_1_spawn_point,
-        .entity =
+        .spawn_point =
             {
-                .position = guard_1_spawn_point,
-                .size =
-                    {
-                        .width = PLAYER_WIDTH,
-                        .height = PLAYER_HEIGHT,
-                    },
+                .x = 300,
+                .y = 260,
             },
-        .step = GENGINE_STEP_SIZE,
-        .direction = RIGHT,
-        // .boundaries = map_boundaries,
-    },
-    {
-        .spawn_point = guard_2_spawn_point,
         .entity =
             {
-                .position = guard_2_spawn_point,
                 .size =
                     {
                         .width = PLAYER_WIDTH,
@@ -209,7 +187,75 @@ Guard guards[] = {
             },
         .step = GENGINE_STEP_SIZE,
         .direction = LEFT,
-        // .boundaries = map_boundaries,
+    },
+    {
+        .spawn_point =
+            {
+                .x = 500,
+                .y = 400,
+            },
+        .entity =
+            {
+                .size =
+                    {
+                        .width = PLAYER_WIDTH,
+                        .height = PLAYER_HEIGHT,
+                    },
+            },
+        .step = GENGINE_STEP_SIZE,
+        .direction = UP,
+    },
+    {
+        .spawn_point =
+            {
+                .x = 380,
+                .y = 510,
+            },
+        .entity =
+            {
+                .size =
+                    {
+                        .width = PLAYER_WIDTH,
+                        .height = PLAYER_HEIGHT,
+                    },
+            },
+        .step = GENGINE_STEP_SIZE,
+        .direction = LEFT,
+    },
+
+    {
+        .spawn_point =
+            {
+                .x = 620,
+                .y = 510,
+            },
+        .entity =
+            {
+                .size =
+                    {
+                        .width = PLAYER_WIDTH,
+                        .height = PLAYER_HEIGHT,
+                    },
+            },
+        .step = GENGINE_STEP_SIZE,
+        .direction = LEFT,
+    },
+    {
+        .spawn_point =
+            {
+                .x = 640,
+                .y = 680,
+            },
+        .entity =
+            {
+                .size =
+                    {
+                        .width = PLAYER_WIDTH,
+                        .height = PLAYER_HEIGHT,
+                    },
+            },
+        .step = GENGINE_STEP_SIZE,
+        .direction = RIGHT,
     },
 };
 

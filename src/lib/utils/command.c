@@ -8,10 +8,10 @@
 #include "../headers/color.h"
 #include "../headers/config.h"
 #include "../headers/font.h"
+#include "../headers/framebf.h"
 #include "../headers/print.h"
 #include "../headers/string.h"
 #include "../headers/uart0.h"
-#include "../headers/framebf.h"
 
 Command commands[] = {
     {
@@ -92,9 +92,9 @@ Command commands[] = {
         display_video,     // Func
     },
     {
-        "font",           // Name
-        "Display a font", // Description
-        display_font,      // Func
+        "team",                 // Name
+        "Display team members", // Description
+        display_team_details,   // Func
     },
     {
         "play",                                             // Name
@@ -271,7 +271,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     uart_puts("Press Escape to exit Font Mode\n");
 
     mode = FONT;
-    display_font(IMAGE_WIDTH, IMAGE_HEIGHT);
+    display_team_details(IMAGE_WIDTH, IMAGE_HEIGHT);
     return 0;
   }
 

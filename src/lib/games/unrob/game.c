@@ -113,8 +113,6 @@ void initialize_buffers() {
   for (int i = 0; i < map->num_items; i++) {
     map->items[i].entity.position.x = -1;
     map->items[i].entity.position.y = -1;
-
-    map->items[i].entity.position = *player_position;
   }
 
   // Reset all guard positions
@@ -356,7 +354,7 @@ void start_unrob_game() {
   draw_guard(&map->guards[1], background_guard_2_cache_buffer,
              guard_2_sprite_buffer);
 
-  display_selected_item(selected_item);
+  display_selected_item(selected_item, map->items, map->num_items);
   draw_placement_boxes(map->items, map->num_items, EMPTY_BOX);
 
   game_time = 61;
@@ -527,14 +525,33 @@ void execute_main_action() {
   int is_empty = is_box_empty(items, num_items, nearest_box_index);
   enum Action action = is_empty ? PLACE_DOWN : SWAP_ITEM;
 
+  if (action == SWAP_ITEM) {
+    // Check if all items are placed, if so, change to PICK_UP action
+    action = are_all_items_placed(items, num_items) ? PICK_UP : SWAP_ITEM;
+  }
+
   uart_puts("\n\nAction: ");
   uart_puts(COLOR.TEXT.BLUE);
   uart_puts(action == PLACE_DOWN ? "Place Down" : "Swap Item");
   uart_puts(COLOR.RESET);
 
+  uart_puts("\n\nSelected Item: ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts(items[selected_item].name);
+  uart_puts(COLOR.RESET);
+
+  uart_puts("\nNearest Box: ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts(items[nearest_box_index].name);
+  uart_puts(COLOR.RESET);
+
   switch (action) {
+  case PICK_UP:
+    pick_up_item(items, num_items, nearest_box_index);
+    break;
+
   case PLACE_DOWN:
-    items[nearest_box_index].entity.position =
+    items[selected_item].entity.position =
         items[nearest_box_index].final_position;
 
     if (selected_item == nearest_box_index) {
@@ -542,9 +559,10 @@ void execute_main_action() {
       game_score += 10;
       draw_score();
     } else {
-      draw_item_with_box(&items[nearest_box_index], INCORRECT_BOX);
+      draw_item_with_box(&items[selected_item], INCORRECT_BOX);
     }
     break;
+
   case SWAP_ITEM:
     swap_items_in_box(items, num_items, nearest_box_index,
                       &items[selected_item]);
@@ -556,9 +574,13 @@ void execute_main_action() {
       draw_item_with_box(&items[nearest_box_index], INCORRECT_BOX);
     }
     break;
+
   default:
     break;
   }
+
+  update_placement_boxes(*player_position, items, num_items);
+  display_selected_item(selected_item, map->items, map->num_items);
 }
 
 void draw_item_with_box(Item *item, enum Box box) {
@@ -582,22 +604,19 @@ void update_placement_boxes(Position position, Item *items, int num_items) {
 
   int nearest_box_index = get_nearest_box_index(&position, items, num_items);
 
-  if (nearest_box_index != -1) {
-    draw_placement_boxes(
-        &items[nearest_box_index], 1,
-        IN_RANGE_BOX); // Draw the box in yellow for this item only
-    last_item_in_range_index = nearest_box_index;
-  } else if (last_item_in_range_index != -1) {
-    if (items[last_item_in_range_index].entity.position.x !=
-            items[last_item_in_range_index].final_position.x ||
-        items[last_item_in_range_index].entity.position.y !=
-            items[last_item_in_range_index].final_position.y) {
-      draw_placement_boxes(
-          &items[last_item_in_range_index], 1,
-          EMPTY_BOX); // Draw the box in white for this item only
+  for (int i = 0; i < num_items; i++) {
+    if (is_item_in_correct_position(&items[i])) {
+      draw_placement_boxes(&items[i], 1, CORRECT_BOX);
+    } else if (!is_box_empty(items, num_items, i)) {
+      draw_placement_boxes(&items[i], 1, INCORRECT_BOX);
+    } else if (i == nearest_box_index) {
+      draw_placement_boxes(&items[i], 1, IN_RANGE_BOX);
+    } else {
+      draw_placement_boxes(&items[i], 1, EMPTY_BOX);
     }
-    last_item_in_range_index = -1; // Reset the last item in range index
   }
+
+  last_item_in_range_index = nearest_box_index;
 }
 
 unsigned int get_placement_box_color(enum Box box) {
@@ -696,6 +715,11 @@ void draw_score() {
 }
 
 void move_player(char key) {
+  if (is_game_over) {
+    game_over();
+    return;
+  }
+
   int force_redraw = false;
 
   Position player_bottom_right = {
@@ -724,8 +748,19 @@ void move_player(char key) {
     game_over();
   }
 
-  if (is_game_over) {
-    return;
+  // display all item positions in console for debugging
+  for (int i = 0; i < map->num_items; i++) {
+    uart_puts("\n\nItem: ");
+    uart_puts(COLOR.TEXT.BLUE);
+    uart_puts(map->items[i].name);
+    uart_puts(COLOR.RESET);
+
+    uart_puts("\nPosition: ");
+    uart_puts(COLOR.TEXT.BLUE);
+    uart_dec(map->items[i].entity.position.x);
+    uart_puts(", ");
+    uart_dec(map->items[i].entity.position.y);
+    uart_puts(COLOR.RESET);
   }
 
   switch (key) {
@@ -806,10 +841,10 @@ void switch_inventory_item(char key) {
   uart_puts(COLOR.RESET);
 
   // Display the selected item in the inventory
-  display_selected_item(selected_item);
+  display_selected_item(selected_item, map->items, map->num_items);
 }
 
-void display_selected_item(int selected_item) {
+void display_selected_item(int selected_item, Item *items, int num_items) {
   long long prev_pixels = get_rendered_pixels();
 
   // display top right corner
@@ -820,9 +855,19 @@ void display_selected_item(int selected_item) {
   // effect
   draw_rect(5, 5, 50, 50, 0x00ffffff, 1);
 
-  // Draw the image centered within the box
+  // Check if the selected item is already placed
+  int is_placed = is_item_placed(&items[selected_item]);
+
   draw_transparent_image(8, 8, GENGINE_ITEM_SIZE, GENGINE_ITEM_SIZE,
-                         item_m1_allArray[selected_item]);
+                         items[selected_item].entity.sprite);
+
+  // If the item is placed, draw a red crossed line
+  if (is_placed) {
+    draw_line(10, 8, 8 + GENGINE_ITEM_SIZE, 8 + GENGINE_ITEM_SIZE, 0x00ff0000,
+              4); // Diagonal from top-left to bottom-right
+    draw_line(10, 8 + GENGINE_ITEM_SIZE, 8 + GENGINE_ITEM_SIZE, 8, 0x00ff0000,
+              4); // Diagonal from bottom-left to top-right
+  }
 
   print_rendered_pixels(true);
   print_pixel_diff(prev_pixels, "[DRAWN INVENTORY]");
@@ -873,7 +918,7 @@ void toggle_game_debugger() {
                guard_2_sprite_buffer);
 
     draw_time();
-    display_selected_item(selected_item);
+    display_selected_item(selected_item, map->items, map->num_items);
     draw_placement_boxes(map->items, map->num_items, EMPTY_BOX);
     update_placement_boxes(*player_position, map->items, map->num_items);
   }

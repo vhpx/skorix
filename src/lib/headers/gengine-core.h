@@ -33,7 +33,7 @@ typedef struct {
 typedef struct {
   const int id;
   char *name;
-  const Position final_position;
+  Position final_position;
   Entity entity;
 } Item;
 

@@ -27,5 +27,9 @@ int is_box_empty(Item *items, int num_items, int box_index);
 void swap_items_in_box(Item *items, int num_items, int box_index,
                        Item *new_item);
 int is_same_position(Position *pos1, Position *pos2);
+int is_item_in_correct_position(Item *item);
+int is_item_placed(Item *item);
+int are_all_items_placed(Item *items, int num_items);
+void pick_up_item(Item *items, int num_items, int box_index);
 
 #endif

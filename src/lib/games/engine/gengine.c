@@ -446,17 +446,15 @@ int get_nearest_box_index(Position *player_position, Item *items,
 
   // Find the nearest activated box within GENGINE_PLACEMENT_RANGE
   for (int i = 0; i < num_items; i++) {
-    if (is_box_empty(items, num_items, i)) {
-      float dx = (player_position->x + PLAYER_WIDTH / 2.0) -
-                 (items[i].final_position.x + GENGINE_ITEM_SIZE / 2.0);
-      float dy = (player_position->y + PLAYER_HEIGHT / 2.0) -
-                 (items[i].final_position.y + GENGINE_ITEM_SIZE / 2.0);
-      float distance = sqrt(dx * dx + dy * dy);
+    float dx = (player_position->x + PLAYER_WIDTH / 2.0) -
+               (items[i].final_position.x + GENGINE_ITEM_SIZE / 2.0);
+    float dy = (player_position->y + PLAYER_HEIGHT / 2.0) -
+               (items[i].final_position.y + GENGINE_ITEM_SIZE / 2.0);
+    float distance = sqrt(dx * dx + dy * dy);
 
-      if (distance < nearest_distance && distance <= GENGINE_PLACEMENT_RANGE) {
-        nearest_distance = distance;
-        nearest_box_index = i;
-      }
+    if (distance < nearest_distance && distance <= GENGINE_PLACEMENT_RANGE) {
+      nearest_distance = distance;
+      nearest_box_index = i;
     }
   }
 
@@ -495,4 +493,35 @@ void swap_items_in_box(Item *items, int num_items, int box_index,
 
 int is_same_position(Position *pos1, Position *pos2) {
   return (pos1->x == pos2->x && pos1->y == pos2->y);
+}
+
+int is_item_in_correct_position(Item *item) {
+  return is_same_position(&item->entity.position, &item->final_position);
+}
+int is_item_placed(Item *item) {
+  // An item is considered placed if its current position is not (-1, -1)
+  return item->entity.position.x != -1 || item->entity.position.y != -1;
+}
+
+int are_all_items_placed(Item *items, int num_items) {
+  for (int i = 0; i < num_items; i++) {
+    if (!is_item_placed(&items[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+void pick_up_item(Item *items, int num_items, int box_index) {
+  Position box_position = items[box_index].final_position;
+
+  // Set the entity.position of the item in the box to (-1, -1)
+  for (int i = 0; i < num_items; i++) {
+    if (is_same_position(&items[i].entity.position, &box_position)) {
+      items[i].entity.position.x = -1;
+      items[i].entity.position.y = -1;
+      break;
+    }
+  }
 }

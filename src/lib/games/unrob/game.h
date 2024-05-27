@@ -20,7 +20,7 @@ void draw_player();
 void draw_final_items();
 void draw_placed_items();
 void draw_placement_boxes(Item *items, int num_items, enum Box box);
-void display_selected_item(int selected_item);
+void display_selected_item(int selected_item, Item *items, int num_items);
 void update_placement_boxes(Position player_position, Item *items,
                             int num_items);
 void move_items_to_final_position();

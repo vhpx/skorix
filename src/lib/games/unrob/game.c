@@ -12,7 +12,7 @@
 #include "../../headers/timer.h"
 #include "../../headers/uart0.h"
 #include "../../headers/utils.h"
-#include "../engine/game-menu.h"
+#include "../screens/game-menu.h"
 #include "../engine/guard.h"
 #include "../engine/item.h"
 #include "../engine/map-bitmap.h"

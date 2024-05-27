@@ -94,7 +94,7 @@ Command commands[] = {
     {
         "font",           // Name
         "Display a font", // Description
-        displayFont,      // Func
+        display_font,      // Func
     },
     {
         "play",                                             // Name
@@ -271,7 +271,7 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     uart_puts("Press Escape to exit Font Mode\n");
 
     mode = FONT;
-    displayFont(IMAGE_WIDTH, IMAGE_HEIGHT);
+    display_font(IMAGE_WIDTH, IMAGE_HEIGHT);
     return 0;
   }
 

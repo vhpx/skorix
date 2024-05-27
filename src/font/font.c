@@ -265,8 +265,7 @@ unsigned char font[FONT_NUMGLYPHS][FONT_BPG] = {
 };
 
 /* Functions to display text on the screen */
-void displayFont(int image_width, int image_height) {
-  // Clear the screen or framebuffer here
+void display_font(int image_width, int image_height) {
   clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
   draw_string(SCREEN_WIDTH/2 - 120, 50, "--- Our Members ---", 0x00FF0000, 2);
 

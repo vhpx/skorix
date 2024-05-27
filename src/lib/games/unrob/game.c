@@ -898,6 +898,10 @@ void draw_final_items() {
   long long prev_pixels;
 
   for (int i = 0; i < map->num_items; i++) {
+    if (map->items[i].final_position.x == -1 &&
+        map->items[i].final_position.y == -1)
+      continue; // Skip if the item has no final position
+
     prev_pixels = get_rendered_pixels();
 
     draw_transparent_image(map->items[i].final_position.x,

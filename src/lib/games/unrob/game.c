@@ -600,8 +600,6 @@ void update_placement_boxes(Position position, Item *items, int num_items) {
   if (enable_game_debugger)
     return; // Do not update placement boxes if the collision debugger is on
 
-  static int last_item_in_range_index = -1;
-
   int nearest_box_index = get_nearest_box_index(&position, items, num_items);
 
   for (int i = 0; i < num_items; i++) {
@@ -615,8 +613,6 @@ void update_placement_boxes(Position position, Item *items, int num_items) {
       draw_placement_boxes(&items[i], 1, EMPTY_BOX);
     }
   }
-
-  last_item_in_range_index = nearest_box_index;
 }
 
 unsigned int get_placement_box_color(enum Box box) {

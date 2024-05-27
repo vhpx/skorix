@@ -28,6 +28,13 @@ typedef struct {
   const Size size;
   Bitmap *sprite;
   Bitmap *background_cache;
+} FlexibleEntity;
+
+typedef struct {
+  Position position;
+  const Size size;
+  const Bitmap *sprite;
+  Bitmap *background_cache;
 } Entity;
 
 typedef struct {
@@ -40,7 +47,7 @@ typedef struct {
 typedef struct {
   const Position spawn_point;
   const Position position;
-  Entity entity;
+  FlexibleEntity entity;
   const int step;
   enum Direction direction;
   const Boundary *boundaries;
@@ -60,7 +67,7 @@ typedef struct {
 } GameMap;
 
 struct Game {
-  Entity *entities;
+  FlexibleEntity *entities;
   GameMap *maps;
   int num_entities;
   const int num_maps;

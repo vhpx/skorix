@@ -24,7 +24,7 @@ Position *player_position;
 
 int enable_game_debugger = false;
 
-const int SKIP_STAGE_ANIMATION = true;
+const int SKIP_STAGE_ANIMATION = false;
 
 int is_game_over = 0;
 int timer_counter = 0;
@@ -539,17 +539,9 @@ void execute_main_action() {
 
   uart_puts("\n\nAction: ");
   uart_puts(COLOR.TEXT.BLUE);
-  uart_puts(action == PLACE_DOWN ? "Place Down" : "Swap Item");
-  uart_puts(COLOR.RESET);
-
-  uart_puts("\n\nSelected Item: ");
-  uart_puts(COLOR.TEXT.BLUE);
-  uart_puts(items[selected_item].name);
-  uart_puts(COLOR.RESET);
-
-  uart_puts("\nNearest Box: ");
-  uart_puts(COLOR.TEXT.BLUE);
-  uart_puts(items[nearest_box_index].name);
+  uart_puts(action == PICK_UP      ? "PICK UP"
+            : action == PLACE_DOWN ? "PLACE DOWN"
+                                   : "SWAP ITEM");
   uart_puts(COLOR.RESET);
 
   switch (action) {
@@ -591,15 +583,6 @@ void execute_main_action() {
 }
 
 void draw_item_with_box(Item *item, enum Box box) {
-  long long prev_pixels = get_rendered_pixels();
-
-  // Draw the item at the entity.position instead of final_position
-  draw_transparent_image(item->entity.position.x, item->entity.position.y,
-                         GENGINE_ITEM_SIZE, GENGINE_ITEM_SIZE,
-                         item->entity.sprite);
-  print_rendered_pixels(true);
-  print_pixel_diff(prev_pixels, "[DRAWN ITEM]");
-
   draw_placement_boxes(item, 1, box);
 }
 
@@ -660,14 +643,18 @@ void draw_placement_boxes(Item *items, int num_items, enum Box box) {
                 items[i].entity.background_cache);
 
     // Draw the background from the background_cache
-    draw_image(items[i].entity.position.x, items[i].entity.position.y, width,
-               height, items[i].entity.background_cache);
+    if (items[i].entity.position.x != -1 && items[i].entity.position.y != -1)
+      draw_image(items[i].entity.position.x, items[i].entity.position.y, width,
+                 height, items[i].entity.background_cache);
 
     // Draw the item
     if (items[i].entity.position.x != -1 && items[i].entity.position.y != -1)
       draw_transparent_image(items[i].entity.position.x,
                              items[i].entity.position.y, width, height,
                              items[i].entity.sprite);
+
+    // Draw player
+    draw_player();
 
     // Draw the box using lines
     draw_line(x, y + 2, x + width, y + 2, color, 4);           // Top line
@@ -768,19 +755,19 @@ void move_player(char key) {
   }
 
   // display all item positions in console for debugging
-  for (int i = 0; i < map->num_items; i++) {
-    uart_puts("\n\nItem: ");
-    uart_puts(COLOR.TEXT.BLUE);
-    uart_puts(map->items[i].name);
-    uart_puts(COLOR.RESET);
+  // for (int i = 0; i < map->num_items; i++) {
+  //   uart_puts("\n\nItem: ");
+  //   uart_puts(COLOR.TEXT.BLUE);
+  //   uart_puts(map->items[i].name);
+  //   uart_puts(COLOR.RESET);
 
-    uart_puts("\nPosition: ");
-    uart_puts(COLOR.TEXT.BLUE);
-    uart_dec(map->items[i].entity.position.x);
-    uart_puts(", ");
-    uart_dec(map->items[i].entity.position.y);
-    uart_puts(COLOR.RESET);
-  }
+  //   uart_puts("\nPosition: ");
+  //   uart_puts(COLOR.TEXT.BLUE);
+  //   uart_dec(map->items[i].entity.position.x);
+  //   uart_puts(", ");
+  //   uart_dec(map->items[i].entity.position.y);
+  //   uart_puts(COLOR.RESET);
+  // }
 
   switch (key) {
   case 'w':

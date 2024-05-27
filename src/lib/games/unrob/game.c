@@ -12,15 +12,14 @@
 #include "../../headers/timer.h"
 #include "../../headers/uart0.h"
 #include "../../headers/utils.h"
-#include "../screens/game-menu.h"
-#include "../screens/stage-select.h"
-#include "../screens/post-game.h"
-#include "../screens/post-game-buttons.h"
 #include "../engine/guard.h"
 #include "../engine/item.h"
 #include "../engine/map-bitmap.h"
 #include "../engine/player.h"
 #include "../screens/game-menu.h"
+#include "../screens/post-game-buttons.h"
+#include "../screens/post-game.h"
+#include "../screens/stage-select.h"
 #include "maps.h"
 
 GameMap *map;

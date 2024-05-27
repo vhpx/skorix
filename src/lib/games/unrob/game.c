@@ -24,7 +24,7 @@ Position *player_position;
 
 int enable_game_debugger = false;
 
-const int SKIP_STAGE_ANIMATION = false;
+const int SKIP_STAGE_ANIMATION = true;
 
 int is_game_over = 0;
 int timer_counter = 0;
@@ -47,6 +47,10 @@ void initialize_game() {
   player_position = &map->player_position;
 
   for (int i = 0; i < map->num_items; i++) {
+    if (map->items[i].final_position.x == -1 &&
+        map->items[i].final_position.y == -1)
+      continue; // Skip if the item has no final position
+
     map->items[i].entity.position = *player_position;
     map->items[i].entity.background_cache = 0;
   }
@@ -436,6 +440,10 @@ const Bitmap *get_guard_sprite(enum Direction direction) {
 
 void move_items_to_final_position() {
   for (int i = 0; i < map->num_items; i++) {
+    if (map->items[i].final_position.x == -1 &&
+        map->items[i].final_position.y == -1)
+      continue; // Skip if the item has no final position
+
     float time = 0.0f;
     float speed = 0.005f; // Adjust this value to control the speed of movement
 
@@ -624,6 +632,7 @@ void draw_placement_boxes(Item *items, int num_items, enum Box box) {
   unsigned int color = get_placement_box_color(box);
 
   for (int i = 0; i < num_items; i++) {
+
     long long prev_pixels = get_rendered_pixels();
     char msg[MAX_STR_LENGTH];
     clrstr(msg);
@@ -655,6 +664,9 @@ void draw_placement_boxes(Item *items, int num_items, enum Box box) {
 
     // Draw player
     draw_player();
+
+    if (items[i].final_position.x == -1 && items[i].final_position.y == -1)
+      continue; // Skip if the item has no final position
 
     // Draw the box using lines
     draw_line(x, y + 2, x + width, y + 2, color, 4);           // Top line
@@ -823,7 +835,7 @@ void switch_inventory_item(char key) {
 
     // Wrap around if the index goes below 0
     if (selected_item < 0) {
-      selected_item = item_m1_allArray_LEN - 1;
+      selected_item = map->num_items - 1;
     }
     break;
 
@@ -831,7 +843,7 @@ void switch_inventory_item(char key) {
     selected_item++;
 
     // Wrap around if the index exceeds array length
-    if (selected_item >= item_m1_allArray_LEN) {
+    if (selected_item >= map->num_items) {
       selected_item = 0;
     }
     break;

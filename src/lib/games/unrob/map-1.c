@@ -118,13 +118,27 @@ Item map_items[] = {
         .final_position = {.x = 850, .y = 810},
         .entity =
             {
-                .position = {.x = 100, .y = 100},
                 .size =
                     {
                         .width = GENGINE_ITEM_SIZE,
                         .height = GENGINE_ITEM_SIZE,
                     },
                 .sprite = item_m1_7,
+            },
+    },
+    {
+        .id = 8,
+        .name = "Item 8 (Outlier)",
+        .final_position = {.x = -1, .y = -1},
+        .entity =
+            {
+                .position = {.x = 100, .y = 100},
+                .size =
+                    {
+                        .width = GENGINE_ITEM_SIZE,
+                        .height = GENGINE_ITEM_SIZE,
+                    },
+                .sprite = item_m2_1,
             },
     },
 };

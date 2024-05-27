@@ -1,7 +1,7 @@
 // map-1.c
 #include "map-1.h"
 
-const Position spawn_point = {
+const Position map_1_spawn_point = {
     .x = (SCREEN_WIDTH - PLAYER_WIDTH) / 2,
     .y = (SCREEN_HEIGHT - MARGIN - PLAYER_HEIGHT) - 40,
 };
@@ -118,13 +118,27 @@ Item map_items[] = {
         .final_position = {.x = 850, .y = 810},
         .entity =
             {
-                .position = {.x = 100, .y = 100},
                 .size =
                     {
                         .width = GENGINE_ITEM_SIZE,
                         .height = GENGINE_ITEM_SIZE,
                     },
                 .sprite = item_m1_7,
+            },
+    },
+    {
+        .id = 8,
+        .name = "Item 8 (Outlier)",
+        .final_position = {.x = -1, .y = -1},
+        .entity =
+            {
+                .position = {.x = 100, .y = 100},
+                .size =
+                    {
+                        .width = GENGINE_ITEM_SIZE,
+                        .height = GENGINE_ITEM_SIZE,
+                    },
+                .sprite = item_m2_1,
             },
     },
 };
@@ -135,11 +149,11 @@ const Position map_wall_boundaries[] = {
     {.x = 155, .y = 635}, {.x = 155, .y = 735}, {.x = 105, .y = 735},
     {.x = 105, .y = 865}, {.x = 215, .y = 865}, {.x = 215, .y = 805},
     {.x = 275, .y = 805}, {.x = 275, .y = 865}, {.x = 435, .y = 865},
-    {.x = 435, .y = 745}, {.x = 455, .y = 745}, {.x = 455, .y = 805},
-    {.x = 465, .y = 805}, {.x = 465, .y = 805}, {.x = 465, .y = 995},
-    {.x = 535, .y = 995}, {.x = 535, .y = 935}, {.x = 545, .y = 935},
-    {.x = 545, .y = 805}, {.x = 555, .y = 805}, {.x = 555, .y = 745},
-    {.x = 575, .y = 745}, {.x = 575, .y = 865}, {.x = 905, .y = 865},
+    {.x = 435, .y = 755}, {.x = 445, .y = 755}, {.x = 445, .y = 815},
+    {.x = 465, .y = 815}, {.x = 465, .y = 815}, {.x = 465, .y = 995},
+    {.x = 545, .y = 995}, {.x = 545, .y = 935}, {.x = 545, .y = 935},
+    {.x = 545, .y = 815}, {.x = 565, .y = 815}, {.x = 565, .y = 755},
+    {.x = 575, .y = 755}, {.x = 575, .y = 865}, {.x = 905, .y = 865},
     {.x = 905, .y = 745}, {.x = 855, .y = 745}, {.x = 855, .y = 635},
     {.x = 915, .y = 635}, {.x = 915, .y = 425}, {.x = 855, .y = 425},
     {.x = 855, .y = 305}, {.x = 905, .y = 305}, {.x = 905, .y = 145},
@@ -200,8 +214,8 @@ Guard guards[] = {
 };
 
 GameMap map1 = {
-    .spawn_point = spawn_point,
-    .player_position = spawn_point,
+    .spawn_point = map_1_spawn_point,
+    .player_position = map_1_spawn_point,
     .boundaries = map_boundaries,
     .bitmap = game_map_1_bitmap,
     .size = map_size,

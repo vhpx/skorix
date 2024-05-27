@@ -24,7 +24,7 @@ Item map_3_map_items[] = {
     {
         .id = 1,
         .name = "Item 1",
-        .final_position = {.x = 125, .y = 150},
+        .final_position = {.x = 150, .y = 900},
         .entity =
             {
                 .position = {.x = 100, .y = 100},
@@ -39,7 +39,7 @@ Item map_3_map_items[] = {
     {
         .id = 2,
         .name = "Item 2",
-        .final_position = {.x = 320, .y = 150},
+        .final_position = {.x = 800, .y = 900},
         .entity =
             {
                 .position = {.x = 100, .y = 100},
@@ -54,7 +54,7 @@ Item map_3_map_items[] = {
     {
         .id = 3,
         .name = "Item 3",
-        .final_position = {.x = 690, .y = 150},
+        .final_position = {.x = 155, .y = 545},
         .entity =
             {
                 .position = {.x = 100, .y = 100},
@@ -69,7 +69,7 @@ Item map_3_map_items[] = {
     {
         .id = 4,
         .name = "Item 4",
-        .final_position = {.x = 830, .y = 150},
+        .final_position = {.x = 155, .y = 400},
         .entity =
             {
                 .position = {.x = 100, .y = 100},
@@ -84,7 +84,7 @@ Item map_3_map_items[] = {
     {
         .id = 5,
         .name = "Item 5",
-        .final_position = {.x = 120, .y = 810},
+        .final_position = {.x = 800, .y = 545},
         .entity =
             {
                 .position = {.x = 100, .y = 100},
@@ -99,7 +99,7 @@ Item map_3_map_items[] = {
     {
         .id = 6,
         .name = "Item 6",
-        .final_position = {.x = 330, .y = 810},
+        .final_position = {.x = 800, .y = 400},
         .entity =
             {
                 .position = {.x = 100, .y = 100},
@@ -114,7 +114,7 @@ Item map_3_map_items[] = {
     {
         .id = 7,
         .name = "Item 7",
-        .final_position = {.x = 850, .y = 810},
+        .final_position = {.x = 790, .y = 220},
         .entity =
             {
                 .position = {.x = 100, .y = 100},
@@ -126,41 +126,129 @@ Item map_3_map_items[] = {
                 .sprite = item_m3_7,
             },
     },
+    {
+        .id = 8,
+        .name = "Item 8 (Outlier)",
+        .final_position = {.x = -1, .y = -1},
+        .entity =
+            {
+                .position = {.x = 100, .y = 100},
+                .size =
+                    {
+                        .width = GENGINE_ITEM_SIZE,
+                        .height = GENGINE_ITEM_SIZE,
+                    },
+                .sprite = item_m1_1,
+            },
+    },
 };
 
 const Position map_3_map_wall_boundaries[] = {
-    {.x = 105, .y = 145}, {.x = 105, .y = 305}, {.x = 155, .y = 305},
-    {.x = 155, .y = 415}, {.x = 95, .y = 415},  {.x = 95, .y = 635},
-    {.x = 155, .y = 635}, {.x = 155, .y = 735}, {.x = 105, .y = 735},
-    {.x = 105, .y = 865}, {.x = 215, .y = 865}, {.x = 215, .y = 805},
-    {.x = 275, .y = 805}, {.x = 275, .y = 865}, {.x = 435, .y = 865},
-    {.x = 435, .y = 745}, {.x = 455, .y = 745}, {.x = 455, .y = 805},
-    {.x = 465, .y = 805}, {.x = 465, .y = 805}, {.x = 465, .y = 995},
-    {.x = 535, .y = 995}, {.x = 535, .y = 935}, {.x = 545, .y = 935},
-    {.x = 545, .y = 805}, {.x = 555, .y = 805}, {.x = 555, .y = 745},
-    {.x = 575, .y = 745}, {.x = 575, .y = 865}, {.x = 905, .y = 865},
-    {.x = 905, .y = 745}, {.x = 855, .y = 745}, {.x = 855, .y = 635},
-    {.x = 915, .y = 635}, {.x = 915, .y = 425}, {.x = 855, .y = 425},
-    {.x = 855, .y = 305}, {.x = 905, .y = 305}, {.x = 905, .y = 145},
-    {.x = 805, .y = 145}, {.x = 805, .y = 205}, {.x = 755, .y = 205},
-    {.x = 755, .y = 145}, {.x = 675, .y = 145}, {.x = 675, .y = 205},
-    {.x = 555, .y = 205}, {.x = 555, .y = 215}, {.x = 455, .y = 215},
-    {.x = 455, .y = 205}, {.x = 375, .y = 205}, {.x = 375, .y = 145},
-    {.x = 305, .y = 145}, {.x = 305, .y = 205}, {.x = 205, .y = 205},
-    {.x = 205, .y = 145}, {.x = 105, .y = 145},
+    {.x = 435, .y = 998}, {.x = 435, .y = 950}, {.x = 115, .y = 950},
+    {.x = 115, .y = 495}, {.x = 200, .y = 495}, {.x = 200, .y = 465},
+    {.x = 115, .y = 465}, {.x = 115, .y = 350}, {.x = 215, .y = 350},
+    {.x = 215, .y = 280}, {.x = 245, .y = 280}, {.x = 245, .y = 260},
+    {.x = 325, .y = 260}, {.x = 325, .y = 235}, {.x = 245, .y = 235},
+    {.x = 245, .y = 280}, {.x = 115, .y = 280}, {.x = 115, .y = 150},
+    {.x = 360, .y = 150}, {.x = 360, .y = 185}, {.x = 450, .y = 185},
+    {.x = 450, .y = 160}, {.x = 465, .y = 160}, {.x = 465, .y = 95},
+    {.x = 540, .y = 95},  {.x = 540, .y = 160}, {.x = 555, .y = 160},
+    {.x = 555, .y = 185}, {.x = 595, .y = 185}, {.x = 595, .y = 160},
+    {.x = 880, .y = 160}, {.x = 880, .y = 290}, {.x = 755, .y = 290},
+    {.x = 755, .y = 235}, {.x = 655, .y = 235}, {.x = 655, .y = 260},
+    {.x = 755, .y = 260}, {.x = 755, .y = 290}, {.x = 780, .y = 290},
+    {.x = 780, .y = 350}, {.x = 880, .y = 350}, {.x = 880, .y = 460},
+    {.x = 800, .y = 460}, {.x = 800, .y = 500}, {.x = 880, .y = 500},
+    {.x = 880, .y = 700}, {.x = 810, .y = 700}, {.x = 810, .y = 715},
+    {.x = 880, .y = 715}, {.x = 880, .y = 950}, {.x = 560, .y = 950},
+    {.x = 560, .y = 998}, {.x = 435, .y = 998},
 };
 
-const Position map_3_map_fountain_boundaries[] = {
-    {.x = 445, .y = 480}, {.x = 445, .y = 550}, {.x = 470, .y = 575},
-    {.x = 530, .y = 575}, {.x = 555, .y = 550}, {.x = 555, .y = 480},
-    {.x = 530, .y = 455}, {.x = 470, .y = 455},
+const Position map_3_bottom_left_set_boundaries[] = {
+    {.x = 230, .y = 840},
+    {.x = 230, .y = 815},
+    {.x = 315, .y = 815},
+    {.x = 315, .y = 840},
+};
+
+const Position map_3_bottom_right_set_boundaries[] = {
+    {.x = 650, .y = 840},
+    {.x = 650, .y = 815},
+    {.x = 780, .y = 815},
+    {.x = 780, .y = 840},
+};
+
+const Position map_3_bottom_center_set_boundaries[] = {
+    {.x = 465, .y = 770},
+    {.x = 465, .y = 710},
+    {.x = 535, .y = 710},
+    {.x = 535, .y = 770},
+};
+
+const Position map_3_center_left_set_boundaries[] = {
+    {.x = 225, .y = 610},
+    {.x = 225, .y = 580},
+    {.x = 315, .y = 580},
+    {.x = 315, .y = 610},
+};
+
+const Position map_3_center_right_set_boundaries[] = {
+    {.x = 720, .y = 610},
+    {.x = 720, .y = 560},
+    {.x = 780, .y = 560},
+    {.x = 780, .y = 610},
+};
+
+const Position map_3_top_left_set_boundaries[] = {
+    {.x = 315, .y = 400}, {.x = 315, .y = 380}, {.x = 445, .y = 380},
+    {.x = 445, .y = 430}, {.x = 410, .y = 430}, {.x = 410, .y = 400},
+};
+
+const Position map_3_top_right_set_boundaries[] = {
+    {.x = 685, .y = 400}, {.x = 685, .y = 380}, {.x = 550, .y = 380},
+    {.x = 550, .y = 430}, {.x = 585, .y = 430}, {.x = 585, .y = 400},
 };
 
 const Boundary map_3_map_boundaries[] = {
-    {.positions = map_3_map_wall_boundaries,
-     .num_positions = sizeof(map_3_map_wall_boundaries) / sizeof(Position)},
-    {.positions = map_3_map_fountain_boundaries,
-     .num_positions = sizeof(map_3_map_fountain_boundaries) / sizeof(Position)},
+    {
+        .positions = map_3_map_wall_boundaries,
+        .num_positions = sizeof(map_3_map_wall_boundaries) / sizeof(Position),
+    },
+    {
+        .positions = map_3_bottom_left_set_boundaries,
+        .num_positions =
+            sizeof(map_3_bottom_left_set_boundaries) / sizeof(Position),
+    },
+    {
+        .positions = map_3_bottom_right_set_boundaries,
+        .num_positions =
+            sizeof(map_3_bottom_right_set_boundaries) / sizeof(Position),
+    },
+    {
+        .positions = map_3_bottom_center_set_boundaries,
+        .num_positions =
+            sizeof(map_3_bottom_center_set_boundaries) / sizeof(Position),
+    },
+    {
+        .positions = map_3_center_left_set_boundaries,
+        .num_positions =
+            sizeof(map_3_center_left_set_boundaries) / sizeof(Position),
+    },
+    {
+        .positions = map_3_center_right_set_boundaries,
+        .num_positions =
+            sizeof(map_3_center_right_set_boundaries) / sizeof(Position),
+    },
+    {
+        .positions = map_3_top_left_set_boundaries,
+        .num_positions =
+            sizeof(map_3_top_left_set_boundaries) / sizeof(Position),
+    },
+    {
+        .positions = map_3_top_right_set_boundaries,
+        .num_positions =
+            sizeof(map_3_top_right_set_boundaries) / sizeof(Position),
+    },
 };
 
 Guard map_3_guards[] = {
@@ -168,6 +256,7 @@ Guard map_3_guards[] = {
 };
 
 GameMap map3 = {
+    .spawn_point = map_3_spawn_point,
     .player_position = map_3_spawn_point,
     .boundaries = map_3_map_boundaries,
     .bitmap = game_map_3_bitmap,

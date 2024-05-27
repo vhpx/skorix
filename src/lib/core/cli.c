@@ -149,11 +149,12 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       char2upper(&c);
       uart_sendc(c);
       uart_puts(COLOR.RESET);
-      uart_puts("\nRestarting Unrob Game...\n\n");
+      uart_puts("\nRestarting Unrob Game...");
 
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       sys_timer3_irq_disable();
       start_unrob_game();
+      uart_puts("Restarted Unrob Game.");
 
       return 0;
     }
@@ -190,7 +191,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       } else if (c == 'q' || c == 'e') {
         switch_inventory_item(c);
       } else if (c == 'f') {
-        swap_placed_item();
+        execute_main_action();
       } else if (c == 'c') {
         // Display position change
         uart_puts("\n\nReceived key: ");
@@ -198,14 +199,29 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
         char2upper(&c);
         uart_sendc(c);
         uart_puts(COLOR.RESET);
-        uart_puts("\nDebug Mode: ");
-        uart_puts(get_game_debugger_status() ? COLOR.TEXT.RED
-                                             : COLOR.TEXT.GREEN);
-        uart_puts(get_game_debugger_status() ? "OFF" : "ON");
+
+        uart_puts("\nGame Debug Mode: ");
+        uart_puts(enable_game_debugger ? COLOR.TEXT.RED : COLOR.TEXT.GREEN);
+        uart_puts(enable_game_debugger ? "OFF" : "ON");
         uart_puts(COLOR.RESET);
         uart_puts("\n");
-
         toggle_game_debugger();
+
+      } else if (c == 'x') {
+        // Display position change
+        uart_puts("\n\nReceived key: ");
+        uart_puts(COLOR.TEXT.BLUE);
+        char2upper(&c);
+        uart_sendc(c);
+        uart_puts(COLOR.RESET);
+
+        uart_puts("\nRendering Debug Mode: ");
+        uart_puts(enable_rendering_debugger ? COLOR.TEXT.RED
+                                            : COLOR.TEXT.GREEN);
+        uart_puts(enable_rendering_debugger ? "OFF" : "ON");
+        uart_puts(COLOR.RESET);
+        uart_puts("\n");
+        toggle_rendering_debugger();
       } else if (c == 27) { // escape key
         exit_game();
       } else {

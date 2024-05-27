@@ -6,7 +6,7 @@ typedef unsigned long Bitmap;
 
 long long get_rendered_pixels();
 void reset_rendered_pixels();
-void print_rendered_pixels();
+void print_rendered_pixels(int has_extra);
 void print_pixel_diff(unsigned long long start, char *message);
 void initialize_frame_buffer(int physicalWidth, int physicalHeight,
                              int virtualWidth, int virtualHeight);
@@ -36,4 +36,6 @@ void draw_rect_from_bitmap_alpha(int x, int y, int width, int height,
 void draw_transparent_image(int x, int y, int width, int height,
                             const Bitmap *bitmap);
 void clear_frame_buffer(int width, int height);
+
+extern int enable_rendering_debugger;
 #endif

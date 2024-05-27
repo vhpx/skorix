@@ -23,7 +23,8 @@ void draw_placement_boxes(Item *items, int num_items, enum Box box);
 void display_selected_item(int selected_item, Item *items, int num_items);
 void update_placement_boxes(Position player_position, Item *items,
                             int num_items);
-void move_items_to_final_position();
+void move_items_to_final_position_original();
+void move_items_to_final_position(Item *items, int num_items, const Bitmap *bitmap);
 void toggle_rendering_debugger();
 void toggle_game_debugger();
 int is_intersect_guard(const Position *a, const Position *b, const Position *c,
@@ -42,7 +43,7 @@ void select_level(char key);
 void game_start_selector(void);
 void select_game_start_exit(char key);
 void start_timer3(void);
-void shuffleItems(Item source_items[], Item dest_items[], int n);
+void shuffleItems(Item *items, int num_items, int n);
 
 extern int is_game_over;
 extern int is_game_start;

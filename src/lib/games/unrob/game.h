@@ -45,6 +45,7 @@ void select_game_start_exit(char key);
 void start_timer3(void);
 void shuffleItems(Item *items, int num_items, int n);
 
+
 extern int is_game_over;
 extern int is_game_start;
 extern int select_game_option;

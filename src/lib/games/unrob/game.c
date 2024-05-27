@@ -591,14 +591,16 @@ void draw_item_with_box(Item *item, enum Box box) {
 }
 
 void update_placement_boxes(Position position, Item *items, int num_items) {
-  if (enable_game_debugger)
-    return; // Do not update placement boxes if the collision debugger is on
-
   int nearest_box_index = get_nearest_box_index(&position, items, num_items);
 
   for (int i = 0; i < num_items; i++) {
-    if (is_item_in_correct_position(&items[i])) {
-      draw_placement_boxes(&items[i], 1, CORRECT_BOX);
+    if (enable_game_debugger || is_item_in_correct_position(&items[i])) {
+      if (enable_game_debugger) {
+        Item item = items[i];
+        item.entity.position = item.final_position;
+        draw_placement_boxes(&item, 1, CORRECT_BOX);
+      } else
+        draw_placement_boxes(&items[i], 1, CORRECT_BOX);
     } else if (!is_box_empty(items, num_items, i)) {
       draw_placement_boxes(&items[i], 1, INCORRECT_BOX);
     } else if (i == nearest_box_index) {
@@ -922,7 +924,7 @@ void toggle_game_debugger() {
 
   if (enable_game_debugger) {
     render_boundaries(map->boundaries, map->num_boundaries);
-    draw_final_items();
+    update_placement_boxes(map->player_position, map->items, map->num_items);
   } else {
     long long prev_pixels = get_rendered_pixels();
 

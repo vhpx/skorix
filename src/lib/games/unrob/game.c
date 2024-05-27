@@ -48,6 +48,7 @@ void initialize_game() {
 
   for (int i = 0; i < map->num_items; i++) {
     map->items[i].entity.position = *player_position;
+    map->items[i].entity.background_cache = 0;
   }
 
   copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
@@ -523,11 +524,17 @@ void execute_main_action() {
   }
 
   int is_empty = is_box_empty(items, num_items, nearest_box_index);
-  enum Action action = is_empty ? PLACE_DOWN : SWAP_ITEM;
+  enum Action action = are_all_items_placed(items, num_items)  ? PICK_UP
+                       : is_item_placed(&items[selected_item]) ? NO_ACTION
+                       : is_empty                              ? PLACE_DOWN
+                                                               : SWAP_ITEM;
 
-  if (action == SWAP_ITEM) {
-    // Check if all items are placed, if so, change to PICK_UP action
-    action = are_all_items_placed(items, num_items) ? PICK_UP : SWAP_ITEM;
+  // If no activated box is found within GENGINE_PLACEMENT_RANGE, return
+  if (action == NO_ACTION) {
+    uart_puts(COLOR.TEXT.RED);
+    uart_puts("\n\nSelected item is already placed.");
+    uart_puts(COLOR.RESET);
+    return;
   }
 
   uart_puts("\n\nAction: ");
@@ -643,8 +650,24 @@ void draw_placement_boxes(Item *items, int num_items, enum Box box) {
 
     int x = items[i].final_position.x;
     int y = items[i].final_position.y;
+
     int width = GENGINE_ITEM_SIZE;
-    int height = GENGINE_ITEM_SIZE; // Ensure the box is a square
+    int height = GENGINE_ITEM_SIZE;
+
+    if (items[i].entity.background_cache == 0)
+      copy_rect(items[i].entity.position.x, items[i].entity.position.y, 0, 0,
+                SCREEN_WIDTH, width, height, map->bitmap,
+                items[i].entity.background_cache);
+
+    // Draw the background from the background_cache
+    draw_image(items[i].entity.position.x, items[i].entity.position.y, width,
+               height, items[i].entity.background_cache);
+
+    // Draw the item
+    if (items[i].entity.position.x != -1 && items[i].entity.position.y != -1)
+      draw_transparent_image(items[i].entity.position.x,
+                             items[i].entity.position.y, width, height,
+                             items[i].entity.sprite);
 
     // Draw the box using lines
     draw_line(x, y + 2, x + width, y + 2, color, 4);           // Top line

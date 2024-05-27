@@ -183,7 +183,11 @@ Guard map_2_guards[] = {
 
 GameMap map2 = {
     .spawn_point = map_2_spawn_point,
-    .player_position = map_2_spawn_point,
+    .player =
+        {
+            .position = map_2_spawn_point,
+            .size = {.width = PLAYER_WIDTH, .height = PLAYER_HEIGHT},
+        },
     .boundaries = map_2_map_boundaries,
     .bitmap = game_map_2_bitmap,
     .size = map_2_map_size,

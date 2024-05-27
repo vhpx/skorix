@@ -1,5 +1,6 @@
 // map-1.c
 #include "map-1.h"
+#include "../engine/player.h"
 
 const Position map_1_spawn_point = {
     .x = (SCREEN_WIDTH - PLAYER_WIDTH) / 2,
@@ -118,6 +119,7 @@ Item map_items[] = {
         .final_position = {.x = 850, .y = 810},
         .entity =
             {
+                .position = {.x = 100, .y = 100},
                 .size =
                     {
                         .width = GENGINE_ITEM_SIZE,
@@ -181,7 +183,6 @@ const Boundary map_boundaries[] = {
 Guard guards[] = {
     {
         .spawn_point = guard_1_spawn_point,
-        .position = guard_1_spawn_point,
         .entity =
             {
                 .position = guard_1_spawn_point,
@@ -197,7 +198,6 @@ Guard guards[] = {
     },
     {
         .spawn_point = guard_2_spawn_point,
-        .position = guard_2_spawn_point,
         .entity =
             {
                 .position = guard_2_spawn_point,
@@ -215,7 +215,11 @@ Guard guards[] = {
 
 GameMap map1 = {
     .spawn_point = map_1_spawn_point,
-    .player_position = map_1_spawn_point,
+    .player =
+        {
+            .position = map_1_spawn_point,
+            .size = {.width = PLAYER_WIDTH, .height = PLAYER_HEIGHT},
+        },
     .boundaries = map_boundaries,
     .bitmap = game_map_1_bitmap,
     .size = map_size,

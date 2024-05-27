@@ -1087,50 +1087,6 @@ int is_intersect_guard(const Position *a, const Position *b, const Position *c,
   return is_intersect(a, b, c, d) ? 1 : 0;
 }
 
-// Function to manually copy only the mutable parts of an item
-void copyItem(Item *dest, Item *src) {
-  dest->name = src->name;
-  dest->final_position = src->final_position;
-  dest->entity.position = src->entity.position;
-  dest->entity.sprite = src->entity.sprite;
-  dest->entity.background_cache = src->entity.background_cache;
-}
-
-// Function to swap two items, working around const fields
-void swapItems(Item *a, Item *b) {
-  Item temp;
-  copyItem(&temp, a);
-  copyItem(a, b);
-  copyItem(b, &temp);
-}
-
-// Function to shuffle items into a destination array
-void shuffleItems(Item source_items[], Item dest_items[], int n) {
-  // First, manually copy the items from source to destination
-  for (int i = 0; i < n; i++) {
-    copyItem(&dest_items[i], &source_items[i]);
-  }
-
-  // Now shuffle the destination array
-  for (int i = n - 1; i > 0; i--) {
-    // Generate a random number using the provided function
-    int j = timer_counter % (i + 1);
-
-    // Swap items[i] with the element at random index in the destination array
-    swapItems(&dest_items[i], &dest_items[j]);
-  }
-}
-
-// Function to manually copy only the mutable parts of an item
-void copyItem(Item *dest, Item *src) {
-    dest->name = src->name;
-    dest->final_position = src->final_position;
-    dest->entity.position = src->entity.position;
-    dest->entity.sprite = src->entity.sprite;
-    dest->entity.background_cache = src->entity.background_cache;
-}
-
-
 void shuffleItems(Item *items, int num_items, int n) { //change the final destination of the items
     // Temporary storage for final positions of the first num_items - 1 items
     // Last item always stays in place

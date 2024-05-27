@@ -21,7 +21,7 @@
 
 GameMap *map;
 
-Item temp_item[] = {};
+Item temp_items[6];
 
 int enable_game_debugger = false;
 
@@ -55,6 +55,15 @@ void initialize_game() {
     map->items[i].entity.position = map->player_position;
     map->items[i].entity.background_cache = 0;
   }
+
+  // for (int i = 0; i < map->num_items; i++) {
+  //   if (temp_items[i].final_position.x == -1 &&
+  //       temp_items[i].final_position.y == -1)
+  //     continue; // Skip if the item has no final position
+
+  //   temp_items[i].entity.position = map->player_position;
+  //   temp_items[i].entity.background_cache = 0;
+  // }
 
   copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
             get_player_sprite(), player_sprite_buffer);
@@ -223,10 +232,11 @@ void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
 // function to start the game
 void game_start_selector() {
   draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_menu);
-  draw_transparent_image(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT - 250, 220, 70,
-                         button_start);
-  draw_transparent_image(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT - 150, 220, 70,
-                         button_exit);
+    draw_transparent_image(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT - 150, 220, 70,
+                           button_exit);
+    draw_transparent_image(SCREEN_WIDTH / 2 - 135, SCREEN_HEIGHT - 280, 290,
+                           100, button_start_selected);
+    select_game_option = 1;
 }
 
 // function to start or exit game
@@ -350,7 +360,7 @@ void start_unrob_game() {
   uart_puts("\n\nStarting Unrob Game...");
   uart_dec(timer_counter%10);
   uart_puts("\n");
-
+  // shuffleItems(map->items, temp_items, map->num_items);
   is_game_over = 0;
   timer_counter = 0;
   // turn off debugger upon game start
@@ -989,44 +999,36 @@ int is_intersect_guard(const Position *a, const Position *b, const Position *c,
   return is_intersect(a, b, c, d) ? 1 : 0;
 }
 
-void swapItems(Item *a, Item *b) {
-    // Swap names
-    char *temp_name = a->name;
-    a->name = b->name;
-    b->name = temp_name;
-
-    // Swap final positions
-    Position temp_final_position = a->final_position;
-    a->final_position = b->final_position;
-    b->final_position = temp_final_position;
-
-    // Swap mutable parts of entities if required
-    if (a->entity.sprite != 0 && b->entity.sprite != 0) {
-        Bitmap *temp_sprite = a->entity.sprite;
-        a->entity.sprite = b->entity.sprite;
-        b->entity.sprite = temp_sprite;
-    }
-
-    // Swap background caches if required
-    Bitmap *temp_cache = a->entity.background_cache;
-    a->entity.background_cache = b->entity.background_cache;
-    b->entity.background_cache = temp_cache;
-
-    // Swap positions within entities
-    Position temp_position = a->entity.position;
-    a->entity.position = b->entity.position;
-    b->entity.position = temp_position;
+// Function to manually copy only the mutable parts of an item
+void copyItem(Item *dest, Item *src) {
+    dest->name = src->name;
+    dest->final_position = src->final_position;
+    dest->entity.position = src->entity.position;
+    dest->entity.sprite = src->entity.sprite;
+    dest->entity.background_cache = src->entity.background_cache;
 }
 
+// Function to swap two items, working around const fields
+void swapItems(Item *a, Item *b) {
+    Item temp;
+    copyItem(&temp, a);
+    copyItem(a, b);
+    copyItem(b, &temp);
+}
 
+// Function to shuffle items into a destination array
+void shuffleItems(Item source_items[], Item dest_items[], int n) {
+    // First, manually copy the items from source to destination
+    for (int i = 0; i < n; i++) {
+        copyItem(&dest_items[i], &source_items[i]);
+    }
 
-// Function to shuffle items
-void shuffleItems(Item items[], int n) {
-
+    // Now shuffle the destination array
     for (int i = n - 1; i > 0; i--) {
+        // Generate a random number using the provided function
         int j = timer_counter % (i + 1);
 
-        // Swap items[i] with the element at random index
-        swapItems(&items[i], &items[j]);
+        // Swap items[i] with the element at random index in the destination array
+        swapItems(&dest_items[i], &dest_items[j]);
     }
 }

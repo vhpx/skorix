@@ -265,18 +265,24 @@ unsigned char font[FONT_NUMGLYPHS][FONT_BPG] = {
 };
 
 /* Functions to display text on the screen */
-void display_font(int image_width, int image_height) {
+void display_team_details(int image_width, int image_height) {
   clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-  draw_string(SCREEN_WIDTH/2 - 120, 50, "--- Our Members ---", 0x00FF0000, 2);
+  draw_string(SCREEN_WIDTH / 2 - 120, 50, "--- Our Members ---", 0x00FF0000, 2);
 
-  int name_spacing = 150; 
-  draw_string(name_spacing, SCREEN_HEIGHT/2 - 50, "Do Phuong Linh",0x00FFC0CB, 2);
-  draw_string(SCREEN_WIDTH/2 + name_spacing, SCREEN_HEIGHT/2 - 50,"Vo Hoang Phuc", 0x0000FF00, 2);
-  draw_string(name_spacing, SCREEN_HEIGHT - 150,"Le Duy Quang", 0x000000FF, 2);
-  draw_string(SCREEN_WIDTH/2 + name_spacing, SCREEN_HEIGHT - 150, "Tran Thanh Tung", 0x00FFFF00, 2);
+  int name_spacing = 150;
+  draw_string(name_spacing, SCREEN_HEIGHT / 2 - 50, "Do Phuong Linh",
+              0x00FFC0CB, 2);
+  draw_string(SCREEN_WIDTH / 2 + name_spacing, SCREEN_HEIGHT / 2 - 50,
+              "Vo Hoang Phuc", 0x0000FF00, 2);
+  draw_string(name_spacing, SCREEN_HEIGHT - 150, "Le Duy Quang", 0x000000FF, 2);
+  draw_string(SCREEN_WIDTH / 2 + name_spacing, SCREEN_HEIGHT - 150,
+              "Tran Thanh Tung", 0x00FFFF00, 2);
 
   draw_image(name_spacing, 150, AVATAR_WIDTH, AVATAR_HEIGHT, ava_linh);
-  draw_image(SCREEN_WIDTH/2 + name_spacing, 150, AVATAR_WIDTH, AVATAR_HEIGHT, ava_phuc);
-  draw_image(name_spacing, SCREEN_HEIGHT/2 + 50 , AVATAR_WIDTH, AVATAR_HEIGHT, ava_quang);
-  draw_image(SCREEN_WIDTH/2 + name_spacing, SCREEN_HEIGHT/2 + 50, AVATAR_WIDTH, AVATAR_HEIGHT, ava_tung);
+  draw_image(SCREEN_WIDTH / 2 + name_spacing, 150, AVATAR_WIDTH, AVATAR_HEIGHT,
+             ava_phuc);
+  draw_image(name_spacing, SCREEN_HEIGHT / 2 + 50, AVATAR_WIDTH, AVATAR_HEIGHT,
+             ava_quang);
+  draw_image(SCREEN_WIDTH / 2 + name_spacing, SCREEN_HEIGHT / 2 + 50,
+             AVATAR_WIDTH, AVATAR_HEIGHT, ava_tung);
 }

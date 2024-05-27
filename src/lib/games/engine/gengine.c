@@ -28,9 +28,7 @@ void render_boundaries(const Boundary *boundaries, int num_boundaries) {
     }
   }
 
-  uart_puts("\nProcessed pixels: ");
-  print_rendered_pixels();
-  uart_puts(" | ");
+  print_rendered_pixels(true);
   print_pixel_diff(prev_pixels, "[DRAWN COLLISION BOUNDARIES]");
 }
 
@@ -136,7 +134,10 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
     uart_puts(COLOR.TEXT.YELLOW);
     uart_dec(next_pos.y);
     uart_puts(COLOR.RESET);
-    uart_puts(")\n");
+    uart_puts(")");
+
+    if (enable_rendering_debugger)
+      uart_puts("\n");
   }
 
   // Calculate rectangular regions that need to be updated
@@ -159,6 +160,8 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
                          boundary_end)) {
           if (is_guard == false) {
             uart_puts(COLOR.TEXT.RED);
+            if (!enable_rendering_debugger)
+              uart_puts("\n");
             uart_puts("Intersection detected with boundary");
             uart_puts(COLOR.RESET);
             uart_puts(": (");
@@ -192,9 +195,7 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
           // Update only the necessary portions of the background and sprite
           draw_rect_from_bitmap(erase_x, erase_y, update_width, update_height,
                                 background_cache_buffer);
-          uart_puts("\nProcessed pixels: ");
-          print_rendered_pixels();
-          uart_puts(" | ");
+          print_rendered_pixels(true);
 
           if (is_guard == false)
             print_pixel_diff(prev_pixels, "[ERASED PLAYER]");
@@ -208,9 +209,7 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
           draw_transparent_image(redraw_x, redraw_y, update_width,
                                  update_height, player_sprite_buffer);
 
-          uart_puts("\nProcessed pixels: ");
-          print_rendered_pixels();
-          uart_puts(" | ");
+          print_rendered_pixels(true);
 
           if (is_guard == false)
             print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
@@ -247,9 +246,7 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
   // Update only the necessary portions of the background and sprite
   draw_rect_from_bitmap(erase_x, erase_y, update_width, update_height,
                         background_cache_buffer);
-  uart_puts("\nProcessed pixels: ");
-  print_rendered_pixels();
-  uart_puts(" | ");
+  print_rendered_pixels(true);
 
   if (is_guard == false)
     print_pixel_diff(prev_pixels, "[ERASED PLAYER]");
@@ -263,9 +260,7 @@ void move_in_boundaries(const Boundary *boundaries, int num_boundaries,
   draw_transparent_image(redraw_x, redraw_y, update_width, update_height,
                          player_sprite_buffer);
 
-  uart_puts("\nProcessed pixels: ");
-  print_rendered_pixels();
-  uart_puts(" | ");
+  print_rendered_pixels(true);
 
   if (is_guard == false)
     print_pixel_diff(prev_pixels, "[DRAWN PLAYER]");
@@ -379,9 +374,7 @@ void move_guard_in_boundaries(const Boundary *boundaries, int num_boundaries,
           // Update only the necessary portions of the background and sprite
           draw_rect_from_bitmap(erase_x, erase_y, update_width, update_height,
                                 background_cache_buffer);
-          uart_puts("\nProcessed pixels: ");
-          print_rendered_pixels();
-          uart_puts(" | ");
+          print_rendered_pixels(true);
 
           print_pixel_diff(prev_pixels, "[ERASED GUARD]");
 
@@ -392,9 +385,7 @@ void move_guard_in_boundaries(const Boundary *boundaries, int num_boundaries,
           draw_transparent_image(redraw_x, redraw_y, update_width,
                                  update_height, player_sprite_buffer);
 
-          uart_puts("\nProcessed pixels: ");
-          print_rendered_pixels();
-          uart_puts(" | ");
+          print_rendered_pixels(true);
 
           print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
 
@@ -428,9 +419,7 @@ void move_guard_in_boundaries(const Boundary *boundaries, int num_boundaries,
   // Update only the necessary portions of the background and sprite
   draw_rect_from_bitmap(erase_x, erase_y, update_width, update_height,
                         background_cache_buffer);
-  uart_puts("\nProcessed pixels: ");
-  print_rendered_pixels();
-  uart_puts(" | ");
+  print_rendered_pixels(true);
 
   print_pixel_diff(prev_pixels, "[ERASED GUARD]");
 
@@ -441,13 +430,98 @@ void move_guard_in_boundaries(const Boundary *boundaries, int num_boundaries,
   draw_transparent_image(redraw_x, redraw_y, update_width, update_height,
                          player_sprite_buffer);
 
-  uart_puts("\nProcessed pixels: ");
-  print_rendered_pixels();
-  uart_puts(" | ");
+  print_rendered_pixels(true);
 
   print_pixel_diff(prev_pixels, "[DRAWN GUARD]");
 
   // Update player's current position
   current_pos->x = next_pos.x;
   current_pos->y = next_pos.y;
+}
+
+int get_nearest_box_index(Position *player_position, Item *items,
+                          int num_items) {
+  int nearest_box_index = -1;
+  float nearest_distance = FLOAT_MAX;
+
+  // Find the nearest activated box within GENGINE_PLACEMENT_RANGE
+  for (int i = 0; i < num_items; i++) {
+    float dx = (player_position->x + PLAYER_WIDTH / 2.0) -
+               (items[i].final_position.x + GENGINE_ITEM_SIZE / 2.0);
+    float dy = (player_position->y + PLAYER_HEIGHT / 2.0) -
+               (items[i].final_position.y + GENGINE_ITEM_SIZE / 2.0);
+    float distance = sqrt(dx * dx + dy * dy);
+
+    if (distance < nearest_distance && distance <= GENGINE_PLACEMENT_RANGE) {
+      nearest_distance = distance;
+      nearest_box_index = i;
+    }
+  }
+
+  return nearest_box_index;
+}
+
+int is_box_empty(Item *items, int num_items, int box_index) {
+  Position box_position = items[box_index].final_position;
+
+  // Check if any item's entity.position matches the box_position
+  for (int i = 0; i < num_items; i++) {
+    if (is_same_position(&items[i].entity.position, &box_position)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+void swap_items_in_box(Item *items, int num_items, int box_index,
+                       Item *new_item) {
+  Position box_position = items[box_index].final_position;
+
+  // Set the entity.position of the current item in the box to (-1, -1)
+  for (int i = 0; i < num_items; i++) {
+    if (is_same_position(&items[i].entity.position, &box_position)) {
+      items[i].entity.position.x = -1;
+      items[i].entity.position.y = -1;
+      break;
+    }
+  }
+
+  // Set the entity.position of the new item to the box's position
+  new_item->entity.position = box_position;
+}
+
+int is_same_position(Position *pos1, Position *pos2) {
+  return (pos1->x == pos2->x && pos1->y == pos2->y);
+}
+
+int is_item_in_correct_position(Item *item) {
+  return is_same_position(&item->entity.position, &item->final_position);
+}
+int is_item_placed(Item *item) {
+  // An item is considered placed if its current position is not (-1, -1)
+  return item->entity.position.x != -1 || item->entity.position.y != -1;
+}
+
+int are_all_items_placed(Item *items, int num_items) {
+  for (int i = 0; i < num_items; i++) {
+    if (!is_item_placed(&items[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+void pick_up_item(Item *items, int num_items, int box_index) {
+  Position box_position = items[box_index].final_position;
+
+  // Set the entity.position of the item in the box to (-1, -1)
+  for (int i = 0; i < num_items; i++) {
+    if (is_same_position(&items[i].entity.position, &box_position)) {
+      items[i].entity.position.x = -1;
+      items[i].entity.position.y = -1;
+      break;
+    }
+  }
 }

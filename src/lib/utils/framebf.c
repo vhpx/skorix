@@ -17,21 +17,33 @@ unsigned int width, height, pitch;
 unsigned char *fb;
 
 unsigned long long rendered_pixels = 0;
+int enable_rendering_debugger = false;
 
 long long get_rendered_pixels() { return rendered_pixels; }
 
 void reset_rendered_pixels() { rendered_pixels = 0; }
 
-void print_rendered_pixels() {
+void print_rendered_pixels(int has_extra) {
+  if (!enable_rendering_debugger)
+    return;
+
   char buffer[20];
+  uart_puts("\nProcessed pixels: ");
   format_num(rendered_pixels, buffer);
   pad_str(buffer, 12, ' ');
   uart_puts(COLOR.TEXT.BLUE);
   uart_puts(buffer);
   uart_puts(COLOR.RESET);
+
+  if (has_extra) {
+    uart_puts(" | ");
+  }
 }
 
 void print_pixel_diff(unsigned long long start, char *message) {
+  if (!enable_rendering_debugger)
+    return;
+
   char buffer[20];
   format_num(rendered_pixels - start, buffer);
   pad_str(buffer, 12, ' ');

@@ -142,18 +142,43 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
     }
 
   } else if (mode == GAME) {
+    if (c == 'r') {
+      // Display position change
+      uart_puts("\n\nReceived key: ");
+      uart_puts(COLOR.TEXT.BLUE);
+      char2upper(&c);
+      uart_sendc(c);
+      uart_puts(COLOR.RESET);
+      uart_puts("\nRestarting Unrob Game...");
+
+      clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+      sys_timer3_irq_disable();
+      start_unrob_game();
+      uart_puts("Restarted Unrob Game.");
+
+      return 0;
+    }
+
     if (!is_game_start) {
       if (c == 'w' || c == 's') {
         select_game_start_exit(c);
-      } else if (c == '\n') {
-        if (select_game_option) {
-          is_game_start = 1;
-          level_selector();
-        } else {
-          exit_game();
-        }
+        return 0;
       }
-    } else if (!is_level_selected) {
+
+      if (c != '\n')
+        return 0;
+
+      if (select_game_option) {
+        is_game_start = 1;
+        level_selector();
+      } else {
+        exit_game();
+      }
+
+      return 0;
+    }
+
+    if (!is_level_selected) {
       if (c == 'w' || c == 's') {
         select_level(c);
       } else if (c == '\n') {
@@ -164,7 +189,9 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
         move_player(c);
       } else if (c == 'q' || c == 'e') {
-        rotate_inventory(c);
+        switch_inventory_item(c);
+      } else if (c == 'f') {
+        execute_main_action();
       } else if (c == 'c') {
         // Display position change
         uart_puts("\n\nReceived key: ");
@@ -172,26 +199,29 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
         char2upper(&c);
         uart_sendc(c);
         uart_puts(COLOR.RESET);
-        uart_puts("\nDebug Mode: ");
-        uart_puts(get_game_debugger_status() ? COLOR.TEXT.RED
-                                             : COLOR.TEXT.GREEN);
-        uart_puts(get_game_debugger_status() ? "OFF" : "ON");
+
+        uart_puts("\nGame Debug Mode: ");
+        uart_puts(enable_game_debugger ? COLOR.TEXT.RED : COLOR.TEXT.GREEN);
+        uart_puts(enable_game_debugger ? "OFF" : "ON");
         uart_puts(COLOR.RESET);
         uart_puts("\n");
-
         toggle_game_debugger();
-      } else if (c == 'r') {
+
+      } else if (c == 'x') {
         // Display position change
         uart_puts("\n\nReceived key: ");
         uart_puts(COLOR.TEXT.BLUE);
         char2upper(&c);
         uart_sendc(c);
         uart_puts(COLOR.RESET);
-        uart_puts("\nRestarting Unrob Game...\n\n");
 
-        clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-        sys_timer3_irq_disable();
-        start_unrob_game();
+        uart_puts("\nRendering Debug Mode: ");
+        uart_puts(enable_rendering_debugger ? COLOR.TEXT.RED
+                                            : COLOR.TEXT.GREEN);
+        uart_puts(enable_rendering_debugger ? "OFF" : "ON");
+        uart_puts(COLOR.RESET);
+        uart_puts("\n");
+        toggle_rendering_debugger();
       } else if (c == 27) { // escape key
         exit_game();
       } else {

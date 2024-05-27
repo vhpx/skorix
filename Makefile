@@ -106,7 +106,7 @@ clean:
 	if exist .\src\build rmdir .\src\build /s /q
 
 #   Remove new build files (.\build)
-	for %%f in (.\build\*.o) do if not %%~nxf == video_src.o (if not %%~nxf == img_src.o (if not %%~nxf == map-bitmap.o (if not %%~nxf == welcome_img.o (if not %%~nxf == game-menu.o del %%~f))))
+	for %%f in (.\build\*.o) do if not %%~nxf == video_src.o (if not %%~nxf == img_src.o (if not %%~nxf == map-bitmap.o (if not %%~nxf == welcome_img.o (if not %%~nxf == game-menu.o (if not %%~nxf == members_img.o del %%~f)))))
 	if exist .\build\kernel\*.elf del .\build\kernel\*.elf
 	if exist .\build\images\*.img del .\build\images\*.img
 
@@ -115,7 +115,7 @@ clean_mac:
 	rm -rf ./src/build
 	
 #   Remove new build files (./build)
-	find ./build -path '*.o' -not -iname 'video_src.o' -not -iname 'img_src.o' -not -iname 'map-bitmap.o' -not -iname 'welcome_img.o' -not -iname 'game-menu.o' -exec rm {} \;
+	find ./build -path '*.o' -not -iname 'video_src.o' -not -iname 'img_src.o' -not -iname 'map-bitmap.o' -not -iname 'welcome_img.o' -not -iname 'game-menu.o' -not -iname 'members_img.o' -exec rm {} \;
 	rm -f ./build/kernel/*.elf
 	rm -f ./build/images/*.img
 

@@ -5,7 +5,7 @@
 #include "../../img/img_src.h"
 #include "../../img/welcome_img.h"
 #include "../../video/video.h"
-#include "../games/engine/game-menu.h"
+#include "../games/screens/game-menu.h"
 #include "../games/unrob/game.h"
 #include "../headers/color.h"
 #include "../headers/config.h"

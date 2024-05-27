@@ -5,7 +5,7 @@
 #include "../../img/img_src.h"
 #include "../../img/welcome_img.h"
 #include "../../video/video.h"
-#include "../games/engine/game-menu.h"
+#include "../games/screens/game-menu.h"
 #include "../games/unrob/game.h"
 #include "../headers/color.h"
 #include "../headers/config.h"
@@ -98,6 +98,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
                  CommandHistory *cmd_history, char *pre_autofilled_cmd,
                  char *post_autofilled_cmd) {
   int reset_past_cmd_index = 1;
+  char2lower(&c);
 
   // TODO: Add improved support for image scrolling
   if (mode == IMAGE) {
@@ -226,6 +227,10 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
         uart_puts("\n");
         toggle_rendering_debugger();
       } else if (c == 27) { // escape key
+        is_level_selected = 0;
+        is_game_start = 0;
+        is_game_over = 0;
+        selected_level = 1;
         exit_game();
       } else {
         // Display position change

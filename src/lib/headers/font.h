@@ -12,6 +12,6 @@ enum {
 
 extern unsigned char font[FONT_NUMGLYPHS][FONT_BPG];
 
-void displayFont(int image_width, int image_height);
+void display_font(int image_width, int image_height);
 
 #endif

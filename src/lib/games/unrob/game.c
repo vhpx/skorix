@@ -22,6 +22,8 @@
 GameMap *map = &map1;
 Position *player_position;
 
+Item temp_item[] = {};
+
 int enable_game_debugger = false;
 
 const int SKIP_STAGE_ANIMATION = false;
@@ -339,7 +341,17 @@ void map_select(int map_num) {
   }
 }
 
+void start_timer3(void) {
+  game_time = 10000;
+  sys_timer3_init();
+  sys_timer3_irq_enable();
+}
+
 void start_unrob_game() {
+  uart_puts("\n\nStarting Unrob Game...");
+  uart_dec(timer_counter%10);
+  uart_puts("\n");
+
   is_game_over = 0;
   timer_counter = 0;
   // turn off debugger upon game start
@@ -360,8 +372,8 @@ void start_unrob_game() {
 
   game_time = 61;
   draw_time();
-  sys_timer3_init();
-  sys_timer3_irq_enable();
+  // sys_timer3_init();
+  // sys_timer3_irq_enable();
 
   draw_score();
 }
@@ -375,18 +387,23 @@ void countdown(void) {
     uart_puts("\n");
   }
 
-  if (game_time) {
-    if (timer_counter >= 2) {
-      timer_counter = 0;
-      game_time--;
-      draw_time();
+  if (game_time) { //check if game time is not 0
+    if(is_level_selected){ //check if game start
+      if (timer_counter >= 2) {
+        timer_counter = 0;
+        game_time--;
+        draw_time();
+      }
+      if (map == &map1) {
+        move_guard(&map->guards[0], guard_1_sprite_buffer,
+                  background_guard_1_cache_buffer);
+        move_guard(&map->guards[1], guard_2_sprite_buffer,
+                  background_guard_2_cache_buffer);
+      }
+    }else{
+      return;
     }
-    if (map == &map1) {
-      move_guard(&map->guards[0], guard_1_sprite_buffer,
-                 background_guard_1_cache_buffer);
-      move_guard(&map->guards[1], guard_2_sprite_buffer,
-                 background_guard_2_cache_buffer);
-    }
+    
   } else {
     game_over();
   }
@@ -955,4 +972,46 @@ int is_intersect_guard(const Position *a, const Position *b, const Position *c,
 
   // Check for edge intersections:
   return is_intersect(a, b, c, d) ? 1 : 0;
+}
+
+void swapItems(Item *a, Item *b) {
+    // Swap names
+    char *temp_name = a->name;
+    a->name = b->name;
+    b->name = temp_name;
+
+    // Swap final positions
+    Position temp_final_position = a->final_position;
+    a->final_position = b->final_position;
+    b->final_position = temp_final_position;
+
+    // Swap mutable parts of entities if required
+    if (a->entity.sprite != 0 && b->entity.sprite != 0) {
+        Bitmap *temp_sprite = a->entity.sprite;
+        a->entity.sprite = b->entity.sprite;
+        b->entity.sprite = temp_sprite;
+    }
+
+    // Swap background caches if required
+    Bitmap *temp_cache = a->entity.background_cache;
+    a->entity.background_cache = b->entity.background_cache;
+    b->entity.background_cache = temp_cache;
+
+    // Swap positions within entities
+    Position temp_position = a->entity.position;
+    a->entity.position = b->entity.position;
+    b->entity.position = temp_position;
+}
+
+
+
+// Function to shuffle items
+void shuffleItems(Item items[], int n) {
+
+    for (int i = n - 1; i > 0; i--) {
+        int j = timer_counter % (i + 1);
+
+        // Swap items[i] with the element at random index
+        swapItems(&items[i], &items[j]);
+    }
 }

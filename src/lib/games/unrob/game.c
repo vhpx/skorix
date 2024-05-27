@@ -534,9 +534,10 @@ void execute_main_action() {
 
   switch (action) {
   case PLACE_DOWN:
-    if (selected_item == items[nearest_box_index].id) {
-      items[nearest_box_index].entity.position =
-          items[nearest_box_index].final_position;
+    items[nearest_box_index].entity.position =
+        items[nearest_box_index].final_position;
+
+    if (selected_item == nearest_box_index) {
       draw_item_with_box(&items[nearest_box_index], CORRECT_BOX);
       game_score += 10;
       draw_score();

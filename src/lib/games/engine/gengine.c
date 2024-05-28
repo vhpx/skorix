@@ -498,6 +498,7 @@ int is_same_position(Position *pos1, Position *pos2) {
 int is_item_in_correct_position(Item *item) {
   return is_same_position(&item->entity.position, &item->final_position);
 }
+
 int is_item_placed(Item *item) {
   // An item is considered placed if its current position is not (-1, -1)
   return item->entity.position.x != -1 || item->entity.position.y != -1;

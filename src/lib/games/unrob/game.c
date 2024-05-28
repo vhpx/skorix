@@ -57,7 +57,7 @@ void initialize_game() {
   }
 
   // shuffle items
-  shuffleItems(map->items, map->num_items, time_passed);
+  shuffle_items(map->items, map->num_items, time_passed);
 
   for (int i = 0; i < map->num_items; i++) {
     if (map->items[i].final_position.x == -1 &&
@@ -368,15 +368,15 @@ void draw_level_selection_base(int selected_level) {
   if (selected_level == 1) {
     draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_INFO_ZOOM - 50,
                 SCREEN_HEIGHT / 2 + FONT_HEIGHT * GENGINE_INFO_ZOOM - 10, ">",
-                0x00FF0000, GENGINE_INFO_ZOOM*2);
+                0x00FF0000, GENGINE_INFO_ZOOM * 2);
   } else if (selected_level == 2) {
     draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_INFO_ZOOM - 50,
-                SCREEN_HEIGHT / 2 + 7 * FONT_HEIGHT * GENGINE_INFO_ZOOM -3,
-                ">", 0x00FF0000, GENGINE_INFO_ZOOM*2);
+                SCREEN_HEIGHT / 2 + 7 * FONT_HEIGHT * GENGINE_INFO_ZOOM - 3,
+                ">", 0x00FF0000, GENGINE_INFO_ZOOM * 2);
   } else if (selected_level == 3) {
     draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_INFO_ZOOM - 50,
-                SCREEN_HEIGHT / 2 + 14 * FONT_HEIGHT * GENGINE_INFO_ZOOM - 13, ">",
-                0x00FF0000, GENGINE_INFO_ZOOM*2);
+                SCREEN_HEIGHT / 2 + 14 * FONT_HEIGHT * GENGINE_INFO_ZOOM - 13,
+                ">", 0x00FF0000, GENGINE_INFO_ZOOM * 2);
   }
 }
 
@@ -429,8 +429,11 @@ void start_unrob_game() {
 
   // Draw outline for info
   draw_rect(SCREEN_WIDTH - 1 -
-                strlen(game_time_str) * FONT_WIDTH * GENGINE_INFO_ZOOM - GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING * 2,
-            0, SCREEN_WIDTH - 1, (FONT_HEIGHT * GENGINE_INFO_ZOOM) * 2 + GENGINE_INFO_PADDING * 2, 0x00FFFFFF, 1);
+                strlen(game_time_str) * FONT_WIDTH * GENGINE_INFO_ZOOM -
+                GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING * 2,
+            0, SCREEN_WIDTH - 1,
+            (FONT_HEIGHT * GENGINE_INFO_ZOOM) * 2 + GENGINE_INFO_PADDING * 2,
+            0x00FFFFFF, 1);
 
   draw_time();
   draw_score();
@@ -440,32 +443,39 @@ void countdown(void) {
   // This function is called every 1/5 second
   time_passed++;
 
-//   if (interval < 4) {
-//     // If less than a full second (20 intervals of 1/5 second each) has passed,
-//     // increment the interval by 8. This means that a "second" in this context
-//     // will pass in less than 3 intervals (24/8), which is less than half a real
-//     // second.
-//     interval ++;
-//   } else {
-//     // If a full "second" (20 intervals) or more has passed, increment the timer
-//     // counter. This counter can be used to track the number of full "seconds"
-//     // that have passed.
-//     timer_counter++;
+  //   if (interval < 4) {
+  //     // If less than a full second (20 intervals of 1/5 second each) has
+  //     passed,
+  //     // increment the interval by 8. This means that a "second" in this
+  //     context
+  //     // will pass in less than 3 intervals (24/8), which is less than half a
+  //     real
+  //     // second.
+  //     interval ++;
+  //   } else {
+  //     // If a full "second" (20 intervals) or more has passed, increment the
+  //     timer
+  //     // counter. This counter can be used to track the number of full
+  //     "seconds"
+  //     // that have passed.
+  //     timer_counter++;
 
-//     // If the rendering debugger is enabled, print the current value of the
-//     // timer counter to the UART. This can be useful for debugging
-//     // timing-related issues.
-//     if (enable_rendering_debugger) {
-//       uart_puts("\n\nTimer Counter: ");
-//       uart_dec(timer_counter);
-//       uart_puts("\n");
-//     }
+  //     // If the rendering debugger is enabled, print the current value of the
+  //     // timer counter to the UART. This can be useful for debugging
+  //     // timing-related issues.
+  //     if (enable_rendering_debugger) {
+  //       uart_puts("\n\nTimer Counter: ");
+  //       uart_dec(timer_counter);
+  //       uart_puts("\n");
+  //     }
 
-//     // Subtract 20 from the interval, effectively "consuming" the full "second"
-//     // that just passed. If the interval was more than 20, the excess will carry
-//     // over to the next "second".
-//     interval = interval - 4;
-//   }
+  //     // Subtract 20 from the interval, effectively "consuming" the full
+  //     "second"
+  //     // that just passed. If the interval was more than 20, the excess will
+  //     carry
+  //     // over to the next "second".
+  //     interval = interval - 4;
+  //   }
 
   if (game_time) {
     if (is_level_selected) { // check if game start
@@ -508,6 +518,9 @@ void draw_game_over_screen() {
 }
 
 void game_over() {
+  if (is_game_over)
+    return;
+
   selected_game_over_action = 0;
   draw_game_over_screen();
 
@@ -522,19 +535,23 @@ void game_over() {
 
   uart_puts("\n\nPress ");
   uart_puts(COLOR.TEXT.BLUE);
-  uart_puts("R");
+  uart_puts("W");
   uart_puts(COLOR.RESET);
-  uart_puts(" to restart the game or ");
+  uart_puts(" to navigate up or ");
   uart_puts(COLOR.TEXT.BLUE);
-  uart_puts("Esc");
+  uart_puts("S");
   uart_puts(COLOR.RESET);
-  uart_puts(" to quit.\n");
+  uart_puts(" to navigate down. To confirm your selection, press ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("ENTER");
+  uart_puts(COLOR.RESET);
+  uart_puts(".\n");
 
   sys_timer3_irq_disable();
   is_game_over = 1;
 }
 
-void draw_stage_complete_screen(){
+void draw_stage_complete_screen() {
   draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, stage_complete_screen);
 
   char score[10];
@@ -556,7 +573,7 @@ void draw_stage_complete_screen(){
   }
 }
 
-void stage_complete(){
+void stage_complete() {
   selected_stage_complete_action = 0;
   draw_stage_complete_screen();
 
@@ -933,11 +950,16 @@ void draw_time() {
   long long prev_pixels = get_rendered_pixels();
 
   draw_rect(SCREEN_WIDTH - 1 -
-                strlen(game_time_str) * FONT_WIDTH * GENGINE_INFO_ZOOM - GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING,
-            GENGINE_INFO_PADDING, SCREEN_WIDTH - 1 - GENGINE_INFO_PADDING, FONT_HEIGHT * GENGINE_INFO_ZOOM + GENGINE_INFO_PADDING, 0x00000000, 1);
+                strlen(game_time_str) * FONT_WIDTH * GENGINE_INFO_ZOOM -
+                GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING,
+            GENGINE_INFO_PADDING, SCREEN_WIDTH - 1 - GENGINE_INFO_PADDING,
+            FONT_HEIGHT * GENGINE_INFO_ZOOM + GENGINE_INFO_PADDING, 0x00000000,
+            1);
   draw_string(SCREEN_WIDTH - 1 -
-                  strlen(game_time_str) * FONT_WIDTH * GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING,
-              GENGINE_INFO_PADDING, game_time_str, 0x00FFFFFF, GENGINE_INFO_ZOOM);
+                  strlen(game_time_str) * FONT_WIDTH * GENGINE_INFO_ZOOM -
+                  GENGINE_INFO_PADDING,
+              GENGINE_INFO_PADDING, game_time_str, 0x00FFFFFF,
+              GENGINE_INFO_ZOOM);
 
   print_rendered_pixels(true);
   print_pixel_diff(prev_pixels, "[DRAWN COUNTDOWN TIMER]");
@@ -946,18 +968,22 @@ void draw_time() {
 void draw_score() {
   game_score_str[7] = '0' + game_score / 100;
   game_score_str[8] = '0' + (game_score / 10) % 10;
-//   game_score_str[9] = '0' + game_score % 100;
+  //   game_score_str[9] = '0' + game_score % 100;
 
   long long prev_pixels = get_rendered_pixels();
 
   draw_rect(SCREEN_WIDTH - 1 -
-                strlen(game_score_str) * FONT_WIDTH * GENGINE_INFO_ZOOM - GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING,
-            FONT_HEIGHT * GENGINE_INFO_ZOOM + GENGINE_INFO_PADDING, SCREEN_WIDTH - 1 - GENGINE_INFO_PADDING,
-            (FONT_HEIGHT * GENGINE_INFO_ZOOM) * 2 + GENGINE_INFO_PADDING, 0x00000000, 1);
+                strlen(game_score_str) * FONT_WIDTH * GENGINE_INFO_ZOOM -
+                GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING,
+            FONT_HEIGHT * GENGINE_INFO_ZOOM + GENGINE_INFO_PADDING,
+            SCREEN_WIDTH - 1 - GENGINE_INFO_PADDING,
+            (FONT_HEIGHT * GENGINE_INFO_ZOOM) * 2 + GENGINE_INFO_PADDING,
+            0x00000000, 1);
   draw_string(SCREEN_WIDTH - 1 -
-                  strlen(game_score_str) * FONT_WIDTH * GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING,
-              FONT_HEIGHT * GENGINE_INFO_ZOOM + GENGINE_INFO_PADDING, game_score_str, 0x00FFFFFF,
-              GENGINE_INFO_ZOOM);
+                  strlen(game_score_str) * FONT_WIDTH * GENGINE_INFO_ZOOM -
+                  GENGINE_INFO_PADDING,
+              FONT_HEIGHT * GENGINE_INFO_ZOOM + GENGINE_INFO_PADDING,
+              game_score_str, 0x00FFFFFF, GENGINE_INFO_ZOOM);
 
   print_rendered_pixels(true);
   print_pixel_diff(prev_pixels, "[DRAWN SCORE]");
@@ -1209,7 +1235,7 @@ int is_intersect_guard(const Position *a, const Position *b, const Position *c,
   return is_intersect(a, b, c, d) ? 1 : 0;
 }
 
-void shuffleItems(Item *items, int num_items, int random_num) {
+void shuffle_items(Item *items, int num_items, int random_num) {
   // Create a pseudo-random sequence using the provided random number
   for (int i = num_items - 1; i > 0; i--) {
     // Use the random number to generate a pseudo-random index

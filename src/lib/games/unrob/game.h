@@ -40,7 +40,7 @@ void draw_level_selection_base(int selected_level);
 void select_level(char key);
 void game_start_selector(void);
 void select_game_start_exit(char key);
-void shuffleItems(Item *items, int num_items, int random_num);
+void shuffle_items(Item *items, int num_items, int random_num);
 void display_game_controls();
 void draw_game_over_screen();
 void draw_stage_complete_screen();

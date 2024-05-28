@@ -47,7 +47,6 @@ typedef struct {
 typedef struct {
   const Position spawn_point;
   enum Direction direction;
-  const Boundary *boundaries;
   FlexibleEntity entity;
   const int step;
 } Guard;

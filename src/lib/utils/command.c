@@ -12,6 +12,8 @@
 #include "../headers/print.h"
 #include "../headers/string.h"
 #include "../headers/uart0.h"
+#include "../headers/timer.h"
+#include "../headers/interrupt.h"
 
 Command commands[] = {
     {
@@ -309,7 +311,18 @@ int execute_command(char *input, CommandHistory *cmd_history) {
     uart_puts("\n---Entering Font Mode---\n\n");
     uart_puts("Press Escape to exit Font Mode\n");
 
+    mode = FONT;
     display_team_details(IMAGE_WIDTH, IMAGE_HEIGHT);
+    return 0;
+  }
+
+  if (strcmp(command_name, "timer") == 0) {
+    uart_puts("\n---Entering Timer Mode---\n\n");
+    uart_puts("Press Escape to exit Timer Mode\n");
+
+    mode = TIMER;
+    sys_timer1_init();
+    sys_timer1_irq_enable();
     return 0;
   }
 
@@ -695,8 +708,6 @@ void restart_uart() {
 #define AVATAR_HEIGHT 250
 
 void display_team_details(int image_width, int image_height) {
-  mode = FONT;
-
   clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
   draw_string(SCREEN_WIDTH / 2 - 120, 50, "--- Our Members ---", 0x00FF0000, 2);
 

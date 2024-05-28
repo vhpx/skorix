@@ -43,8 +43,11 @@ void select_game_start_exit(char key);
 void shuffleItems(Item *items, int num_items, int random_num);
 void display_game_controls();
 void draw_game_over_screen();
+void draw_stage_complete_screen();
+void stage_complete();
 
 extern int is_game_over;
+extern int is_stage_complete;
 extern int is_game_start;
 extern int select_game_option;
 extern int is_level_selected;
@@ -52,4 +55,5 @@ extern int selected_level;
 extern int enable_game_debugger;
 extern int enable_rendering_debugger;
 extern int selected_game_over_action;
+extern int selected_stage_complete_action;
 extern unsigned long executed_cmd_count;

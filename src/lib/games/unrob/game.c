@@ -34,12 +34,14 @@ int selected_level = 1;
 
 int is_game_start = false;
 int is_game_over = false;
+int is_stage_complete = false;
 int selected_game_over_action = 0;
 int selected_item = 0;
+int selected_stage_complete_action = 0;
 
-unsigned int interval = 0;
+// unsigned int interval = 0;
 unsigned int time_passed = 0;
-int timer_counter = 0;
+// int timer_counter = 0;
 
 unsigned int game_time = 0;
 unsigned int game_score = 0;
@@ -211,7 +213,7 @@ void draw_guard(Guard *guard, Bitmap *guard_bg_cache_buffer,
 
 void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
                 Bitmap *guard_bg_cache_buffer) {
-  if (is_game_over)
+  if (is_game_over || is_stage_complete)
     return;
 
   int force_redraw = false;
@@ -266,7 +268,7 @@ void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
     game_over();
   }
 
-  if (is_game_over) {
+  if (is_game_over || is_stage_complete) {
     game_over();
   }
 }
@@ -313,7 +315,7 @@ void select_game_start_exit(char key) {
     break;
   case 's':
     // draw_rect_from_bitmap(0, 0, 290, 360, game_home_screen_buffer);
-    draw_transparent_image(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT - 250, 220, 70,
+    draw_transparent_image(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT - 275, 220, 70,
                            button_start);
     draw_transparent_image(SCREEN_WIDTH / 2 - 135, SCREEN_HEIGHT - 180, 290,
                            100, button_exit_selected);
@@ -364,17 +366,17 @@ void draw_level_selection_base(int selected_level) {
 
   // draw_rect at level selected
   if (selected_level == 1) {
-    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
-                SCREEN_HEIGHT / 2 + FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
-                0x00FF0000, GENGINE_TIME_ZOOM);
+    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_INFO_ZOOM - 50,
+                SCREEN_HEIGHT / 2 + FONT_HEIGHT * GENGINE_INFO_ZOOM - 10, ">",
+                0x00FF0000, GENGINE_INFO_ZOOM*2);
   } else if (selected_level == 2) {
-    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
-                SCREEN_HEIGHT / 2 + 7 * FONT_HEIGHT * GENGINE_TIME_ZOOM + 9,
-                ">", 0x00FF0000, GENGINE_TIME_ZOOM);
+    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_INFO_ZOOM - 50,
+                SCREEN_HEIGHT / 2 + 7 * FONT_HEIGHT * GENGINE_INFO_ZOOM -3,
+                ">", 0x00FF0000, GENGINE_INFO_ZOOM*2);
   } else if (selected_level == 3) {
-    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
-                SCREEN_HEIGHT / 2 + 14 * FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
-                0x00FF0000, GENGINE_TIME_ZOOM);
+    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_INFO_ZOOM - 50,
+                SCREEN_HEIGHT / 2 + 14 * FONT_HEIGHT * GENGINE_INFO_ZOOM - 13, ">",
+                0x00FF0000, GENGINE_INFO_ZOOM*2);
   }
 }
 
@@ -401,6 +403,7 @@ void start_unrob_game() {
 
   // turn off debugger upon game start
   is_game_over = false;
+  is_stage_complete = false;
   enable_game_debugger = false;
 
   reset_rendered_pixels();
@@ -419,9 +422,15 @@ void start_unrob_game() {
   draw_placement_boxes(map->items, map->num_items, EMPTY_BOX);
 
   game_time = 60;
+  game_score = 0;
 
   sys_timer3_init();
   sys_timer3_irq_enable();
+
+  // Draw outline for info
+  draw_rect(SCREEN_WIDTH - 1 -
+                strlen(game_time_str) * FONT_WIDTH * GENGINE_INFO_ZOOM - GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING * 2,
+            0, SCREEN_WIDTH - 1, (FONT_HEIGHT * GENGINE_INFO_ZOOM) * 2 + GENGINE_INFO_PADDING * 2, 0x00FFFFFF, 1);
 
   draw_time();
   draw_score();
@@ -431,37 +440,37 @@ void countdown(void) {
   // This function is called every 1/5 second
   time_passed++;
 
-  if (interval < 20) {
-    // If less than a full second (20 intervals of 1/5 second each) has passed,
-    // increment the interval by 8. This means that a "second" in this context
-    // will pass in less than 3 intervals (24/8), which is less than half a real
-    // second.
-    interval += 8;
-  } else {
-    // If a full "second" (20 intervals) or more has passed, increment the timer
-    // counter. This counter can be used to track the number of full "seconds"
-    // that have passed.
-    timer_counter++;
+//   if (interval < 4) {
+//     // If less than a full second (20 intervals of 1/5 second each) has passed,
+//     // increment the interval by 8. This means that a "second" in this context
+//     // will pass in less than 3 intervals (24/8), which is less than half a real
+//     // second.
+//     interval ++;
+//   } else {
+//     // If a full "second" (20 intervals) or more has passed, increment the timer
+//     // counter. This counter can be used to track the number of full "seconds"
+//     // that have passed.
+//     timer_counter++;
 
-    // If the rendering debugger is enabled, print the current value of the
-    // timer counter to the UART. This can be useful for debugging
-    // timing-related issues.
-    if (enable_rendering_debugger) {
-      uart_puts("\n\nTimer Counter: ");
-      uart_dec(timer_counter);
-      uart_puts("\n");
-    }
+//     // If the rendering debugger is enabled, print the current value of the
+//     // timer counter to the UART. This can be useful for debugging
+//     // timing-related issues.
+//     if (enable_rendering_debugger) {
+//       uart_puts("\n\nTimer Counter: ");
+//       uart_dec(timer_counter);
+//       uart_puts("\n");
+//     }
 
-    // Subtract 20 from the interval, effectively "consuming" the full "second"
-    // that just passed. If the interval was more than 20, the excess will carry
-    // over to the next "second".
-    interval = interval - 20;
-  }
+//     // Subtract 20 from the interval, effectively "consuming" the full "second"
+//     // that just passed. If the interval was more than 20, the excess will carry
+//     // over to the next "second".
+//     interval = interval - 4;
+//   }
 
   if (game_time) {
     if (is_level_selected) { // check if game start
-      if (timer_counter >= 2) {
-        timer_counter = 0;
+      if (time_passed % 5 == 0) {
+        // timer_counter = 0;
         game_time--;
         draw_time();
       }
@@ -523,6 +532,56 @@ void game_over() {
 
   sys_timer3_irq_disable();
   is_game_over = 1;
+}
+
+void draw_stage_complete_screen(){
+  draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, stage_complete_screen);
+
+  char score[10];
+  int2str(game_score, score);
+
+  draw_string((SCREEN_WIDTH - strlen(score) * FONT_WIDTH * 5) / 2,
+              SCREEN_HEIGHT / 2 - 30, score, 0x00FF0000, 5);
+
+  if (selected_stage_complete_action == 0) {
+    draw_transparent_image((SCREEN_WIDTH - 390) / 2, SCREEN_HEIGHT / 2 + 150,
+                           390, 100, button_restart_selected);
+    draw_transparent_image((SCREEN_WIDTH - 220) / 2, SCREEN_HEIGHT / 2 + 270,
+                           220, 70, button_menu);
+  } else {
+    draw_transparent_image((SCREEN_WIDTH - 320) / 2, SCREEN_HEIGHT / 2 + 150,
+                           320, 70, button_restart);
+    draw_transparent_image((SCREEN_WIDTH - 290) / 2, SCREEN_HEIGHT / 2 + 240,
+                           290, 100, button_menu_selected);
+  }
+}
+
+void stage_complete(){
+  selected_stage_complete_action = 0;
+  draw_stage_complete_screen();
+
+  uart_puts(COLOR.TEXT.RED);
+  uart_puts("\n\nStage Completed!\n");
+  uart_puts(COLOR.RESET);
+
+  uart_puts("Final Score: ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_dec(game_score);
+  uart_puts(COLOR.RESET);
+
+  uart_puts("\n\nPress ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("R");
+  uart_puts(COLOR.RESET);
+  uart_puts(" to restart the game or ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("Esc");
+  uart_puts(COLOR.RESET);
+  uart_puts(" to quit.\n");
+
+  sys_timer3_irq_disable();
+  is_stage_complete = 1;
+  game_score += game_time * 10;
 }
 
 static int player_direction = UP;
@@ -707,10 +766,12 @@ void execute_main_action() {
                       &items[selected_item]);
     if (selected_item == items[nearest_box_index].id) {
       draw_item_with_box(&items[nearest_box_index], CORRECT_BOX);
-      game_score += 10;
+      game_score += 50;
       draw_score();
     } else {
       draw_item_with_box(&items[nearest_box_index], INCORRECT_BOX);
+      game_score -= 10;
+      draw_score();
     }
     break;
 
@@ -745,7 +806,7 @@ void execute_main_action() {
   }
 
   if (are_all_items_correctly_placed(items, num_items)) {
-    game_over();
+    stage_complete();
   }
 }
 
@@ -759,6 +820,8 @@ void update_placement_boxes(Position position, Item *items, int num_items) {
   for (int i = 0; i < num_items; i++) {
     if (enable_game_debugger || is_item_in_correct_position(&items[i])) {
       if (enable_game_debugger) {
+        // TODO
+
         Item item = items[i];
         item.entity.position = item.final_position;
         draw_placement_boxes(&item, 1, CORRECT_BOX);
@@ -863,12 +926,12 @@ void draw_time() {
 
   long long prev_pixels = get_rendered_pixels();
 
-  draw_rect(SCREEN_WIDTH -
-                strlen(game_time_str) * FONT_WIDTH * GENGINE_TIME_ZOOM - 1,
-            0, SCREEN_WIDTH, FONT_HEIGHT * GENGINE_TIME_ZOOM, 0x00000000, 1);
-  draw_string(SCREEN_WIDTH -
-                  strlen(game_time_str) * FONT_WIDTH * GENGINE_TIME_ZOOM,
-              0, game_time_str, 0x00FFFFFF, GENGINE_TIME_ZOOM);
+  draw_rect(SCREEN_WIDTH - 1 -
+                strlen(game_time_str) * FONT_WIDTH * GENGINE_INFO_ZOOM - GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING,
+            GENGINE_INFO_PADDING, SCREEN_WIDTH - 1 - GENGINE_INFO_PADDING, FONT_HEIGHT * GENGINE_INFO_ZOOM + GENGINE_INFO_PADDING, 0x00000000, 1);
+  draw_string(SCREEN_WIDTH - 1 -
+                  strlen(game_time_str) * FONT_WIDTH * GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING,
+              GENGINE_INFO_PADDING, game_time_str, 0x00FFFFFF, GENGINE_INFO_ZOOM);
 
   print_rendered_pixels(true);
   print_pixel_diff(prev_pixels, "[DRAWN COUNTDOWN TIMER]");
@@ -877,25 +940,25 @@ void draw_time() {
 void draw_score() {
   game_score_str[7] = '0' + game_score / 100;
   game_score_str[8] = '0' + (game_score / 10) % 10;
-  game_score_str[9] = '0' + game_score % 100;
+//   game_score_str[9] = '0' + game_score % 100;
 
   long long prev_pixels = get_rendered_pixels();
 
-  draw_rect(SCREEN_WIDTH -
-                strlen(game_score_str) * FONT_WIDTH * GENGINE_TIME_ZOOM - 1,
-            FONT_HEIGHT * GENGINE_TIME_ZOOM, SCREEN_WIDTH,
-            (FONT_HEIGHT * GENGINE_TIME_ZOOM) * 2, 0x00000000, 1);
-  draw_string(SCREEN_WIDTH -
-                  strlen(game_score_str) * FONT_WIDTH * GENGINE_TIME_ZOOM,
-              FONT_HEIGHT * GENGINE_TIME_ZOOM, game_score_str, 0x00FFFFFF,
-              GENGINE_TIME_ZOOM);
+  draw_rect(SCREEN_WIDTH - 1 -
+                strlen(game_score_str) * FONT_WIDTH * GENGINE_INFO_ZOOM - GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING,
+            FONT_HEIGHT * GENGINE_INFO_ZOOM + GENGINE_INFO_PADDING, SCREEN_WIDTH - 1 - GENGINE_INFO_PADDING,
+            (FONT_HEIGHT * GENGINE_INFO_ZOOM) * 2 + GENGINE_INFO_PADDING, 0x00000000, 1);
+  draw_string(SCREEN_WIDTH - 1 -
+                  strlen(game_score_str) * FONT_WIDTH * GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING,
+              FONT_HEIGHT * GENGINE_INFO_ZOOM + GENGINE_INFO_PADDING, game_score_str, 0x00FFFFFF,
+              GENGINE_INFO_ZOOM);
 
   print_rendered_pixels(true);
   print_pixel_diff(prev_pixels, "[DRAWN SCORE]");
 }
 
 void move_player(char key) {
-  if (is_game_over)
+  if (is_game_over || is_stage_complete)
     return;
 
   int force_redraw = false;
@@ -981,7 +1044,7 @@ void move_player(char key) {
                      force_redraw, false);
   update_placement_boxes(map->player.position, map->items, map->num_items);
 
-  if (is_game_over) {
+  if (is_game_over || is_stage_complete) {
     game_over();
   }
 }

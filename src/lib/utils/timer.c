@@ -2,16 +2,17 @@
 #include "../games/unrob/game.h"
 #include "../headers/cli.h"
 #include "../headers/gpio.h"
+#include "../headers/uart0.h"
 
-unsigned int timer1_cmp = 0;
-unsigned int timer1_period = TIMER_CLOCK / 5;
-unsigned int timer3_cmp = 0;
-unsigned int timer3_period = TIMER_CLOCK / 5;
+volatile unsigned int timer1_cmp = 0;
+volatile unsigned int timer1_period = TIMER_CLOCK / 2;
+volatile unsigned int timer3_cmp = 0;
+volatile unsigned int timer3_period = TIMER_CLOCK / 5;
 
 // Initialize system timer 1
 void sys_timer1_init(void) {
-  // Set GPIO3 as output
-  GPFSEL0 |= 1 << 9;
+  // Set GPIO23 as output
+  GPFSEL2 |= 1 << 9;
 
   // Set the compare value for timer 1
   // This determines when the timer will trigger an interrupt
@@ -31,13 +32,15 @@ void handle_sys_timer1(void) {
   // Acknowledge the interrupt
   TIMER_CS |= TIMER_CS_M1;
 
-  // Toggle GPIO3
+  // Toggle GPIO23
   // This will turn an LED or similar device on and off
-  if (GPLEV0 & (1 << 3)) {
-    GPCLR0 |= 1 << 3;
+  if (GPLEV0 & (1 << 23)) {
+    GPCLR0 |= 1 << 23;
   } else {
-    GPSET0 |= 1 << 3;
+    GPSET0 |= 1 << 23;
   }
+  
+  uart_puts("Timer 1 interrupt\n");
 }
 
 // Initialize system timer 3

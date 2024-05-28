@@ -754,10 +754,14 @@ void execute_main_action() {
 
     if (selected_item == nearest_box_index) {
       draw_item_with_box(&items[nearest_box_index], CORRECT_BOX);
-      game_score += 10;
+      game_score += 50;
       draw_score();
     } else {
       draw_item_with_box(&items[selected_item], INCORRECT_BOX);
+      if (game_score) {
+        game_score -= 10;
+        draw_score();
+      }
     }
     break;
 

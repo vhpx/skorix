@@ -320,7 +320,9 @@ void select_game_start_exit(char key) {
 }
 
 // default level selector
-void level_selector() { draw_level_selection_base(1); }
+void level_selector() { 
+  draw_level_selection_base(1); 
+}
 
 // function to select the level
 void select_level(char key) {
@@ -355,22 +357,7 @@ void select_level(char key) {
 
 // draw the level selection base like pointing to level 1, level 2, level 3
 void draw_level_selection_base(int selected_level) {
-  // black screen
-  draw_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0x00000000, 1);
-
-  // LEVELS
-  draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM,
-              SCREEN_HEIGHT / 2 - FONT_HEIGHT * GENGINE_TIME_ZOOM, "LEVELS",
-              0x00FF0000, GENGINE_TIME_ZOOM);
-  draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM,
-              SCREEN_HEIGHT / 2 + FONT_HEIGHT * GENGINE_TIME_ZOOM, "1. Level 1",
-              0x0000FF00, GENGINE_TIME_ZOOM);
-  draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM,
-              SCREEN_HEIGHT / 2 + 2 * FONT_HEIGHT * GENGINE_TIME_ZOOM,
-              "2. Level 2", 0x00FFFF00, GENGINE_TIME_ZOOM);
-  draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM,
-              SCREEN_HEIGHT / 2 + 3 * FONT_HEIGHT * GENGINE_TIME_ZOOM,
-              "3. Level 3", 0x00FF00FF, GENGINE_TIME_ZOOM);
+  draw_rect_from_bitmap(0, 0, 1000, 1000, stage_select);
 
   // draw_rect at level selected
   if (selected_level == 1) {
@@ -379,11 +366,11 @@ void draw_level_selection_base(int selected_level) {
                 0x00FF0000, GENGINE_TIME_ZOOM);
   } else if (selected_level == 2) {
     draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
-                SCREEN_HEIGHT / 2 + 2 * FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
+                SCREEN_HEIGHT / 2 + 7 * FONT_HEIGHT * GENGINE_TIME_ZOOM + 9, ">",
                 0x00FF0000, GENGINE_TIME_ZOOM);
   } else if (selected_level == 3) {
     draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
-                SCREEN_HEIGHT / 2 + 3 * FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
+                SCREEN_HEIGHT / 2 + 14 * FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
                 0x00FF0000, GENGINE_TIME_ZOOM);
   }
 }

@@ -23,19 +23,21 @@
 #include "maps.h"
 
 GameMap *map;
-Item temp_items[6];
 
 int enable_game_debugger = false;
 const int SKIP_STAGE_ANIMATION = true;
 
 int is_game_over = 0;
-int timer_counter = 0;
 int is_game_start = 0;
 
 int select_game_option = 1;
 int is_level_selected = 0;
 int selected_level = 1;
 int selected_item = 0;
+
+unsigned int interval = 0;
+unsigned int time_passed = 0;
+int timer_counter = 0;
 
 unsigned int game_time = 0;
 unsigned int game_score = 0;
@@ -50,6 +52,9 @@ void initialize_game() {
     map->guards[i].entity.position = map->guards[i].spawn_point;
   }
 
+  // shuffle items
+  shuffleItems(map->items, map->num_items, time_passed);
+
   for (int i = 0; i < map->num_items; i++) {
     if (map->items[i].final_position.x == -1 &&
         map->items[i].final_position.y == -1)
@@ -58,15 +63,6 @@ void initialize_game() {
     map->items[i].entity.position = map->player.position;
     map->items[i].entity.background_cache = 0;
   }
-
-  // for (int i = 0; i < map->num_items; i++) {
-  //   if (temp_items[i].final_position.x == -1 &&
-  //       temp_items[i].final_position.y == -1)
-  //     continue; // Skip if the item has no final position
-
-  //   temp_items[i].entity.position = map->player.position;
-  //   temp_items[i].entity.background_cache = 0;
-  // }
 
   copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
             get_player_sprite(), map->player.sprite);
@@ -99,6 +95,7 @@ void initialize_buffers() {
     print_pixel_diff(prev_pixels, "[DRAWN INITIAL MAP] ALPHA: 50");
 
     move_items_to_final_position();
+    // move_items_to_final_position(temp_items, map->num_items, map->bitmap);
     for (int i = 50; i <= 100; i += 5) {
       prev_pixels = get_rendered_pixels();
       char msg[MAX_STR_LENGTH];
@@ -200,10 +197,6 @@ void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
   default:
     return; // Do nothing if another key is pressed
   }
-
-  // if (force_redraw)
-  // copy_rect(0, 0, 0, 0, GUARD_WIDTH, GUARD_WIDTH, GUARD_HEIGHT,
-  //           get_guard_sprite(), guard_sprite_buffer);
 
   move_guard_in_boundaries(map->boundaries, map->num_boundaries,
                            &guard->direction, &guard->entity.position,
@@ -349,11 +342,6 @@ void select_map(int map_num) {
 void start_unrob_game() {
   uart_puts("\n\nStarting Unrob Game...");
 
-  // shuffleItems(map->items, temp_items, map->num_items);
-
-  is_game_over = 0;
-  timer_counter = 0;
-
   // turn off debugger upon game start
   enable_game_debugger = false;
 
@@ -381,24 +369,48 @@ void start_unrob_game() {
 }
 
 void countdown(void) {
-  timer_counter++;
+  // This function is called every 1/5 second
+  time_passed++;
 
-  if (enable_rendering_debugger) {
-    uart_puts("\n\nTimer Counter: ");
-    uart_dec(timer_counter);
-    uart_puts("\n");
+  if (interval < 20) {
+    // If less than a full second (20 intervals of 1/5 second each) has passed,
+    // increment the interval by 8. This means that a "second" in this context
+    // will pass in less than 3 intervals (24/8), which is less than half a real
+    // second.
+    interval += 8;
+  } else {
+    // If a full "second" (20 intervals) or more has passed, increment the timer
+    // counter. This counter can be used to track the number of full "seconds"
+    // that have passed.
+    timer_counter++;
+
+    // If the rendering debugger is enabled, print the current value of the
+    // timer counter to the UART. This can be useful for debugging
+    // timing-related issues.
+    if (enable_rendering_debugger) {
+      uart_puts("\n\nTimer Counter: ");
+      uart_dec(timer_counter);
+      uart_puts("\n");
+    }
+
+    // Subtract 20 from the interval, effectively "consuming" the full "second"
+    // that just passed. If the interval was more than 20, the excess will carry
+    // over to the next "second".
+    interval = interval - 20;
   }
 
   if (game_time) {
-    if (timer_counter >= 2) {
-      timer_counter = 0;
-      game_time--;
-      draw_time();
-    }
+    if (is_level_selected) { // check if game start
+      if (timer_counter >= 2) {
+        timer_counter = 0;
+        game_time--;
+        draw_time();
+      }
 
-    for (int i = 0; i < map->num_guards; i++) {
-      move_guard(&map->guards[i], map->guards[i].entity.sprite,
-                 map->guards[i].entity.background_cache);
+      for (int i = 0; i < map->num_guards; i++) {
+        move_guard(&map->guards[i], map->guards[i].entity.sprite,
+                   map->guards[i].entity.background_cache);
+      }
     }
   } else {
     game_over();
@@ -987,36 +999,33 @@ int is_intersect_guard(const Position *a, const Position *b, const Position *c,
   return is_intersect(a, b, c, d) ? 1 : 0;
 }
 
-// Function to manually copy only the mutable parts of an item
-void copyItem(Item *dest, Item *src) {
-  dest->name = src->name;
-  dest->final_position = src->final_position;
-  dest->entity.position = src->entity.position;
-  dest->entity.sprite = src->entity.sprite;
-  dest->entity.background_cache = src->entity.background_cache;
-}
+void shuffleItems(Item *items, int num_items, int random_num) {
+  // Create a pseudo-random sequence using the provided random number
+  for (int i = num_items - 1; i > 0; i--) {
+    // Use the random number to generate a pseudo-random index
+    int j = random_num % (i + 1);
 
-// Function to swap two items, working around const fields
-void swapItems(Item *a, Item *b) {
-  Item temp;
-  copyItem(&temp, a);
-  copyItem(a, b);
-  copyItem(b, &temp);
-}
+    // Swap items[i] and items[j]
+    Position temp = items[i].final_position;
+    items[i].final_position = items[j].final_position;
+    items[j].final_position = temp;
 
-// Function to shuffle items into a destination array
-void shuffleItems(Item source_items[], Item dest_items[], int n) {
-  // First, manually copy the items from source to destination
-  for (int i = 0; i < n; i++) {
-    copyItem(&dest_items[i], &source_items[i]);
+    // Update the random number for the next iteration
+    random_num = (random_num * 31) % (num_items + 1);
   }
 
-  // Now shuffle the destination array
-  for (int i = n - 1; i > 0; i--) {
-    // Generate a random number using the provided function
-    int j = timer_counter % (i + 1);
+  // for debugging or visualization
+  // for (int i = 0; i < num_items; i++) {
+  //     uart_puts("\n\nItem: ");
+  //     uart_puts(COLOR.TEXT.BLUE);
+  //     uart_puts(items[i].name);
+  //     uart_puts(COLOR.RESET);
 
-    // Swap items[i] with the element at random index in the destination array
-    swapItems(&dest_items[i], &dest_items[j]);
-  }
+  //     uart_puts("\nPosition: ");
+  //     uart_puts(COLOR.TEXT.BLUE);
+  //     uart_dec(items[i].final_position.x);
+  //     uart_puts(", ");
+  //     uart_dec(items[i].final_position.y);
+  //     uart_puts(COLOR.RESET);
+  // }
 }

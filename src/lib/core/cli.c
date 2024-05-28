@@ -166,8 +166,9 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
         return 0;
       }
 
-      if (c != '\n')
+      if (c != '\n') {
         return 0;
+      }
 
       if (select_game_option) {
         is_game_start = 1;

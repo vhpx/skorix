@@ -80,7 +80,9 @@ void initialize_buffers() {
 
   long long prev_pixels = get_rendered_pixels();
 
-  uart_puts("\n");
+  if (enable_rendering_debugger)
+    uart_puts("\n");
+
   print_rendered_pixels(true);
   print_pixel_diff(prev_pixels, "[RESET RENDERED PIXELS]");
 
@@ -220,6 +222,11 @@ void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
 
 // function to start the game
 void game_start_selector() {
+  uart_puts("\n---Entering Game Mode---\n");
+  uart_puts("Unrob game launched successfully.\n\n");
+  uart_puts("- To navigate through the menu, press W (UP), or S (DOWN).\n");
+  uart_puts("- To select an option, press ENTER.");
+
   draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_menu);
   draw_transparent_image(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT - 150, 220, 70,
                          button_exit);
@@ -420,6 +427,11 @@ void countdown(void) {
 }
 
 void game_over() {
+  uart_puts("\n\nGame Over!\n");
+  uart_puts("Final Score: ");
+  uart_dec(game_score);
+  uart_puts("\n\nPress \"R\" to restart the game or \"Esc\" to quit.\n");
+
   clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
   draw_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0x00000000, 1);
   draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM,

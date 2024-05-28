@@ -110,8 +110,16 @@ void empty_func() {}
 void handle_received_key(char c) {
   uart_puts("\n\nReceived key: ");
   uart_puts(COLOR.TEXT.BLUE);
-  char2upper(&c);
-  uart_sendc(c);
+  if (c == '\n') {
+    uart_puts("ENTER");
+  }
+  // escape key
+  else if (c == 27) {
+    uart_puts("ESCAPE");
+  } else {
+    char2upper(&c);
+    uart_sendc(c);
+  }
   uart_puts(COLOR.RESET);
   uart_puts(" (ACK)");
 }
@@ -303,7 +311,6 @@ int execute_command(char *input, CommandHistory *cmd_history) {
       return 0;
     }
 
-    mode = GAME;
     play_game(tags); // used this later on
     return 0;
   }
@@ -568,7 +575,8 @@ void play_game(Tag tags[MAX_CMD_ARGS]) {
     if (strcmp(tags[i].tag, "g") == 0) {
       if (strcmp(tags[i].value, "unrob") == 0 ||
           strcmp(tags[i].value, "ur") == 0) {
-        // start_unrob_game();
+        mode = GAME;
+
         game_start_selector();
       } else {
         uart_puts("\nInvalid game.\n");

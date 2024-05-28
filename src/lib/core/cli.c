@@ -155,6 +155,12 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
 
     if (!is_game_start) {
       if (c == 'w' || c == 's') {
+        handle_received_key(c);
+        uart_puts("\nSelecting option: ");
+        uart_puts(COLOR.TEXT.YELLOW);
+        uart_puts(c == 'w' ? "Start" : "Exit");
+        uart_puts(COLOR.RESET);
+
         select_game_start_exit(c);
         return 0;
       }
@@ -163,8 +169,15 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
         return 0;
       }
 
+      handle_received_key(c);
       if (select_game_option) {
         is_game_start = 1;
+
+        uart_puts("\nSelecting Level: ");
+        uart_puts(COLOR.TEXT.YELLOW);
+        uart_dec(selected_level);
+        uart_puts(COLOR.RESET);
+
         level_selector();
       } else {
         exit_game();
@@ -175,9 +188,16 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
 
     if (!is_level_selected) {
       if (c == 'w' || c == 's' || c == '\n') {
+        handle_received_key(c);
         select_level(c);
+
         if (c == '\n') {
           is_level_selected = 1;
+        } else {
+          uart_puts("\nSelecting Level: ");
+          uart_puts(COLOR.TEXT.YELLOW);
+          uart_dec(selected_level);
+          uart_puts(COLOR.RESET);
         }
       }
     } else {
@@ -208,6 +228,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
         uart_puts("\n");
         toggle_rendering_debugger();
       } else if (c == 27) { // escape key
+        handle_received_key(c);
         is_level_selected = 0;
         is_game_start = 0;
         is_game_over = 0;

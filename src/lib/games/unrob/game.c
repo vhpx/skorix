@@ -24,7 +24,7 @@
 GameMap *map;
 
 int enable_game_debugger = false;
-const int SKIP_STAGE_ANIMATION = true;
+const int SKIP_STAGE_ANIMATION = false;
 
 int select_game_option = 1;
 int is_level_selected = false;
@@ -96,8 +96,39 @@ void initialize_buffers() {
     print_rendered_pixels(true);
     print_pixel_diff(prev_pixels, "[DRAWN INITIAL MAP] ALPHA: 50");
 
+    // Animate items to their final positions
     move_items_to_final_position();
-    // move_items_to_final_position(temp_items, map->num_items, map->bitmap);
+
+    // Give the player 5 seconds to memorize the map
+    // for each second, display a number in the center of the screen
+    for (int i = 5; i > 0; i--) {
+      char num[2];
+      int2str(i, num);
+
+      // Calculate the width and height of the number
+      int num_width = strlen(num) * FONT_WIDTH * 10;
+      int num_height = FONT_HEIGHT * 10;
+
+      // Calculate the position to draw the number so that it is centered
+      int x = (SCREEN_WIDTH - num_width) / 2;
+      int y = (SCREEN_HEIGHT - num_height) / 2;
+
+      // Create a background cache and store the original background
+      Bitmap background_cache[num_width * num_height];
+      copy_rect_alpha(x, y, 0, 0, SCREEN_WIDTH, num_width, num_height,
+                      map->bitmap, background_cache, 50);
+
+      // Draw the number
+      draw_string(x, y, num, 0x00FFFFFF, 10);
+
+      // Print the rendered pixels and wait for 1 second
+      print_rendered_pixels(true);
+      wait_msec(1000);
+
+      // Restore the original background before drawing the next number
+      draw_image(x, y, num_width, num_height, background_cache);
+    }
+
     for (int i = 50; i <= 100; i += 5) {
       prev_pixels = get_rendered_pixels();
       char msg[MAX_STR_LENGTH];

@@ -1,12 +1,7 @@
-// This is font.c
+// font.c
 #include "../lib/headers/font.h"
-#include "../img/img.h"
 #include "../lib/headers/constants.h"
-#include "../lib/headers/framebf.h"
 #include "members_img.h"
-
-#define AVATAR_WIDTH 250
-#define AVATAR_HEIGHT 250
 
 unsigned char font[FONT_NUMGLYPHS][FONT_BPG] = {
     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // U+0000 (nul)
@@ -263,26 +258,3 @@ unsigned char font[FONT_NUMGLYPHS][FONT_BPG] = {
     {0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0}, // U+2590 (right half)
     {0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00}, // U+2580 (top half)
 };
-
-/* Functions to display text on the screen */
-void display_team_details(int image_width, int image_height) {
-  clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-  draw_string(SCREEN_WIDTH / 2 - 120, 50, "--- Our Members ---", 0x00FF0000, 2);
-
-  int name_spacing = 150;
-  draw_string(name_spacing, SCREEN_HEIGHT / 2 - 50, "Do Phuong Linh",
-              0x00FFC0CB, 2);
-  draw_string(SCREEN_WIDTH / 2 + name_spacing, SCREEN_HEIGHT / 2 - 50,
-              "Vo Hoang Phuc", 0x0000FF00, 2);
-  draw_string(name_spacing, SCREEN_HEIGHT - 150, "Le Duy Quang", 0x000000FF, 2);
-  draw_string(SCREEN_WIDTH / 2 + name_spacing, SCREEN_HEIGHT - 150,
-              "Tran Thanh Tung", 0x00FFFF00, 2);
-
-  draw_image(name_spacing, 150, AVATAR_WIDTH, AVATAR_HEIGHT, ava_linh);
-  draw_image(SCREEN_WIDTH / 2 + name_spacing, 150, AVATAR_WIDTH, AVATAR_HEIGHT,
-             ava_phuc);
-  draw_image(name_spacing, SCREEN_HEIGHT / 2 + 50, AVATAR_WIDTH, AVATAR_HEIGHT,
-             ava_quang);
-  draw_image(SCREEN_WIDTH / 2 + name_spacing, SCREEN_HEIGHT / 2 + 50,
-             AVATAR_WIDTH, AVATAR_HEIGHT, ava_tung);
-}

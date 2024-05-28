@@ -1,13 +1,11 @@
 // this file is video.c
 #include "video.h"
-#include "../img/img.h"
 #include "../lib/headers/cli.h"
 #include "../lib/headers/constants.h"
 #include "../lib/headers/framebf.h"
 #include "../lib/headers/interrupt.h"
 #include "../lib/headers/utils.h"
 #include "video_src.h"
-
 
 int video_pause = 0;
 int video_exit = 0;
@@ -42,6 +40,5 @@ void display_video(int video_width, int video_height) {
   }
 
   interrupt_disable();
-  clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
   video_end = 1;
 }

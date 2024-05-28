@@ -38,5 +38,6 @@ void set_config(Tag tags[MAX_CMD_ARGS]);
 void play_game(Tag tags[MAX_CMD_ARGS]);
 void handle_valid_key(char c);
 void handle_invalid_key(char c);
+void display_team_details(int image_width, int image_height);
 
 #endif

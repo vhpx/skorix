@@ -19,7 +19,7 @@
 #include "../headers/uart0.h"
 
 // TODO: Reset to CLI after the game is done
-int mode = GAME;
+int mode = CLI;
 
 // int is_game_start = 0;
 
@@ -70,20 +70,10 @@ int run_cli() {
   // TODO: Remove this after the game is done
   if (mode == GAME)
     game_start_selector();
-  else
+  else {
+    mode = CLI;
     display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
-
-  // Start the CLI
-  //   int status = 0;
-  //   while (status != -1) {
-  //     status = cli();
-
-  //     // Break if the status is -1
-  //     if (status == -1)
-  //       break;
-  //   }
-
-  //   return status;
+  }
 
   while (1) {
     if (mode == SHUTDOWN) {
@@ -108,9 +98,11 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       // exit all the modes
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       uart_puts("\n\nExiting image view...\n\n");
+      display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
+
       mode = CLI;
       reset_console();
-      display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
+      return 0;
     }
   } else if (mode == VIDEO) {
     if (c == 'r') {
@@ -127,21 +119,24 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       }
     } else if (c == 27) { // escape key
       video_exit = 1;
+      clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       uart_puts("\n\nExiting video playback...\n\n");
+      display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
+
       mode = CLI;
       reset_console();
-      display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
+      return 0;
     }
-
   } else if (mode == FONT) {
     if (c == 27) { // escape key
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       uart_puts("\n\nExiting font view...\n\n");
+      display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
+
       mode = CLI;
       reset_console();
-      display_image(SCREEN_WIDTH, SCREEN_HEIGHT, welcome_img);
+      return 0;
     }
-
   } else if (mode == GAME) {
     if (is_game_over) {
       static int prev_action = 0;

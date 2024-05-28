@@ -12,6 +12,4 @@ enum {
 
 extern unsigned char font[FONT_NUMGLYPHS][FONT_BPG];
 
-void display_team_details(int image_width, int image_height);
-
 #endif

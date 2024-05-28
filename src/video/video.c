@@ -21,7 +21,9 @@ void display_video(int video_width, int video_height) {
 
   // Loop through each frame stored in the array
   for (int i = 0; i < video_bitmap_allArray_LEN; i++) {
-    draw_image((SCREEN_WIDTH - VIDEO_WIDTH) / 2, (SCREEN_HEIGHT - VIDEO_HEIGHT) / 2, VIDEO_WIDTH, VIDEO_HEIGHT, video_bitmap_allArray[i]);
+    draw_image((SCREEN_WIDTH - VIDEO_WIDTH) / 2,
+               (SCREEN_HEIGHT - VIDEO_HEIGHT) / 2, VIDEO_WIDTH, VIDEO_HEIGHT,
+               video_bitmap_allArray[i]);
     wait_msec(100);
 
     if (video_pause) {

@@ -2,8 +2,8 @@
 
 OSInfo OS_INFO = {
     .name = "Skorix OS",
-    .version = "1.1.0",
-    .release_date = "30th April, 2024",
+    .version = "2.0.0",
+    .release_date = "28th May, 2024",
     .prefix = "skx",
     .creators =
         {

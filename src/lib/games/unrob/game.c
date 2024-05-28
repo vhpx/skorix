@@ -770,8 +770,10 @@ void execute_main_action() {
       draw_score();
     } else {
       draw_item_with_box(&items[nearest_box_index], INCORRECT_BOX);
-      game_score -= 10;
-      draw_score();
+      if (game_score) {
+        game_score -= 10;
+        draw_score();
+      }
     }
     break;
 

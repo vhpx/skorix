@@ -306,11 +306,10 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
         display_game_controls();
       } else if (c == 'r') {
         handle_received_key(c);
-        uart_puts("\nRestarting Unrob Game...\n");
+        uart_puts("\nRestarting Unrob Game...");
         clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
         sys_timer3_irq_disable();
         start_unrob_game();
-        uart_puts("Restarted Unrob Game.");
         return 0;
       } else {
         handle_invalid_key(c);

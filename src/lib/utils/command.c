@@ -107,9 +107,13 @@ Command commands[] = {
 
 void empty_func() {}
 
-void handle_received_key(char c) {
-  uart_puts("\n\nReceived key: ");
+void print_key(char c, char key_type[], char log_msg[], char msg_color[]) {
+  uart_puts(msg_color);
+  uart_puts("\n\nReceived ");
+  uart_puts(key_type);
+  uart_puts(": ");
   uart_puts(COLOR.TEXT.BLUE);
+
   if (c == '\n') {
     uart_puts("ENTER");
   }
@@ -120,18 +124,19 @@ void handle_received_key(char c) {
     char2upper(&c);
     uart_sendc(c);
   }
+
   uart_puts(COLOR.RESET);
-  uart_puts(" (ACK)");
+  uart_puts(" (");
+  uart_puts(log_msg);
+  uart_puts(")");
+}
+
+void handle_valid_key(char c) {
+  print_key(c, "valid key", "ACK", COLOR.TEXT.GREEN);
 }
 
 void handle_invalid_key(char c) {
-  uart_puts(COLOR.TEXT.RED);
-  uart_puts("\n\nReceived invalid key: ");
-  uart_puts(COLOR.TEXT.BLUE);
-  char2upper(&c);
-  uart_sendc(c);
-  uart_puts(COLOR.RESET);
-  uart_puts(" (NAK)");
+  print_key(c, "invalid key", "NAK", COLOR.TEXT.RED);
 }
 
 char *get_cmd_name(char *command) {

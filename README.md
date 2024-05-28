@@ -1,3 +1,5 @@
+![Skorix OS](/public/skx.png)
+
 # **Skorix OS**
 
 A bare-metal operating system designed for the Raspberry Pi, emphasizing clarity, efficiency, and a focus on the Command Line Interface (CLI).

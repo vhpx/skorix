@@ -19,7 +19,7 @@
 #include "../headers/uart0.h"
 
 // TODO: Reset to CLI after the game is done
-int mode = GAME;
+int mode = CLI;
 
 // int is_game_start = 0;
 

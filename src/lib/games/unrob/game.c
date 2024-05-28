@@ -224,8 +224,21 @@ void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
 void game_start_selector() {
   uart_puts("\n---Entering Game Mode---\n");
   uart_puts("Unrob game launched successfully.\n\n");
-  uart_puts("- To navigate through the menu, press W (UP), or S (DOWN).\n");
-  uart_puts("- To select an option, press ENTER.");
+
+  uart_puts("- To navigate through the menu, press ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("W");
+  uart_puts(COLOR.RESET);
+  uart_puts(" (UP), or ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("S");
+  uart_puts(COLOR.RESET);
+  uart_puts(" (DOWN).\n");
+
+  uart_puts("- To select an option, press ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("ENTER");
+  uart_puts(COLOR.RESET);
 
   draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_menu);
   draw_transparent_image(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT - 150, 220, 70,
@@ -347,7 +360,8 @@ void select_map(int map_num) {
 }
 
 void start_unrob_game() {
-  uart_puts("\n\nStarting Unrob Game...");
+  uart_puts("\n\nWelcome to Unrob Game!");
+  display_game_controls();
 
   // turn off debugger upon game start
   is_game_over = false;
@@ -427,10 +441,24 @@ void countdown(void) {
 }
 
 void game_over() {
+  uart_puts(COLOR.TEXT.RED);
   uart_puts("\n\nGame Over!\n");
+  uart_puts(COLOR.RESET);
+
   uart_puts("Final Score: ");
+  uart_puts(COLOR.TEXT.BLUE);
   uart_dec(game_score);
-  uart_puts("\n\nPress \"R\" to restart the game or \"Esc\" to quit.\n");
+  uart_puts(COLOR.RESET);
+
+  uart_puts("\n\nPress ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("R");
+  uart_puts(COLOR.RESET);
+  uart_puts(" to restart the game or ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("Esc");
+  uart_puts(COLOR.RESET);
+  uart_puts(" to quit.\n");
 
   clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
   draw_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0x00000000, 1);
@@ -1044,4 +1072,80 @@ void shuffleItems(Item *items, int num_items, int random_num) {
   //     uart_dec(items[i].final_position.y);
   //     uart_puts(COLOR.RESET);
   // }
+}
+
+void display_game_controls() {
+  uart_puts("\n\nGame controls:\n");
+
+  // uart_puts("- Press W, A, S, D to move the player.\n");
+  uart_puts("- Press ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("W");
+  uart_puts(COLOR.RESET);
+  uart_puts(", ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("A");
+  uart_puts(COLOR.RESET);
+  uart_puts(", ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("S");
+  uart_puts(COLOR.RESET);
+  uart_puts(", ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("D");
+  uart_puts(COLOR.RESET);
+  uart_puts(" to move the player.\n");
+
+  // uart_puts("- Press Q and E to navigate through the inventory.\n");
+  uart_puts("- Press ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("Q");
+  uart_puts(COLOR.RESET);
+  uart_puts(" and ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("E");
+  uart_puts(COLOR.RESET);
+  uart_puts(" to navigate through the inventory.\n");
+
+  // uart_puts("- Press F to place or swap the item.\n");
+  uart_puts("- Press ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("F");
+  uart_puts(COLOR.RESET);
+  uart_puts(" to place or swap the item.\n");
+
+  // uart_puts("- Press R to restart the game.\n");
+  uart_puts("- Press ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("R");
+  uart_puts(COLOR.RESET);
+  uart_puts(" to restart the game.\n");
+
+  // uart_puts("- Press C to toggle Debug Mode (contains spoilers).\n");
+  uart_puts("- Press ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("C");
+  uart_puts(COLOR.RESET);
+  uart_puts(" to toggle Debug Mode (contains spoilers).\n");
+
+  // uart_puts("- Press X to toggle Rendering Debug Mode.\n");
+  uart_puts("- Press ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("X");
+  uart_puts(COLOR.RESET);
+  uart_puts(" to toggle Rendering Debug Mode.\n");
+
+  // uart_puts("- Press H to display this help message.\n");
+  uart_puts("- Press ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("H");
+  uart_puts(COLOR.RESET);
+  uart_puts(" to display this help message.\n");
+
+  // uart_puts("- Press Esc to quit the game.");
+  uart_puts("- Press ");
+  uart_puts(COLOR.TEXT.BLUE);
+  uart_puts("Esc");
+  uart_puts(COLOR.RESET);
+  uart_puts(" to quit the game.");
 }

@@ -366,17 +366,17 @@ void draw_level_selection_base(int selected_level) {
 
   // draw_rect at level selected
   if (selected_level == 1) {
-    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
-                SCREEN_HEIGHT / 2 + FONT_HEIGHT * GENGINE_TIME_ZOOM - 10, ">",
-                0x00FF0000, GENGINE_TIME_ZOOM*2);
+    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_INFO_ZOOM - 50,
+                SCREEN_HEIGHT / 2 + FONT_HEIGHT * GENGINE_INFO_ZOOM - 10, ">",
+                0x00FF0000, GENGINE_INFO_ZOOM*2);
   } else if (selected_level == 2) {
-    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
-                SCREEN_HEIGHT / 2 + 7 * FONT_HEIGHT * GENGINE_TIME_ZOOM -3,
-                ">", 0x00FF0000, GENGINE_TIME_ZOOM*2);
+    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_INFO_ZOOM - 50,
+                SCREEN_HEIGHT / 2 + 7 * FONT_HEIGHT * GENGINE_INFO_ZOOM -3,
+                ">", 0x00FF0000, GENGINE_INFO_ZOOM*2);
   } else if (selected_level == 3) {
-    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
-                SCREEN_HEIGHT / 2 + 14 * FONT_HEIGHT * GENGINE_TIME_ZOOM - 13, ">",
-                0x00FF0000, GENGINE_TIME_ZOOM*2);
+    draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_INFO_ZOOM - 50,
+                SCREEN_HEIGHT / 2 + 14 * FONT_HEIGHT * GENGINE_INFO_ZOOM - 13, ">",
+                0x00FF0000, GENGINE_INFO_ZOOM*2);
   }
 }
 
@@ -422,9 +422,15 @@ void start_unrob_game() {
   draw_placement_boxes(map->items, map->num_items, EMPTY_BOX);
 
   game_time = 60;
+  game_score = 0;
 
   sys_timer3_init();
   sys_timer3_irq_enable();
+
+  // Draw outline for info
+  draw_rect(SCREEN_WIDTH - 1 -
+                strlen(game_time_str) * FONT_WIDTH * GENGINE_INFO_ZOOM - GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING * 2,
+            0, SCREEN_WIDTH - 1, (FONT_HEIGHT * GENGINE_INFO_ZOOM) * 2 + GENGINE_INFO_PADDING * 2, 0x00FFFFFF, 1);
 
   draw_time();
   draw_score();
@@ -575,6 +581,7 @@ void stage_complete(){
 
   sys_timer3_irq_disable();
   is_stage_complete = 1;
+  game_score += game_time * 10;
 }
 
 static int player_direction = UP;
@@ -759,10 +766,12 @@ void execute_main_action() {
                       &items[selected_item]);
     if (selected_item == items[nearest_box_index].id) {
       draw_item_with_box(&items[nearest_box_index], CORRECT_BOX);
-      game_score += 10;
+      game_score += 50;
       draw_score();
     } else {
       draw_item_with_box(&items[nearest_box_index], INCORRECT_BOX);
+      game_score -= 10;
+      draw_score();
     }
     break;
 
@@ -812,6 +821,7 @@ void update_placement_boxes(Position position, Item *items, int num_items) {
     if (enable_game_debugger || is_item_in_correct_position(&items[i])) {
       if (enable_game_debugger) {
         // TODO
+
         Item item = items[i];
         item.entity.position = item.final_position;
         draw_placement_boxes(&item, 1, CORRECT_BOX);
@@ -916,12 +926,12 @@ void draw_time() {
 
   long long prev_pixels = get_rendered_pixels();
 
-  draw_rect(SCREEN_WIDTH -
-                strlen(game_time_str) * FONT_WIDTH * GENGINE_TIME_ZOOM - 1,
-            0, SCREEN_WIDTH, FONT_HEIGHT * GENGINE_TIME_ZOOM, 0x00000000, 1);
-  draw_string(SCREEN_WIDTH -
-                  strlen(game_time_str) * FONT_WIDTH * GENGINE_TIME_ZOOM,
-              0, game_time_str, 0x00FFFFFF, GENGINE_TIME_ZOOM);
+  draw_rect(SCREEN_WIDTH - 1 -
+                strlen(game_time_str) * FONT_WIDTH * GENGINE_INFO_ZOOM - GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING,
+            GENGINE_INFO_PADDING, SCREEN_WIDTH - 1 - GENGINE_INFO_PADDING, FONT_HEIGHT * GENGINE_INFO_ZOOM + GENGINE_INFO_PADDING, 0x00000000, 1);
+  draw_string(SCREEN_WIDTH - 1 -
+                  strlen(game_time_str) * FONT_WIDTH * GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING,
+              GENGINE_INFO_PADDING, game_time_str, 0x00FFFFFF, GENGINE_INFO_ZOOM);
 
   print_rendered_pixels(true);
   print_pixel_diff(prev_pixels, "[DRAWN COUNTDOWN TIMER]");
@@ -934,14 +944,14 @@ void draw_score() {
 
   long long prev_pixels = get_rendered_pixels();
 
-  draw_rect(SCREEN_WIDTH -
-                strlen(game_score_str) * FONT_WIDTH * GENGINE_TIME_ZOOM - 1,
-            FONT_HEIGHT * GENGINE_TIME_ZOOM, SCREEN_WIDTH,
-            (FONT_HEIGHT * GENGINE_TIME_ZOOM) * 2, 0x00000000, 1);
-  draw_string(SCREEN_WIDTH -
-                  strlen(game_score_str) * FONT_WIDTH * GENGINE_TIME_ZOOM,
-              FONT_HEIGHT * GENGINE_TIME_ZOOM, game_score_str, 0x00FFFFFF,
-              GENGINE_TIME_ZOOM);
+  draw_rect(SCREEN_WIDTH - 1 -
+                strlen(game_score_str) * FONT_WIDTH * GENGINE_INFO_ZOOM - GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING,
+            FONT_HEIGHT * GENGINE_INFO_ZOOM + GENGINE_INFO_PADDING, SCREEN_WIDTH - 1 - GENGINE_INFO_PADDING,
+            (FONT_HEIGHT * GENGINE_INFO_ZOOM) * 2 + GENGINE_INFO_PADDING, 0x00000000, 1);
+  draw_string(SCREEN_WIDTH - 1 -
+                  strlen(game_score_str) * FONT_WIDTH * GENGINE_INFO_ZOOM - GENGINE_INFO_PADDING,
+              FONT_HEIGHT * GENGINE_INFO_ZOOM + GENGINE_INFO_PADDING, game_score_str, 0x00FFFFFF,
+              GENGINE_INFO_ZOOM);
 
   print_rendered_pixels(true);
   print_pixel_diff(prev_pixels, "[DRAWN SCORE]");

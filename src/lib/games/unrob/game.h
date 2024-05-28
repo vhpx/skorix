@@ -42,6 +42,7 @@ void game_start_selector(void);
 void select_game_start_exit(char key);
 void shuffleItems(Item *items, int num_items, int random_num);
 void display_game_controls();
+void draw_game_over_screen();
 
 extern int is_game_over;
 extern int is_game_start;
@@ -50,3 +51,4 @@ extern int is_level_selected;
 extern int selected_level;
 extern int enable_game_debugger;
 extern int enable_rendering_debugger;
+extern int selected_game_over_action;

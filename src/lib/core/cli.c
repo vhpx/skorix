@@ -143,13 +143,58 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
     }
 
   } else if (mode == GAME) {
-    if (c == 'r') {
+    if (is_game_over) {
+      static int prev_action = 0;
+
+      if (c == 'w' || c == 's') {
+        handle_received_key(c);
+
+        selected_game_over_action = c == 'w' ? 0 : 1;
+
+        uart_puts("\nSelecting option: ");
+        uart_puts(COLOR.TEXT.YELLOW);
+        uart_puts(c == 'w' ? "New game" : "Quit");
+        uart_puts(COLOR.RESET);
+
+        if (prev_action != selected_game_over_action) {
+          draw_game_over_screen();
+          prev_action = selected_game_over_action;
+        }
+
+        return 0;
+      }
+
+      if (c != 27 && c != '\n') {
+        handle_invalid_key(c);
+        return 0;
+      }
+
       handle_received_key(c);
-      uart_puts("\nRestarting Unrob Game...\n");
-      clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-      sys_timer3_irq_disable();
-      start_unrob_game();
-      uart_puts("Restarted Unrob Game.");
+      if (c == 27) { // escape key
+        exit_game();
+        return 0;
+      }
+
+      is_game_over = 0;
+      is_game_start = 1;
+      selected_level = 1;
+      is_level_selected = 0;
+
+      if (selected_game_over_action == 1) {
+        select_game_start_exit('w');
+        uart_puts("\nExiting to Game Menu...\n");
+        is_game_start = 0;
+        return 0;
+      }
+
+      uart_puts("\nNavigating to Level Selection...\n");
+
+      uart_puts("\nSelecting Level: ");
+      uart_puts(COLOR.TEXT.YELLOW);
+      uart_dec(selected_level);
+      uart_puts(COLOR.RESET);
+      level_selector();
+
       return 0;
     }
 
@@ -259,6 +304,14 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       } else if (c == 'h') {
         handle_received_key(c);
         display_game_controls();
+      } else if (c == 'r') {
+        handle_received_key(c);
+        uart_puts("\nRestarting Unrob Game...\n");
+        clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+        sys_timer3_irq_disable();
+        start_unrob_game();
+        uart_puts("Restarted Unrob Game.");
+        return 0;
       } else {
         handle_invalid_key(c);
       }

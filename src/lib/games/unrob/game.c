@@ -26,13 +26,13 @@ GameMap *map;
 int enable_game_debugger = false;
 const int SKIP_STAGE_ANIMATION = true;
 
-int is_game_over = false;
-int is_game_start = false;
-
 int select_game_option = 1;
 int is_level_selected = false;
-
 int selected_level = 1;
+
+int is_game_start = false;
+int is_game_over = false;
+int selected_game_over_action = 0;
 int selected_item = 0;
 
 unsigned int interval = 0;
@@ -168,6 +168,9 @@ void draw_guard(Guard *guard, Bitmap *guard_bg_cache_buffer,
 
 void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
                 Bitmap *guard_bg_cache_buffer) {
+  if (is_game_over)
+    return;
+
   int force_redraw = false;
   // Bitmap *guard_sprite = get_guard_sprite(guard->direction);
   guard_sprite_buffer = get_guard_sprite(guard->direction);
@@ -440,7 +443,7 @@ void countdown(void) {
   }
 }
 
-void game_over() {
+void draw_game_over_screen() {
   draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_over_screen);
 
   char score[10];
@@ -449,10 +452,22 @@ void game_over() {
   draw_string((SCREEN_WIDTH - strlen(score) * FONT_WIDTH * 5) / 2,
               SCREEN_HEIGHT / 2 - 30, score, 0x00FF0000, 5);
 
-  draw_transparent_image((SCREEN_WIDTH - 320) / 2, SCREEN_HEIGHT / 2 + 200, 320,
-                         70, button_restart);
-  draw_transparent_image((SCREEN_WIDTH - 220) / 2, SCREEN_HEIGHT / 2 + 300, 220,
-                         70, button_menu);
+  if (selected_game_over_action == 0) {
+    draw_transparent_image((SCREEN_WIDTH - 390) / 2, SCREEN_HEIGHT / 2 + 150,
+                           390, 100, button_restart_selected);
+    draw_transparent_image((SCREEN_WIDTH - 220) / 2, SCREEN_HEIGHT / 2 + 270,
+                           220, 70, button_menu);
+  } else {
+    draw_transparent_image((SCREEN_WIDTH - 320) / 2, SCREEN_HEIGHT / 2 + 150,
+                           320, 70, button_restart);
+    draw_transparent_image((SCREEN_WIDTH - 290) / 2, SCREEN_HEIGHT / 2 + 240,
+                           290, 100, button_menu_selected);
+  }
+}
+
+void game_over() {
+  selected_game_over_action = 0;
+  draw_game_over_screen();
 
   uart_puts(COLOR.TEXT.RED);
   uart_puts("\n\nGame Over!\n");
@@ -807,10 +822,8 @@ void draw_score() {
 }
 
 void move_player(char key) {
-  if (is_game_over) {
-    game_over();
+  if (is_game_over)
     return;
-  }
 
   int force_redraw = false;
 

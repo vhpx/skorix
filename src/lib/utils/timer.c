@@ -19,7 +19,7 @@ void sys_timer1_init(void) {
   timer1_cmp = TIMER_CLO + timer1_period;
   TIMER_C1 = timer1_cmp;
 
-  // Enable the interrupt for timer 1
+  // Clear any existing interrupt for timer 1
   TIMER_CS |= TIMER_CS_M1;
 }
 
@@ -50,7 +50,7 @@ void sys_timer3_init(void) {
   timer3_cmp = TIMER_CLO + timer3_period;
   TIMER_C3 = timer3_cmp;
 
-  // Enable the interrupt for timer 3
+  // Clear any existing interrupt for timer 3
   TIMER_CS |= TIMER_CS_M3;
 }
 

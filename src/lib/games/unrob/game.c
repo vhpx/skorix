@@ -320,9 +320,7 @@ void select_game_start_exit(char key) {
 }
 
 // default level selector
-void level_selector() { 
-  draw_level_selection_base(1); 
-}
+void level_selector() { draw_level_selection_base(1); }
 
 // function to select the level
 void select_level(char key) {
@@ -366,8 +364,8 @@ void draw_level_selection_base(int selected_level) {
                 0x00FF0000, GENGINE_TIME_ZOOM);
   } else if (selected_level == 2) {
     draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
-                SCREEN_HEIGHT / 2 + 7 * FONT_HEIGHT * GENGINE_TIME_ZOOM + 9, ">",
-                0x00FF0000, GENGINE_TIME_ZOOM);
+                SCREEN_HEIGHT / 2 + 7 * FONT_HEIGHT * GENGINE_TIME_ZOOM + 9,
+                ">", 0x00FF0000, GENGINE_TIME_ZOOM);
   } else if (selected_level == 3) {
     draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM - 50,
                 SCREEN_HEIGHT / 2 + 14 * FONT_HEIGHT * GENGINE_TIME_ZOOM, ">",
@@ -717,6 +715,10 @@ void execute_main_action() {
 
   update_placement_boxes(map->player.position, items, num_items);
   display_selected_item(selected_item, map->items, map->num_items);
+
+  if (are_all_items_placed(items, num_items)) {
+    game_over();
+  }
 }
 
 void draw_item_with_box(Item *item, enum Box box) {

@@ -39,9 +39,9 @@ int selected_game_over_action = 0;
 int selected_item = 0;
 int selected_stage_complete_action = 0;
 
-unsigned int interval = 0;
+// unsigned int interval = 0;
 unsigned int time_passed = 0;
-int timer_counter = 0;
+// int timer_counter = 0;
 
 unsigned int game_time = 0;
 unsigned int game_score = 0;
@@ -434,37 +434,37 @@ void countdown(void) {
   // This function is called every 1/5 second
   time_passed++;
 
-  if (interval < 20) {
-    // If less than a full second (20 intervals of 1/5 second each) has passed,
-    // increment the interval by 8. This means that a "second" in this context
-    // will pass in less than 3 intervals (24/8), which is less than half a real
-    // second.
-    interval += 8;
-  } else {
-    // If a full "second" (20 intervals) or more has passed, increment the timer
-    // counter. This counter can be used to track the number of full "seconds"
-    // that have passed.
-    timer_counter++;
+//   if (interval < 4) {
+//     // If less than a full second (20 intervals of 1/5 second each) has passed,
+//     // increment the interval by 8. This means that a "second" in this context
+//     // will pass in less than 3 intervals (24/8), which is less than half a real
+//     // second.
+//     interval ++;
+//   } else {
+//     // If a full "second" (20 intervals) or more has passed, increment the timer
+//     // counter. This counter can be used to track the number of full "seconds"
+//     // that have passed.
+//     timer_counter++;
 
-    // If the rendering debugger is enabled, print the current value of the
-    // timer counter to the UART. This can be useful for debugging
-    // timing-related issues.
-    if (enable_rendering_debugger) {
-      uart_puts("\n\nTimer Counter: ");
-      uart_dec(timer_counter);
-      uart_puts("\n");
-    }
+//     // If the rendering debugger is enabled, print the current value of the
+//     // timer counter to the UART. This can be useful for debugging
+//     // timing-related issues.
+//     if (enable_rendering_debugger) {
+//       uart_puts("\n\nTimer Counter: ");
+//       uart_dec(timer_counter);
+//       uart_puts("\n");
+//     }
 
-    // Subtract 20 from the interval, effectively "consuming" the full "second"
-    // that just passed. If the interval was more than 20, the excess will carry
-    // over to the next "second".
-    interval = interval - 20;
-  }
+//     // Subtract 20 from the interval, effectively "consuming" the full "second"
+//     // that just passed. If the interval was more than 20, the excess will carry
+//     // over to the next "second".
+//     interval = interval - 4;
+//   }
 
   if (game_time) {
     if (is_level_selected) { // check if game start
-      if (timer_counter >= 2) {
-        timer_counter = 0;
+      if (time_passed % 5 == 0) {
+        // timer_counter = 0;
         game_time--;
         draw_time();
       }
@@ -811,6 +811,7 @@ void update_placement_boxes(Position position, Item *items, int num_items) {
   for (int i = 0; i < num_items; i++) {
     if (enable_game_debugger || is_item_in_correct_position(&items[i])) {
       if (enable_game_debugger) {
+        // TODO
         Item item = items[i];
         item.entity.position = item.final_position;
         draw_placement_boxes(&item, 1, CORRECT_BOX);
@@ -929,7 +930,7 @@ void draw_time() {
 void draw_score() {
   game_score_str[7] = '0' + game_score / 100;
   game_score_str[8] = '0' + (game_score / 10) % 10;
-  game_score_str[9] = '0' + game_score % 100;
+//   game_score_str[9] = '0' + game_score % 100;
 
   long long prev_pixels = get_rendered_pixels();
 

@@ -19,7 +19,7 @@
 #include "../headers/uart0.h"
 
 // TODO: Reset to CLI after the game is done
-int mode = CLI;
+int mode = GAME;
 
 // int is_game_start = 0;
 
@@ -138,7 +138,61 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       return 0;
     }
   } else if (mode == GAME) {
-    if (is_game_over) {
+    if(is_stage_complete) {
+      static int prev_action = 0;
+
+      if (c == 'w' || c == 's') {
+        handle_valid_key(c);
+
+        selected_stage_complete_action = c == 'w' ? 0 : 1;
+
+        uart_puts("\nSelecting option: ");
+        uart_puts(COLOR.TEXT.YELLOW);
+        uart_puts(c == 'w' ? "Next" : "Quit");
+        uart_puts(COLOR.RESET);
+
+        if (prev_action != selected_stage_complete_action) {
+          draw_stage_complete_screen();
+          prev_action = selected_stage_complete_action;
+        }
+
+        return 0;
+      }
+
+      if (c != 27 && c != '\n') {
+        handle_invalid_key(c);
+        return 0;
+      }
+
+      handle_valid_key(c);
+      if (c == 27) { // escape key
+        exit_game();
+        return 0;
+      }
+
+      is_game_over = 0;
+      is_game_start = 1;
+      selected_level = 1;
+      is_level_selected = 0;
+      is_stage_complete = 0;
+
+      if (selected_stage_complete_action == 1) {
+        select_game_start_exit('w');
+        uart_puts("\nExiting to Game Menu...\n");
+        is_game_start = 0;
+        return 0;
+      }
+
+      uart_puts("\nNavigating to Level Selection...\n");
+
+      uart_puts("\nSelecting Level: ");
+      uart_puts(COLOR.TEXT.YELLOW);
+      uart_dec(selected_level);
+      uart_puts(COLOR.RESET);
+      level_selector();
+
+      return 0;
+    }else if (is_game_over) {
       static int prev_action = 0;
 
       if (c == 'w' || c == 's') {
@@ -174,6 +228,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       is_game_start = 1;
       selected_level = 1;
       is_level_selected = 0;
+      is_stage_complete = 0;
 
       if (selected_game_over_action == 1) {
         select_game_start_exit('w');

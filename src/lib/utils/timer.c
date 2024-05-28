@@ -2,11 +2,12 @@
 #include "../games/unrob/game.h"
 #include "../headers/cli.h"
 #include "../headers/gpio.h"
+#include "../headers/uart0.h"
 
-unsigned int timer1_cmp = 0;
-unsigned int timer1_period = TIMER_CLOCK / 5;
-unsigned int timer3_cmp = 0;
-unsigned int timer3_period = TIMER_CLOCK / 5;
+volatile unsigned int timer1_cmp = 0;
+volatile unsigned int timer1_period = TIMER_CLOCK / 5;
+volatile unsigned int timer3_cmp = 0;
+volatile unsigned int timer3_period = TIMER_CLOCK / 5;
 
 // Initialize system timer 1
 void sys_timer1_init(void) {
@@ -38,6 +39,9 @@ void handle_sys_timer1(void) {
   } else {
     GPSET0 |= 1 << 3;
   }
+  
+  // Emulator debug
+//   uart_puts("Timer 1 interrupt\n");
 }
 
 // Initialize system timer 3

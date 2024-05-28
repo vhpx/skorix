@@ -513,6 +513,16 @@ int are_all_items_placed(Item *items, int num_items) {
   return true;
 }
 
+int are_all_items_correctly_placed(Item *items, int num_items) {
+  for (int i = 0; i < num_items; i++) {
+    if (!is_item_in_correct_position(&items[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void pick_up_item(Item *items, int num_items, int box_index) {
   Position box_position = items[box_index].final_position;
 

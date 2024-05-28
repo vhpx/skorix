@@ -31,5 +31,6 @@ int is_item_in_correct_position(Item *item);
 int is_item_placed(Item *item);
 int are_all_items_placed(Item *items, int num_items);
 void pick_up_item(Item *items, int num_items, int box_index);
+int are_all_items_correctly_placed(Item *items, int num_items);
 
 #endif

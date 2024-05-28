@@ -1,4 +1,4 @@
-![Skorix OS](/public/skx.png)
+<img src="/public/skx.png" alt="Skorix OS" style="width:100%;">
 
 # **Skorix OS**
 

@@ -115,7 +115,7 @@ A bare-metal operating system designed for the Raspberry Pi, emphasizing clarity
 
 ## **About the Project**
 
-Skorix OS was initially developed by [**Vo Hoang Phuc**](https://github.com/vhpx) as part of the Embedded Systems: OS and Interfacing (EEET2490) course at RMIT University. The project aims to provide a foundational understanding of operating system development and low-level programming.
+Skorix OS was initially developed by [**Vo Hoang Phuc**](https://github.com/vhpx) as part of the Embedded Systems: OS and Interfacing (EEET2490) course at RMIT University (legacy source code available [here](https://github.com/vhpx/skorix-legacy)). The project aims to provide a foundational understanding of operating system development and low-level programming.
 
 The project is then further developed in collaboration with [**Do Phuong Linh**](https://github.com/dophuonglinhh), [**Le Duy Quang**](https://github.com/leQwang), and [**Tran Thanh Tung**](https://github.com/s3927562) to enhance the OS's functionality and user experience. We've worked together to implement image, video, and custom font display capabilities, as well as implementing the "Unrob" game (a clone of the ["Unthief" game by Dan or Daniel](https://dan-or-daniel.itch.io/unthief)). The game utilized the UART driver to receive user input and display the game state on the screen, while having custom timer and interrupt handling to ensure smooth gameplay and user interaction.
 

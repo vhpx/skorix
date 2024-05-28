@@ -52,3 +52,4 @@ extern int selected_level;
 extern int enable_game_debugger;
 extern int enable_rendering_debugger;
 extern int selected_game_over_action;
+extern unsigned long executed_cmd_count;

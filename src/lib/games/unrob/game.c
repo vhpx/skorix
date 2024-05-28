@@ -24,6 +24,8 @@
 GameMap *map;
 
 int enable_game_debugger = false;
+unsigned long executed_cmd_count = 0;
+
 const int SKIP_STAGE_ANIMATION = false;
 
 int select_game_option = 1;
@@ -96,6 +98,8 @@ void initialize_buffers() {
     print_rendered_pixels(true);
     print_pixel_diff(prev_pixels, "[DRAWN INITIAL MAP] ALPHA: 50");
 
+    uart_puts("\n\nMoving items to their final positions...\n");
+
     // Animate items to their final positions
     move_items_to_final_position();
 
@@ -121,6 +125,10 @@ void initialize_buffers() {
       // Draw the number
       draw_string(x, y, num, 0x00FFFFFF, 10);
 
+      uart_puts("\nGame will start in ");
+      uart_dec(i);
+      uart_puts(" seconds.");
+
       // Print the rendered pixels and wait for 1 second
       print_rendered_pixels(true);
       wait_msec(1000);
@@ -128,6 +136,8 @@ void initialize_buffers() {
       // Restore the original background before drawing the next number
       draw_image(x, y, num_width, num_height, background_cache);
     }
+
+    uart_puts("\n\nBringing the map back to its original state...");
 
     for (int i = 50; i <= 100; i += 5) {
       prev_pixels = get_rendered_pixels();
@@ -175,6 +185,8 @@ void initialize_buffers() {
               PLAYER_WIDTH, PLAYER_HEIGHT, map->bitmap,
               map->guards[i].entity.background_cache);
   }
+
+  uart_puts("\n\nGame started!\n");
 }
 
 void draw_guard(Guard *guard, Bitmap *guard_bg_cache_buffer,
@@ -556,10 +568,21 @@ const Bitmap *get_guard_sprite(enum Direction direction) {
 }
 
 void move_items_to_final_position() {
+  int idx = 0;
+
   for (int i = 0; i < map->num_items; i++) {
     if (map->items[i].final_position.x == -1 &&
         map->items[i].final_position.y == -1)
       continue; // Skip if the item has no final position
+
+    // Increase valid item count
+    idx++;
+
+    uart_puts("\nMoving item ");
+    uart_puts(COLOR.TEXT.BLUE);
+    uart_dec(idx);
+    uart_puts(COLOR.RESET);
+    uart_puts(" to its final position...");
 
     float time = 0.0f;
     float speed = 0.005f; // Adjust this value to control the speed of movement
@@ -631,6 +654,8 @@ void move_items_to_final_position() {
       print_pixel_diff(prev_pixels, msg);
     }
   }
+
+  uart_puts("\n\nAll items moved to their final positions.\n");
 }
 
 void execute_main_action() {

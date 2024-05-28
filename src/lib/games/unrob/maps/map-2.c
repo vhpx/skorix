@@ -118,7 +118,7 @@ Item map_2_map_items[] = {
     },
     {
         .id = 8,
-        .name = "Item 8 (Outlier)",
+        .name = "Item 8",
         .final_position = {.x = -1, .y = -1},
         .entity =
             {

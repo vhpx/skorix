@@ -108,8 +108,14 @@ Command commands[] = {
 void empty_func() {}
 
 void print_key(char c, char key_type[], char log_msg[], char msg_color[]) {
+  executed_cmd_count++;
+
+  uart_puts(COLOR.TEXT.YELLOW);
+  uart_puts("\n\nCommand #");
+  uart_dec(executed_cmd_count);
+
   uart_puts(msg_color);
-  uart_puts("\n\nReceived ");
+  uart_puts("\nReceived ");
   uart_puts(key_type);
   uart_puts(": ");
   uart_puts(COLOR.TEXT.BLUE);

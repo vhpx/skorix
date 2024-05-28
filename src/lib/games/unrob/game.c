@@ -24,20 +24,20 @@
 
 GameMap *map;
 
-// Item temp_items[7];
-
 int enable_game_debugger = false;
-
-const int SKIP_STAGE_ANIMATION = false;
+const int SKIP_STAGE_ANIMATION = true;
 
 int is_game_over = 0;
-int timer_counter = 0;
 int is_game_start = 0;
 
 int select_game_option = 1;
 int is_level_selected = 0;
 int selected_level = 1;
 int selected_item = 0;
+
+unsigned int interval = 0;
+unsigned int time_passed = 0;
+int timer_counter = 0;
 
 unsigned int game_time = 0;
 unsigned int game_score = 0;
@@ -52,6 +52,9 @@ void initialize_game() {
     map->guards[i].entity.position = map->guards[i].spawn_point;
   }
 
+  // shuffle items
+  shuffleItems(map->items, map->num_items, time_passed);
+
   for (int i = 0; i < map->num_items; i++) {
     if (map->items[i].final_position.x == -1 &&
         map->items[i].final_position.y == -1)
@@ -60,15 +63,6 @@ void initialize_game() {
     map->items[i].entity.position = map->player.position;
     map->items[i].entity.background_cache = 0;
   }
-
-  // for (int i = 0; i < map->num_items; i++) {
-  //   if (temp_items[i].final_position.x == -1 &&
-  //       temp_items[i].final_position.y == -1)
-  //     continue; // Skip if the item has no final position
-
-  //   temp_items[i].entity.position = map->player_position;
-  //   temp_items[i].entity.background_cache = 0;
-  // }
 
   copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
             get_player_sprite(), map->player.sprite);
@@ -100,7 +94,7 @@ void initialize_buffers() {
     print_rendered_pixels(true);
     print_pixel_diff(prev_pixels, "[DRAWN INITIAL MAP] ALPHA: 50");
 
-    move_items_to_final_position_original();
+    move_items_to_final_position();
     // move_items_to_final_position(temp_items, map->num_items, map->bitmap);
     for (int i = 50; i <= 100; i += 5) {
       prev_pixels = get_rendered_pixels();
@@ -127,10 +121,6 @@ void initialize_buffers() {
     map->items[i].entity.position.x = -1;
     map->items[i].entity.position.y = -1;
   }
-  // for (int i = 0; i < map->num_items; i++) {
-  //   temp_items[i].entity.position.x = -1;
-  //   temp_items[i].entity.position.y = -1;
-  // }
 
   // Reset all guard positions
   for (int i = 0; i < map->num_guards; i++) {
@@ -208,10 +198,6 @@ void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
     return; // Do nothing if another key is pressed
   }
 
-  // if (force_redraw)
-  // copy_rect(0, 0, 0, 0, GUARD_WIDTH, GUARD_WIDTH, GUARD_HEIGHT,
-  //           get_guard_sprite(), guard_sprite_buffer);
-
   move_guard_in_boundaries(map->boundaries, map->num_boundaries,
                            &guard->direction, &guard->entity.position,
                            map->bitmap, guard_bg_cache_buffer,
@@ -268,9 +254,7 @@ void select_game_start_exit(char key) {
 }
 
 // default level selector
-void level_selector() { 
-  draw_level_selection_base(1); 
-}
+void level_selector() { draw_level_selection_base(1); }
 
 // function to select the level
 void select_level(char key) {
@@ -355,28 +339,9 @@ void select_map(int map_num) {
   }
 }
 
-void start_timer3(void) {
-  game_time = 1000;
-  sys_timer3_init();
-  sys_timer3_irq_enable();
-}
-
-//disable timer 3
-void stop_timer3(void) {
-  sys_timer3_irq_disable();
-  game_time = 0;
-  is_game_over = 0;
-  timer_counter = 0;
-}
-
 void start_unrob_game() {
   uart_puts("\n\nStarting Unrob Game...");
-  uart_dec(game_time);
-  uart_puts("\n");
-  uart_dec(timer_counter);
-  uart_puts("\n");
-  shuffleItems(map->items, map->num_items, timer_counter%7);
-  stop_timer3(); //cancel the random timer
+
   // turn off debugger upon game start
   enable_game_debugger = false;
 
@@ -404,16 +369,38 @@ void start_unrob_game() {
 }
 
 void countdown(void) {
-  timer_counter++;
+  // This function is called every 1/5 second
+  time_passed++;
 
-  if (enable_rendering_debugger) {
-    uart_puts("\n\nTimer Counter: ");
-    uart_dec(timer_counter);
-    uart_puts("\n");
+  if (interval < 20) {
+    // If less than a full second (20 intervals of 1/5 second each) has passed,
+    // increment the interval by 8. This means that a "second" in this context
+    // will pass in less than 3 intervals (24/8), which is less than half a real
+    // second.
+    interval += 8;
+  } else {
+    // If a full "second" (20 intervals) or more has passed, increment the timer
+    // counter. This counter can be used to track the number of full "seconds"
+    // that have passed.
+    timer_counter++;
+
+    // If the rendering debugger is enabled, print the current value of the
+    // timer counter to the UART. This can be useful for debugging
+    // timing-related issues.
+    if (enable_rendering_debugger) {
+      uart_puts("\n\nTimer Counter: ");
+      uart_dec(timer_counter);
+      uart_puts("\n");
+    }
+
+    // Subtract 20 from the interval, effectively "consuming" the full "second"
+    // that just passed. If the interval was more than 20, the excess will carry
+    // over to the next "second".
+    interval = interval - 20;
   }
 
   if (game_time) {
-    if(is_level_selected){ //check if game start
+    if (is_level_selected) { // check if game start
       if (timer_counter >= 2) {
         timer_counter = 0;
         game_time--;
@@ -422,7 +409,7 @@ void countdown(void) {
 
       for (int i = 0; i < map->num_guards; i++) {
         move_guard(&map->guards[i], map->guards[i].entity.sprite,
-                  map->guards[i].entity.background_cache);
+                   map->guards[i].entity.background_cache);
       }
     }
   } else {
@@ -472,7 +459,7 @@ const Bitmap *get_guard_sprite(enum Direction direction) {
   }
 }
 
-void move_items_to_final_position_original() {
+void move_items_to_final_position() {
   for (int i = 0; i < map->num_items; i++) {
     if (map->items[i].final_position.x == -1 &&
         map->items[i].final_position.y == -1)
@@ -548,81 +535,6 @@ void move_items_to_final_position_original() {
       print_pixel_diff(prev_pixels, msg);
     }
   }
-}
-
-// Function to move items to their final positions given a pointer to an Item list and number of items
-void move_items_to_final_position(Item *items, int num_items, const Bitmap *bitmap) {
-    for (int i = 0; i < num_items; i++) {
-        if (items[i].final_position.x == -1 && items[i].final_position.y == -1)
-            continue; // Skip if the item has no final position
-
-        float time = 0.0f;
-        float speed = 0.005f; // Adjust this value to control the speed of movement
-
-        Item item = items[i];
-        Position final_position = item.final_position;
-        Size size = item.entity.size;
-
-        Position current_position = item.entity.position;
-
-        // Create a background cache buffer for this item
-        Bitmap background_cache[size.width * size.height];
-
-        while (time < 1.0f) {
-            long long prev_pixels = get_rendered_pixels();
-            char msg[MAX_STR_LENGTH];
-            clrstr(msg);
-
-            append_str(msg, "[MOVED ITEM] Name: ");
-            append_str(msg, item.name);
-
-            // Get the target position
-            Position target_position = final_position;
-
-            // Calculate the new position
-            Position new_position;
-            new_position.x = (1.0f - time) * current_position.x + time * target_position.x;
-            new_position.y = (1.0f - time) * current_position.y + time * target_position.y;
-
-            // If the item is very near its final position, instantly teleport to it
-            if (abs(new_position.x - final_position.x) < 5.0f &&
-                abs(new_position.y - final_position.y) < 5.0f) {
-                new_position = final_position;
-                time = 1.0f; // End the loop
-            }
-
-            // Erase the item at its previous position by applying the background cache
-            draw_rect_from_bitmap(current_position.x, current_position.y, size.width,
-                                  size.height, background_cache);
-
-            // Update the background cache to the current background
-            copy_rect_alpha(current_position.x, current_position.y, 0, 0,
-                            SCREEN_WIDTH, size.width, size.height, bitmap,
-                            background_cache, 100);
-
-            // Copy the background to the item's new position with 50% opacity
-            copy_rect_alpha(new_position.x, new_position.y, 0, 0, SCREEN_WIDTH,
-                            size.width, size.height, bitmap, background_cache,
-                            50);
-
-            // Draw the item sprite
-            draw_transparent_image(new_position.x, new_position.y, size.width,
-                                   size.height, item.entity.sprite);
-
-            // Update the item's position
-            current_position = new_position;
-            items[i].entity.position = new_position;
-
-            // Increase the time
-            time += speed;
-
-            // Wait for a short period of time before the next update
-            wait_msec(10);
-
-            print_rendered_pixels(true);
-            print_pixel_diff(prev_pixels, msg);
-        }
-    }
 }
 
 void execute_main_action() {
@@ -1087,34 +999,33 @@ int is_intersect_guard(const Position *a, const Position *b, const Position *c,
   return is_intersect(a, b, c, d) ? 1 : 0;
 }
 
-void shuffleItems(Item *items, int num_items, int n) { //change the final destination of the items
-    // Temporary storage for final positions of the first num_items - 1 items
-    // Last item always stays in place
-    Position temp_positions[num_items - 1];
+void shuffleItems(Item *items, int num_items, int random_num) {
+  // Create a pseudo-random sequence using the provided random number
+  for (int i = num_items - 1; i > 0; i--) {
+    // Use the random number to generate a pseudo-random index
+    int j = random_num % (i + 1);
 
-    // Copy existing positions to the temporary array for num_items - 1 items
-    for (int i = 0; i < num_items - 1; i++) {
-        temp_positions[i] = items[i].final_position;
-    }
+    // Swap items[i] and items[j]
+    Position temp = items[i].final_position;
+    items[i].final_position = items[j].final_position;
+    items[j].final_position = temp;
 
-    // Assign new positions shifted by n places, excluding the last item
-    for (int i = 0; i < num_items - 1; i++) {
-        int new_index = (i + n) % (num_items - 1); // Ensure the last item's index is never reached
-        items[new_index].final_position = temp_positions[i];
-    }
+    // Update the random number for the next iteration
+    random_num = (random_num * 31) % (num_items + 1);
+  }
 
-    //  for debugging or visualization
-    // for (int i = 0; i < num_items; i++) {
-    //     uart_puts("\n\nItem: ");
-    //     uart_puts(COLOR.TEXT.BLUE);
-    //     uart_puts(items[i].name);
-    //     uart_puts(COLOR.RESET);
+  // for debugging or visualization
+  // for (int i = 0; i < num_items; i++) {
+  //     uart_puts("\n\nItem: ");
+  //     uart_puts(COLOR.TEXT.BLUE);
+  //     uart_puts(items[i].name);
+  //     uart_puts(COLOR.RESET);
 
-    //     uart_puts("\nPosition: ");
-    //     uart_puts(COLOR.TEXT.BLUE);
-    //     uart_dec(items[i].final_position.x);
-    //     uart_puts(", ");
-    //     uart_dec(items[i].final_position.y);
-    //     uart_puts(COLOR.RESET);
-    // }
+  //     uart_puts("\nPosition: ");
+  //     uart_puts(COLOR.TEXT.BLUE);
+  //     uart_dec(items[i].final_position.x);
+  //     uart_puts(", ");
+  //     uart_dec(items[i].final_position.y);
+  //     uart_puts(COLOR.RESET);
+  // }
 }

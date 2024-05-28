@@ -166,12 +166,11 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
         return 0;
       }
 
-      if (c != '\n'){
+      if (c != '\n') {
         return 0;
       }
 
       if (select_game_option) {
-        start_timer3();
         is_game_start = 1;
         level_selector();
       } else {
@@ -188,7 +187,6 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
         select_level(c);
         is_level_selected = 1;
       }
-
     } else {
       if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
         move_player(c);

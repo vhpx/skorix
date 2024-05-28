@@ -721,7 +721,30 @@ void execute_main_action() {
   update_placement_boxes(map->player.position, items, num_items);
   display_selected_item(selected_item, map->items, map->num_items);
 
-  if (are_all_items_placed(items, num_items)) {
+  if (enable_game_debugger) {
+    for (int i = 0; i < num_items; i++) {
+      uart_puts("\nItem ");
+      uart_dec(i + 1);
+      uart_puts(": ");
+      uart_puts(items[i].name);
+
+      uart_puts("\nCurrent position: (");
+      uart_dec(items[i].entity.position.x);
+      uart_puts(", ");
+      uart_dec(items[i].entity.position.y);
+      uart_puts("): Is placed: ");
+      uart_puts(is_item_placed(&items[i]) ? "true" : "false");
+
+      uart_puts("\nFinal position: (");
+      uart_dec(items[i].final_position.x);
+      uart_puts(", ");
+      uart_dec(items[i].final_position.y);
+      uart_puts("): Is correct: ");
+      uart_puts(is_item_in_correct_position(&items[i]) ? "true" : "false");
+    }
+  }
+
+  if (are_all_items_correctly_placed(items, num_items)) {
     game_over();
   }
 }

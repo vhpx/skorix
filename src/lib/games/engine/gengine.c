@@ -515,6 +515,10 @@ int are_all_items_placed(Item *items, int num_items) {
 
 int are_all_items_correctly_placed(Item *items, int num_items) {
   for (int i = 0; i < num_items; i++) {
+    if (items[i].final_position.x == -1 || items[i].final_position.y == -1) {
+      continue;
+    }
+
     if (!is_item_in_correct_position(&items[i])) {
       return false;
     }

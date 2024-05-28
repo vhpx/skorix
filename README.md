@@ -1,4 +1,4 @@
-<img src="/public/skx.png" alt="Skorix OS" style="width:100%; border-radius: 4px;">
+<img src="/public/skx.png" alt="Skorix OS" style="width:100%;">
 
 # **Skorix OS**
 

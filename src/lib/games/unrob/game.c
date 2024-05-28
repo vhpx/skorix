@@ -260,8 +260,13 @@ void move_guard(Guard *guard, const Bitmap *guard_sprite_buffer,
       .x = guard->entity.position.x + PLAYER_WIDTH,
       .y = guard->entity.position.y + PLAYER_HEIGHT,
   };
+
   if (is_intersect_guard(&guard->entity.position, &guard_bottom_right,
                          &map->player.position, &player_bottom_right)) {
+    game_over();
+  }
+
+  if (is_game_over) {
     game_over();
   }
 }
@@ -952,6 +957,10 @@ void move_player(char key) {
                      map->player.background_cache, map->player.sprite,
                      force_redraw, false);
   update_placement_boxes(map->player.position, map->items, map->num_items);
+
+  if (is_game_over) {
+    game_over();
+  }
 }
 
 void switch_inventory_item(char key) {

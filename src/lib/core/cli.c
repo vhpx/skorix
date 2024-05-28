@@ -58,8 +58,6 @@ int run_cli() {
   // Enable interrupts
   exception_init();
   interrupt_init();
-  sys_timer1_init();
-  sys_timer1_irq_enable();
   uart0_irq_enable();
   interrupt_enable();
 
@@ -137,6 +135,15 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       reset_console();
       return 0;
     }
+  } else if (mode == TIMER) {
+    if (c == 27) { // escape key
+      uart_puts("\n\nExiting timer mode...\n\n");
+
+      mode = CLI;
+      sys_timer1_irq_disable();
+      reset_console();
+      return 0;
+    }
   } else if (mode == GAME) {
     if(is_stage_complete) {
       static int prev_action = 0;
@@ -192,7 +199,7 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
       level_selector();
 
       return 0;
-    }else if (is_game_over) {
+    } else if (is_game_over) {
       static int prev_action = 0;
 
       if (c == 'w' || c == 's') {

@@ -3,7 +3,7 @@
 
 extern int mode;
 
-enum { CLI = 0, IMAGE = 1, VIDEO = 2, FONT = 3, GAME = 4, SHUTDOWN = -1 };
+enum { CLI = 0, IMAGE = 1, VIDEO = 2, FONT = 3, GAME = 4, TIMER = 5, SHUTDOWN = -1 };
 
 int cli(char c);
 int run_cli();

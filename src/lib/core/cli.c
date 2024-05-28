@@ -144,19 +144,12 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
 
   } else if (mode == GAME) {
     if (c == 'r') {
-      // Display position change
-      uart_puts("\n\nReceived key: ");
-      uart_puts(COLOR.TEXT.BLUE);
-      char2upper(&c);
-      uart_sendc(c);
-      uart_puts(COLOR.RESET);
-      uart_puts("\nRestarting Unrob Game...");
-
+      handle_received_key(c);
+      uart_puts("\nRestarting Unrob Game...\n");
       clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
       sys_timer3_irq_disable();
       start_unrob_game();
       uart_puts("Restarted Unrob Game.");
-
       return 0;
     }
 
@@ -181,42 +174,32 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
     }
 
     if (!is_level_selected) {
-      if (c == 'w' || c == 's') {
+      if (c == 'w' || c == 's' || c == '\n') {
         select_level(c);
-      } else if (c == '\n') {
-        select_level(c);
-        is_level_selected = 1;
+        if (c == '\n') {
+          is_level_selected = 1;
+        }
       }
     } else {
       if (c == 'w' || c == 's' || c == 'a' || c == 'd') {
+        handle_received_key(c);
         move_player(c);
       } else if (c == 'q' || c == 'e') {
+        handle_received_key(c);
         switch_inventory_item(c);
       } else if (c == 'f') {
+        handle_received_key(c);
         execute_main_action();
       } else if (c == 'c') {
-        // Display position change
-        uart_puts("\n\nReceived key: ");
-        uart_puts(COLOR.TEXT.BLUE);
-        char2upper(&c);
-        uart_sendc(c);
-        uart_puts(COLOR.RESET);
-
+        handle_received_key(c);
         uart_puts("\nGame Debug Mode: ");
         uart_puts(enable_game_debugger ? COLOR.TEXT.RED : COLOR.TEXT.GREEN);
         uart_puts(enable_game_debugger ? "OFF" : "ON");
         uart_puts(COLOR.RESET);
         uart_puts("\n");
         toggle_game_debugger();
-
       } else if (c == 'x') {
-        // Display position change
-        uart_puts("\n\nReceived key: ");
-        uart_puts(COLOR.TEXT.BLUE);
-        char2upper(&c);
-        uart_sendc(c);
-        uart_puts(COLOR.RESET);
-
+        handle_received_key(c);
         uart_puts("\nRendering Debug Mode: ");
         uart_puts(enable_rendering_debugger ? COLOR.TEXT.RED
                                             : COLOR.TEXT.GREEN);
@@ -231,17 +214,9 @@ int handle_input(char c, char *cli_buffer, int *index, int *past_cmd_index,
         selected_level = 1;
         exit_game();
       } else {
-        // Display position change
-        uart_puts(COLOR.TEXT.RED);
-        uart_puts("\n\nReceived invalid key: ");
-        uart_puts(COLOR.TEXT.BLUE);
-        char2upper(&c);
-        uart_sendc(c);
-        uart_puts(COLOR.RESET);
-        uart_puts("\n");
+        handle_invalid_key(c);
       }
     }
-
   } else if (c == '\b' || c == 0x7F) {
     handle_backspace(cli_buffer, index, pre_autofilled_cmd,
                      post_autofilled_cmd);

@@ -36,5 +36,7 @@ void restart_uart();
 void set_color(Tag tags[MAX_CMD_ARGS]);
 void set_config(Tag tags[MAX_CMD_ARGS]);
 void play_game(Tag tags[MAX_CMD_ARGS]);
+void handle_received_key(char c);
+void handle_invalid_key(char c);
 
 #endif

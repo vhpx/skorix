@@ -107,6 +107,25 @@ Command commands[] = {
 
 void empty_func() {}
 
+void handle_received_key(char c) {
+  uart_puts("\n\nReceived key: ");
+  uart_puts(COLOR.TEXT.BLUE);
+  char2upper(&c);
+  uart_sendc(c);
+  uart_puts(COLOR.RESET);
+  uart_puts(" (ACK)");
+}
+
+void handle_invalid_key(char c) {
+  uart_puts(COLOR.TEXT.RED);
+  uart_puts("\n\nReceived invalid key: ");
+  uart_puts(COLOR.TEXT.BLUE);
+  char2upper(&c);
+  uart_sendc(c);
+  uart_puts(COLOR.RESET);
+  uart_puts(" (NAK)");
+}
+
 char *get_cmd_name(char *command) {
   // Skip leading spaces
   while (*command && (*command == ' ')) {

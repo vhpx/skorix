@@ -1,6 +1,6 @@
 #include "../../headers/constants.h"
 #include "../../headers/gengine-core.h"
-#include "maps.h"
+#include "./maps/maps.h"
 
 enum Box {
   EMPTY_BOX = 0,

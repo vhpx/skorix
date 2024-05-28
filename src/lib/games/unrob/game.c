@@ -20,18 +20,18 @@
 #include "../screens/post-game-buttons.h"
 #include "../screens/post-game.h"
 #include "../screens/stage-select.h"
-#include "maps.h"
 
 GameMap *map;
 
 int enable_game_debugger = false;
 const int SKIP_STAGE_ANIMATION = true;
 
-int is_game_over = 0;
-int is_game_start = 0;
+int is_game_over = false;
+int is_game_start = false;
 
 int select_game_option = 1;
-int is_level_selected = 0;
+int is_level_selected = false;
+
 int selected_level = 1;
 int selected_item = 0;
 
@@ -343,6 +343,7 @@ void start_unrob_game() {
   uart_puts("\n\nStarting Unrob Game...");
 
   // turn off debugger upon game start
+  is_game_over = false;
   enable_game_debugger = false;
 
   reset_rendered_pixels();
@@ -360,11 +361,12 @@ void start_unrob_game() {
   display_selected_item(selected_item, map->items, map->num_items);
   draw_placement_boxes(map->items, map->num_items, EMPTY_BOX);
 
-  game_time = 61;
-  draw_time();
+  game_time = 60;
+
   sys_timer3_init();
   sys_timer3_irq_enable();
 
+  draw_time();
   draw_score();
 }
 
@@ -835,13 +837,6 @@ void move_player(char key) {
     return; // Do nothing if another key is pressed
   }
 
-  // Display position change
-  uart_puts("\n\nReceived key: ");
-  uart_puts(COLOR.TEXT.BLUE);
-  char2upper(&key);
-  uart_sendc(key);
-  uart_puts(COLOR.RESET);
-
   if (force_redraw)
     copy_rect(0, 0, 0, 0, PLAYER_WIDTH, PLAYER_WIDTH, PLAYER_HEIGHT,
               get_player_sprite(), map->player.sprite);
@@ -862,6 +857,13 @@ void switch_inventory_item(char key) {
     if (selected_item < 0) {
       selected_item = map->num_items - 1;
     }
+
+    uart_puts("\n\nNavigating inventory item in reverse.");
+    uart_puts("\nSelected Item: ");
+    uart_puts(COLOR.TEXT.BLUE);
+    uart_puts(map->items[selected_item].name);
+    uart_puts(COLOR.RESET);
+
     break;
 
   case 'e': // Rotate right
@@ -871,17 +873,18 @@ void switch_inventory_item(char key) {
     if (selected_item >= map->num_items) {
       selected_item = 0;
     }
+
+    uart_puts("\n\nNavigating inventory item forward.");
+    uart_puts("\nSelected Item: ");
+    uart_puts(COLOR.TEXT.BLUE);
+    uart_puts(map->items[selected_item].name);
+    uart_puts(COLOR.RESET);
+
     break;
 
   default:
     return; // Do nothing if another key is pressed
   }
-
-  uart_puts("\n\nReceived key: ");
-  uart_puts(COLOR.TEXT.BLUE);
-  char2upper(&key);
-  uart_sendc(key);
-  uart_puts(COLOR.RESET);
 
   // Display the selected item in the inventory
   display_selected_item(selected_item, map->items, map->num_items);
@@ -1011,7 +1014,8 @@ void shuffleItems(Item *items, int num_items, int random_num) {
     items[j].final_position = temp;
 
     // Update the random number for the next iteration
-    random_num = (random_num * 31) % (num_items + 1);
+    random_num =
+        (random_num * 31) % num_items; // Ensure the index is within num_items
   }
 
   // for debugging or visualization

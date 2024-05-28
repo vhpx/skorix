@@ -1,6 +1,5 @@
 // map-1.c
 #include "map-1.h"
-#include "../engine/player.h"
 
 const Position map_1_spawn_point = {
     .x = (SCREEN_WIDTH - PLAYER_WIDTH) / 2,

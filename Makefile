@@ -29,9 +29,10 @@ FONT_CFILES = $(wildcard $(FONT_DIR)/*.c)
 GENGINE_LIB_CFILES = $(wildcard $(LIB_DIR)/games/engine/*.c)
 SCREENS_LIB_CFILES = $(wildcard $(LIB_DIR)/games/screens/*.c)
 UNROB_GAME_LIB_CFILES = $(wildcard $(LIB_DIR)/games/unrob/*.c)
+UNROB_GAME_MAP_CFILES = $(wildcard $(LIB_DIR)/games/unrob/maps/*.c)
 
 # C System files
-CFILES = $(KERNEL_CFILES) $(CORE_LIB_CFILES) $(MBOX_LIB_CFILES) $(UTILS_LIB_CFILES) $(IMAGE_CFILES) $(VIDEO_CFILES) $(FONT_CFILES) $(GENGINE_LIB_CFILES) $(SCREENS_LIB_CFILES) $(UNROB_GAME_LIB_CFILES)
+CFILES = $(KERNEL_CFILES) $(CORE_LIB_CFILES) $(MBOX_LIB_CFILES) $(UTILS_LIB_CFILES) $(IMAGE_CFILES) $(VIDEO_CFILES) $(FONT_CFILES) $(GENGINE_LIB_CFILES) $(SCREENS_LIB_CFILES) $(UNROB_GAME_LIB_CFILES) $(UNROB_GAME_MAP_CFILES)
 OFILES = $(addprefix $(BUILD_DIR)/, $(notdir $(CFILES:%.c=%.o)))
 
 # Assembly System files
@@ -178,6 +179,9 @@ $(BUILD_DIR)/%.o: $(LIB_DIR)/games/screens/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.o: $(LIB_DIR)/games/unrob/%.c
+	$(CC) $(GCCFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%.o: $(LIB_DIR)/games/unrob/maps/%.c
 	$(CC) $(GCCFLAGS) -c $< -o $@
 
 #----------------------------------------

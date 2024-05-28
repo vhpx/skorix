@@ -441,6 +441,19 @@ void countdown(void) {
 }
 
 void game_over() {
+  draw_image(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, game_over_screen);
+
+  char score[10];
+  int2str(game_score, score);
+
+  draw_string((SCREEN_WIDTH - strlen(score) * FONT_WIDTH * 5) / 2,
+              SCREEN_HEIGHT / 2 - 30, score, 0x00FF0000, 5);
+
+  draw_transparent_image((SCREEN_WIDTH - 320) / 2, SCREEN_HEIGHT / 2 + 200, 320,
+                         70, button_restart);
+  draw_transparent_image((SCREEN_WIDTH - 220) / 2, SCREEN_HEIGHT / 2 + 300, 220,
+                         70, button_menu);
+
   uart_puts(COLOR.TEXT.RED);
   uart_puts("\n\nGame Over!\n");
   uart_puts(COLOR.RESET);
@@ -460,11 +473,6 @@ void game_over() {
   uart_puts(COLOR.RESET);
   uart_puts(" to quit.\n");
 
-  clear_frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-  draw_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0x00000000, 1);
-  draw_string(SCREEN_WIDTH / 2 - 5 * FONT_WIDTH * GENGINE_TIME_ZOOM,
-              SCREEN_HEIGHT / 2 - FONT_HEIGHT * GENGINE_TIME_ZOOM, "GAME OVER",
-              0x00FF0000, GENGINE_TIME_ZOOM);
   sys_timer3_irq_disable();
   is_game_over = 1;
 }
